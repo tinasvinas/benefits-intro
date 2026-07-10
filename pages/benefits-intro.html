@@ -32,33 +32,33 @@ body {
   background: var(--bg-main);
   color: var(--text-main);
   line-height: 1.5;
-  padding: 32px 20px;
+  padding: 16px 20px;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .intro-banner {
   background: linear-gradient(135deg, #1e3a5f, #2563eb);
-  border-radius: 14px;
-  padding: 32px 40px;
-  margin-bottom: 24px;
+  border-radius: 12px;
+  padding: 20px 28px;
+  margin-bottom: 16px;
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .intro-banner .t {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .intro-banner .s {
-  font-size: 15px;
+  font-size: 13px;
   opacity: 0.95;
-  line-height: 1.7;
+  line-height: 1.5;
   max-width: 900px;
 }
 
@@ -66,16 +66,16 @@ body {
   display: flex;
   gap: 8px;
   background: var(--bg-white);
-  border-radius: 12px;
-  padding: 8px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border);
 }
 
 .intro-tab {
   flex: 1;
-  padding: 14px 20px;
+  padding: 10px 16px;
   text-align: center;
   font-size: 15px;
   color: var(--text-sub);
@@ -119,36 +119,36 @@ body {
 
 .cmp-wrap {
   background: var(--bg-white);
-  border-radius: 14px;
-  padding: 32px;
+  border-radius: 12px;
+  padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   overflow-x: auto;
   border: 1px solid var(--border);
 }
 
 .cmp-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .cmp-sub {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-mute);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .cmp-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
   min-width: 680px;
 }
 
 .cmp-table th,
 .cmp-table td {
-  padding: 14px 16px;
+  padding: 10px 12px;
   text-align: center;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -157,7 +157,7 @@ body {
   background: var(--bg-surface);
   color: var(--text-sub);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   position: sticky;
   top: 0;
 }
@@ -284,12 +284,12 @@ body {
 }
 
 @media (max-width: 760px) {
-  body { padding: 20px 16px; }
-  .intro-banner { padding: 24px 20px; }
-  .intro-banner .t { font-size: 22px; }
-  .intro-banner .s { font-size: 14px; }
+  body { padding: 12px 16px; }
+  .intro-banner { padding: 16px 20px; }
+  .intro-banner .t { font-size: 20px; }
+  .intro-banner .s { font-size: 12px; }
   .intro-tabs { flex-direction: column; gap: 6px; }
-  .cmp-wrap { padding: 20px; }
+  .cmp-wrap { padding: 16px; }
   .pack-grid { grid-template-columns: 1fr; }
 }
 </style>
@@ -299,7 +299,11 @@ body {
 <div class="container">
   <div class="intro-banner">
     <div class="t">💎 权益介绍</div>
-    <div class="s">了解企业权益、个人权益与增量包的完整内容。企业权益由学校统一开通、全校师生共享；个人权益由个人按月订阅；最终可用配额 = 企业权益与个人权益取最大值，叠加增量包。</div>
+    <div class="s">了解企业权益、个人权益与增量包的完整内容。企业权益由学校统一开通、全校师生共享；个人权益由个人按月订阅。</div>
+    <div class="s" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2);">
+      <strong>扣减额度：</strong>按照企业权益（含企业增量包）→ 个人权益 → 个人增量包顺序扣减<br>
+      <strong>功能权益：</strong>企业权益与个人权益取最大值
+    </div>
   </div>
 
   <div class="intro-tabs">
@@ -311,7 +315,7 @@ body {
   <div class="intro-pane active" id="pane-corp">
     <div class="cmp-wrap">
       <div class="cmp-title">企业权益 · 档位对比</div>
-      <div class="cmp-sub">由学校统一开通，全校师生共享配额池（百万 Token = 10 元）</div>
+      <div class="cmp-sub">由学校统一开通，全校师生共享配额池</div>
       <table class="cmp-table" id="corp-table"></table>
     </div>
   </div>
@@ -319,7 +323,7 @@ body {
   <div class="intro-pane" id="pane-pers">
     <div class="cmp-wrap">
       <div class="cmp-title">个人权益 · 套餐对比</div>
-      <div class="cmp-sub">由个人按月订阅，与企业权益叠加取最大值</div>
+      <div class="cmp-sub">由个人按月订阅，与企业权益叠加使用</div>
       <table class="cmp-table" id="pers-table"></table>
     </div>
   </div>
@@ -352,18 +356,18 @@ const BENEFITS_CONFIG = {
         label: '价格与时长',
         values: { free: '-', trial: '年包待定', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' }
       },
-      { type: 'group', label: 'Token 配额' },
+      { type: 'group', label: '扣减额度' },
       {
         type: 'data',
         label: '学校累计 Token',
         values: { free: 0, trial: 10000000, vip: 50000000, vip1: 500000000, svip: 2000000000 }
       },
-      { type: 'group', label: '功能权益' },
       {
         type: 'data',
         label: '付费工具使用次数',
         values: { free: 0, trial: 100, vip: 2000, vip1: 20000, svip: 80000 }
       },
+      { type: 'group', label: '功能权益' },
       {
         type: 'data',
         label: '知识库文档数量/人',
@@ -388,23 +392,23 @@ const BENEFITS_CONFIG = {
       {
         type: 'data',
         label: '班级数量/人（每学期）',
-        values: { free: false, trial: 1, vip: 10, vip1: 10, svip: '无限制' }
+        values: { free: false, trial: 3, vip: 10, vip1: 10, svip: '无限制' }
       },
       { type: 'group', label: '账户数量' },
       {
         type: 'data',
         label: '账户数量 · 教师',
-        values: { free: '无限制', trial: 10, vip: 1, vip1: 30, svip: '无限制' }
+        values: { free: '无限制', trial: 30, vip: 1, vip1: 30, svip: '无限制' }
       },
       {
         type: 'data',
         label: '账户数量 · 学生',
-        values: { free: '无限制', trial: 100, vip: 100, vip1: 1500, svip: '无限制' }
+        values: { free: '无限制', trial: 1500, vip: 200, vip1: 1500, svip: '无限制' }
       },
       {
         type: 'data',
         label: '账户数量 · 运营',
-        values: { free: '无限制', trial: false, vip: 1, vip1: 1, svip: '无限制' }
+        values: { free: '无限制', trial: 1, vip: 1, vip1: 1, svip: '无限制' }
       }
     ]
   },
@@ -413,9 +417,9 @@ const BENEFITS_CONFIG = {
   personal: {
     tiers: [
       { key: 'teacher', name: '教师版', tag: '教师专属', tagClass: 'svip', highlight: false },
-      { key: 'a', name: 'A 套餐', tag: '入门', tagClass: 'basic', highlight: false },
-      { key: 'b', name: 'B 套餐', tag: '进阶', tagClass: 'vip', highlight: false },
-      { key: 'c', name: 'C 套餐', tag: '高阶', tagClass: 'vip', highlight: false }
+      { key: 'a', name: '体验版', tag: '入门', tagClass: 'basic', highlight: false },
+      { key: 'b', name: 'VIP', tag: '进阶', tagClass: 'vip', highlight: false },
+      { key: 'c', name: 'SVIP', tag: '高阶', tagClass: 'vip', highlight: false }
     ],
     rows: [
       {
@@ -423,18 +427,18 @@ const BENEFITS_CONFIG = {
         label: '价格与时长',
         values: { teacher: 'xx 元/月', a: 'A 元/月', b: 'B 元/月', c: 'C 元/月' }
       },
-      { type: 'group', label: 'Token 配额' },
+      { type: 'group', label: '扣减指标' },
       {
         type: 'data',
         label: '个人 Token',
-        values: { teacher: 50000000, a: 1000000, b: 5000000, c: 18000000 }
+        values: { teacher: 50000000, a: 1000000, b: 5000000, c: 30000000 }
       },
-      { type: 'group', label: '功能权益' },
       {
         type: 'data',
-        label: '内置工具 · 文生图',
+        label: '付费工具使用次数',
         values: { teacher: '1000 张', a: '10 张', b: '100 张', c: '1000 张' }
       },
+      { type: 'group', label: '功能权益' },
       {
         type: 'data',
         label: '知识库文档数量',
@@ -442,7 +446,7 @@ const BENEFITS_CONFIG = {
       },
       {
         type: 'data',
-        label: '自定义大模型',
+        label: '新增模型',
         values: { teacher: true, a: true, b: true, c: true }
       },
       {
@@ -453,7 +457,7 @@ const BENEFITS_CONFIG = {
       {
         type: 'data',
         label: '班级数量（每学期）',
-        values: { teacher: '无限制', a: 5, b: 10, c: '无限制' }
+        values: { teacher: '无限制', a: 3, b: 5, c: '无限制' }
       }
     ]
   },
@@ -468,7 +472,7 @@ const BENEFITS_CONFIG = {
         class: '',
         items: [
           { label: '价格', value: '待定' },
-          { label: '学校累计 Token', value: '1 亿', highlight: true }
+          { label: '学校累计 Token', value: '5000万', highlight: true }
         ]
       },
       {
