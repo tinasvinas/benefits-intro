@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工作台 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.workbench-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+@media (max-width:1280px){.workbench-grid{grid-template-columns:1fr}}
+
+/* 横向条形图 */
+.bar-chart{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.bar-row{display:grid;grid-template-columns:160px 1fr 60px;gap:10px;align-items:center;font-size:12px}
+.bar-row .nm{color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-row .bg{height:18px;background:#f1f5f9;border-radius:4px;position:relative;overflow:hidden}
+.bar-row .fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:4px;display:flex;align-items:center;padding-right:6px;justify-content:flex-end;color:#fff;font-size:11px;font-weight:600}
+.bar-row .v{text-align:right;color:var(--primary);font-weight:600}
+
+/* 班级 top5 卡片 */
+.class-card-list{display:flex;flex-direction:column;gap:10px}
+.class-card{padding:12px 14px;border:1px solid #e2e8f0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s}
+.class-card:hover{border-color:#bfdbfe;background:#eff6ff}
+.class-card .nm{font-size:13px;font-weight:600;color:var(--primary)}
+.class-card .meta{font-size:11px;color:var(--text-mute);margin-top:2px}
+.class-card .v{font-size:18px;font-weight:700;color:var(--accent)}
+
+/* agent micro card */
+.micro-agent{display:flex;gap:10px;padding:10px;border:1px solid #f1f5f9;border-radius:8px;margin-bottom:8px;cursor:pointer}
+.micro-agent:hover{background:#f8fafc}
+.micro-agent .ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.micro-agent .info{flex:1;min-width:0}
+.micro-agent .info .nm{font-size:13px;font-weight:500;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.micro-agent .info .meta{font-size:11px;color:var(--text-mute);margin-top:2px}
+
+.tab-pills{display:flex;gap:6px}
+.tab-pill{padding:5px 12px;border-radius:14px;font-size:12px;color:#64748b;background:#f1f5f9;cursor:pointer}
+.tab-pill.active{background:var(--accent);color:#fff;font-weight:500}
+
+.metric-tabs{display:flex;gap:18px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.metric-tab{padding:8px 0;font-size:13px;color:#64748b;cursor:pointer;border-bottom:2px solid transparent}
+.metric-tab.active{color:var(--accent);border-color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- 顶部统计 -->
+    <div class="stats-row stats-5">
+      <div class="stat-card accent">
+        <div class="lbl">📊 本学期班级</div>
+        <div class="val">28</div>
+        <div class="trend">已开课 22 · 已停课 6</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">登录次数（近7日）</div>
+        <div class="val">12,480</div>
+        <div class="trend trend-up">↑ 12.8%</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">智能体提问帖</div>
+        <div class="val">3,256</div>
+        <div class="trend trend-up">↑ 8.4%</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">回答次数</div>
+        <div class="val">9,872</div>
+        <div class="trend trend-up">↑ 15.2%</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">论坛互动</div>
+        <div class="val">486</div>
+        <div class="trend trend-down">↓ 2.1%</div>
+      </div>
+    </div>
+
+    <div class="workbench-grid">
+      <!-- 学生使用情况 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">学生使用情况 · TOP10 班级</div>
+            <div class="card-sub">本学期已开课/已停课班级</div>
+          </div>
+          <input type="text" class="form-control" style="width:200px;font-size:12px;padding:6px 10px" value="2026-05-14 ~ 2026-05-20">
+        </div>
+        <div class="metric-tabs">
+          <span class="metric-tab active">登录次数</span>
+          <span class="metric-tab">智能体访问次数</span>
+          <span class="metric-tab">提问帖数量</span>
+          <span class="metric-tab">回答次数</span>
+          <span class="metric-tab">论坛互动</span>
+        </div>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+
+      <!-- 我的班级 top5 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">我的班级 · TOP5</div>
+            <div class="card-sub">按登录次数排序</div>
+          </div>
+          <a href="teaching-myclass.html" class="btn-link">更多 →</a>
+        </div>
+        <div class="class-card-list" id="class-list"></div>
+      </div>
+    </div>
+
+    <!-- 智能体动态 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">智能体动态</div>
+        <div class="tab-pills">
+          <span class="tab-pill active" data-tab="dev">智能体开发</span>
+          <span class="tab-pill" data-tab="use">智能体使用</span>
+        </div>
+      </div>
+
+      <div id="agent-dev-pane">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+          <div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:600">📚 C语言1班</div>
+            <div class="micro-agent"><div class="ico" style="background:#2563eb">⚙</div><div class="info"><div class="nm">代码大师 v1.2</div><div class="meta">05-19 14:22</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#10b981">📖</div><div class="info"><div class="nm">语法解读小助手</div><div class="meta">05-18 09:15</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#f59e0b">💡</div><div class="info"><div class="nm">指针辅导专家</div><div class="meta">05-17 16:40</div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:600">📚 数据结构A班</div>
+            <div class="micro-agent"><div class="ico" style="background:#1d4ed8">📊</div><div class="info"><div class="nm">链表可视化</div><div class="meta">05-20 10:30</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#0ea5e9">🌳</div><div class="info"><div class="nm">树结构分析</div><div class="meta">05-19 13:50</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#06b6d4">🔍</div><div class="info"><div class="nm">查找算法实验</div><div class="meta">05-18 11:00</div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:600">📚 Python程序设计</div>
+            <div class="micro-agent"><div class="ico" style="background:#84cc16">🐍</div><div class="info"><div class="nm">Pandas 速查</div><div class="meta">05-20 15:12</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#f97316">📈</div><div class="info"><div class="nm">数据可视化助手</div><div class="meta">05-19 09:30</div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:600">📚 软件工程</div>
+            <div class="micro-agent"><div class="ico" style="background:#2563eb">🛠</div><div class="info"><div class="nm">UML 图生成</div><div class="meta">05-20 11:00</div></div></div>
+            <div class="micro-agent"><div class="ico" style="background:#10b981">📋</div><div class="info"><div class="nm">需求评审助手</div><div class="meta">05-18 14:20</div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:600">📚 计算机组成原理</div>
+            <div class="micro-agent"><div class="ico" style="background:#1d4ed8">⚡</div><div class="info"><div class="nm">CPU 流水线模拟</div><div class="meta">05-19 16:00</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PAGE_CONFIG = { activeNav:'workbench', title:'工作台', breadcrumb:['教学管理','工作台'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+const TOP_CLASSES = [
+  { name:'C语言程序设计 · 1班',     v:1280, course:'2025-2026第二学期 · 王老师' },
+  { name:'数据结构 · A班',          v:1086, course:'2025-2026第二学期 · 李老师' },
+  { name:'Python程序设计 · 2班',    v: 982, course:'2025-2026第二学期 · 赵老师' },
+  { name:'软件工程 · 实训班',       v: 854, course:'2025-2026第二学期 · 张老师' },
+  { name:'计算机组成原理 · 1班',    v: 720, course:'2025-2026第二学期 · 陈老师' },
+  { name:'操作系统 · A班',          v: 654, course:'2025-2026第二学期 · 刘老师' },
+  { name:'计算机网络 · 2班',        v: 588, course:'2025-2026第二学期 · 周老师' },
+  { name:'编译原理',                v: 432, course:'2025-2026第二学期 · 吴老师' },
+  { name:'数据库原理',              v: 380, course:'2025-2026第二学期 · 钱老师' },
+  { name:'人工智能导论',            v: 268, course:'2025-2026第二学期 · 孙老师' },
+];
+const max = TOP_CLASSES[0].v;
+document.getElementById('bar-chart').innerHTML = TOP_CLASSES.map(c => `
+  <div class="bar-row">
+    <span class="nm" title="${c.name}">${c.name}</span>
+    <div class="bg"><div class="fill" style="width:${(c.v/max*100).toFixed(0)}%">${c.v}</div></div>
+    <span class="v"></span>
+  </div>
+`).join('');
+
+document.getElementById('class-list').innerHTML = TOP_CLASSES.slice(0,5).map(c => `
+  <div class="class-card">
+    <div>
+      <div class="nm">${c.name}</div>
+      <div class="meta">${c.course}</div>
+    </div>
+    <div class="v">${c.v}</div>
+  </div>
+`).join('');
+
+// metric tab
+document.querySelectorAll('.metric-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.metric-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    toast(`指标已切换为「${t.textContent}」，重新加载 TOP10`, 'info');
+  });
+});
+document.querySelectorAll('.tab-pill').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab-pill').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

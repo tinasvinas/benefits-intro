@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学期管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.sem-tip{background:linear-gradient(90deg,#dbeafe,#eff6ff);border-left:4px solid #3b82f6;padding:14px 18px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.sem-tip .ico{font-size:24px}
+.sem-tip .info .t{font-size:13px;font-weight:700;color:#1e40af}
+.sem-tip .info .s{font-size:11px;color:#1e40af;opacity:.85;margin-top:2px}
+
+.sem-flow{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:0;margin-bottom:18px;padding:0}
+.sem-card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.05);position:relative;border:2px solid transparent;cursor:pointer;transition:all .2s}
+.sem-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.sem-card.current{border-color:var(--accent);background:linear-gradient(135deg,#eff6ff,#fff)}
+.sem-card.upcoming{border-color:#fde68a;background:linear-gradient(135deg,#fffbeb,#fff)}
+.sem-card .badge-current{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:2px 12px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.sem-card .badge-upcoming{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:2px 12px;border-radius:10px;font-size:10px;font-weight:700}
+.sem-name{font-size:15px;font-weight:700;color:var(--primary)}
+.sem-period{font-size:11px;color:var(--text-mute);margin-top:4px}
+.sem-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:14px;padding-top:14px;border-top:1px dashed #e2e8f0}
+.sem-stats .item{font-size:11px;color:#475569}
+.sem-stats .item b{display:block;color:var(--primary);font-size:14px;font-weight:700}
+.sem-arrow{display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:18px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="sem-tip">
+      <span class="ico">📅</span>
+      <div class="info">
+        <div class="t">当前默认学期：2025-2026 第二学期（2026-02-22 ~ 2026-07-15）</div>
+        <div class="s">默认学期影响所有筛选项的初始值，包括我的班级、学生列表、工作台等。学期切换会自动归档历史数据并清零本学期统计。</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('m-switch')">切换默认学期</button>
+    </div>
+
+    <!-- 学期流转 -->
+    <div class="sem-flow">
+      <div class="sem-card">
+        <div class="sem-name">2024-2025 第二学期</div>
+        <div class="sem-period">📆 2025-02-24 ~ 2025-07-13</div>
+        <div class="sem-stats">
+          <div class="item">班级<b>32</b></div>
+          <div class="item">学生<b>1,856</b></div>
+          <div class="item">课程<b>22</b></div>
+          <div class="item">活跃日<b>68 天</b></div>
+        </div>
+      </div>
+      <div class="sem-arrow">→</div>
+      <div class="sem-card">
+        <div class="sem-name">2025-2026 第一学期</div>
+        <div class="sem-period">📆 2025-09-08 ~ 2026-01-26</div>
+        <div class="sem-stats">
+          <div class="item">班级<b>28</b></div>
+          <div class="item">学生<b>1,920</b></div>
+          <div class="item">课程<b>24</b></div>
+          <div class="item">活跃日<b>72 天</b></div>
+        </div>
+      </div>
+      <div class="sem-arrow">→</div>
+      <div class="sem-card current">
+        <span class="badge-current">★ 当前学期</span>
+        <div class="sem-name">2025-2026 第二学期</div>
+        <div class="sem-period">📆 2026-02-22 ~ 2026-07-15</div>
+        <div class="sem-stats">
+          <div class="item">班级<b>28</b></div>
+          <div class="item">学生<b>2,156</b></div>
+          <div class="item">课程<b>26</b></div>
+          <div class="item">活跃日<b>62 天</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item"><label>学年</label>
+        <select class="form-control"><option>全部</option><option>2025-2026</option><option>2024-2025</option><option>2023-2024</option></select>
+      </div>
+      <div class="filter-item"><label>状态</label>
+        <select class="form-control"><option>全部</option><option>当前</option><option>未开始</option><option>已结束</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="openModal('m-sem')">+ 新增学期</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">学期列表</div>
+          <div class="card-sub">每学年通常包含两个学期，按时间倒序排列</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>学年</th>
+              <th>学期</th>
+              <th>起止时间</th>
+              <th>授课周数</th>
+              <th>班级数</th>
+              <th>学生数</th>
+              <th>状态</th>
+              <th>是否默认</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-2027</td>
+              <td>第一学期</td>
+              <td>2026-09-07 ~ 2027-01-25</td>
+              <td>20 周</td>
+              <td>—</td>
+              <td>—</td>
+              <td><span class="badge badge-yellow">未开始</span></td>
+              <td><span class="text-mute">—</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">修改</button>
+                <button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="if(confirm('删除未开始的学期？已设为默认的学期不可删除'))toast('已删除','success')">删除</button>
+              </td>
+            </tr>
+            <tr style="background:#eff6ff">
+              <td>2025-2026</td>
+              <td>第二学期</td>
+              <td>2026-02-22 ~ 2026-07-15</td>
+              <td>20 周</td>
+              <td>28</td>
+              <td>2,156</td>
+              <td><span class="badge badge-green">★ 当前</span></td>
+              <td><span class="badge badge-blue">默认</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">修改</button>
+                <button class="btn btn-sm btn-link" style="opacity:.5;cursor:not-allowed" title="当前默认学期不可切换">已默认</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2025-2026</td>
+              <td>第一学期</td>
+              <td>2025-09-08 ~ 2026-01-26</td>
+              <td>20 周</td>
+              <td>28</td>
+              <td>1,920</td>
+              <td><span class="badge badge-gray">已结束</span></td>
+              <td><span class="text-mute">—</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">查看</button>
+                <button class="btn btn-sm btn-link">归档报告</button>
+                <button class="btn btn-sm btn-link" onclick="toast('切换为默认学期？','info')">设为默认</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-2025</td>
+              <td>第二学期</td>
+              <td>2025-02-24 ~ 2025-07-13</td>
+              <td>20 周</td>
+              <td>32</td>
+              <td>1,856</td>
+              <td><span class="badge badge-gray">已结束</span></td>
+              <td><span class="text-mute">—</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">查看</button>
+                <button class="btn btn-sm btn-link">归档报告</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2024-2025</td>
+              <td>第一学期</td>
+              <td>2024-09-09 ~ 2025-01-27</td>
+              <td>20 周</td>
+              <td>26</td>
+              <td>1,654</td>
+              <td><span class="badge badge-gray">已结束</span></td>
+              <td><span class="text-mute">—</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">查看</button>
+                <button class="btn btn-sm btn-link">归档报告</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2023-2024</td>
+              <td>第二学期</td>
+              <td>2024-02-26 ~ 2024-07-15</td>
+              <td>20 周</td>
+              <td>22</td>
+              <td>1,420</td>
+              <td><span class="badge badge-gray">已归档</span></td>
+              <td><span class="text-mute">—</span></td>
+              <td>
+                <button class="btn btn-sm btn-link">查看</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 新增学期 -->
+<div class="modal-overlay" id="m-sem">
+  <div class="modal">
+    <div class="modal-header"><h3>新增学期</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label><span class="req">*</span>学年</label>
+          <select class="form-control"><option>2026-2027</option><option>2027-2028</option></select>
+        </div>
+        <div class="form-group"><label><span class="req">*</span>学期</label>
+          <select class="form-control"><option>第一学期</option><option>第二学期</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label><span class="req">*</span>起始日期</label>
+          <input class="form-control" type="date" value="2026-09-07">
+        </div>
+        <div class="form-group"><label><span class="req">*</span>结束日期</label>
+          <input class="form-control" type="date" value="2027-01-25">
+          <div class="form-hint">结束当日 23:59:59 为学期最后时刻</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>授课周数</label>
+          <input class="form-control" type="number" value="20">
+        </div>
+        <div class="form-group"><label>放假区间（可选）</label>
+          <input class="form-control" placeholder="2026-10-01 ~ 2026-10-07">
+          <div class="form-hint">用于活跃度统计排除假期</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>立即设为默认</label>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+          <label class="toggle"><input type="checkbox"><span class="slider"></span></label>
+          <span class="form-hint" style="margin:0">打开后，新建后立即切换默认学期（影响所有筛选项）</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-sem');toast('学期已创建','success')">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 切换默认学期 -->
+<div class="modal-overlay" id="m-switch">
+  <div class="modal">
+    <div class="modal-header"><h3>切换默认学期</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:14px">
+        ⚠️ 切换默认学期将同时影响：所有用户的「我的班级」「学生列表」「工作台」等页面的初始筛选项。<br>本操作不影响数据，仅影响"默认显示"。
+      </div>
+      <div class="form-group"><label><span class="req">*</span>选择新的默认学期</label>
+        <select class="form-control">
+          <option>2025-2026 第二学期（当前默认）</option>
+          <option>2026-2027 第一学期（未开始）</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-warning" onclick="closeModal('m-switch');toast('已切换默认学期','success')">确认切换</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'semester', title:'学期管理', breadcrumb:['教学管理','学期管理'] };
+</script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

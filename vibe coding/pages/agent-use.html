@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智能体使用 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+#content{padding:0;display:flex;height:100%;overflow:hidden}
+
+/* 左侧会话列表 */
+.chat-sidebar{width:240px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.cs-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+.cs-search{position:relative}
+.cs-search input{width:100%;padding:8px 12px 8px 32px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none}
+.cs-search::before{content:'🔍';position:absolute;left:10px;top:7px;font-size:12px}
+
+.agent-pick{padding:10px 16px;border-bottom:1px solid var(--border);background:#fafbfc}
+.agent-pick .label{font-size:11px;color:var(--text-mute);margin-bottom:6px}
+.agent-pick .pick-card{display:flex;align-items:center;gap:8px;padding:8px;background:#fff;border-radius:6px;cursor:pointer}
+.agent-pick .pick-card:hover{background:#eff6ff}
+.agent-pick .ico{width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.agent-pick .info{flex:1;min-width:0}
+.agent-pick .nm{font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-pick .meta{font-size:10px;color:var(--text-mute);margin-top:1px}
+.agent-pick .arrow{color:var(--text-mute);font-size:10px}
+
+.cs-list{flex:1;overflow-y:auto;padding:8px}
+.cs-group-label{font-size:10px;color:var(--text-mute);padding:6px 8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.cs-item{padding:9px 10px;border-radius:6px;cursor:pointer;margin-bottom:2px;transition:all .15s}
+.cs-item:hover{background:#f8fafc}
+.cs-item.active{background:#eff6ff;border-left:3px solid var(--accent);padding-left:7px}
+.cs-item .title{font-size:12px;font-weight:500;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-item .preview{font-size:11px;color:var(--text-mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-item .meta{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text-mute)}
+
+.cs-foot{padding:10px;border-top:1px solid var(--border)}
+
+/* 中间消息流 */
+.chat-main{flex:1;display:flex;flex-direction:column;background:#f8fafc;min-width:0}
+.chat-head{padding:14px 22px;background:#fff;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.chat-head .info{display:flex;align-items:center;gap:12px}
+.chat-head .ico{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.chat-head .nm{font-size:14px;font-weight:600;color:var(--primary)}
+.chat-head .desc{font-size:11px;color:var(--text-mute);margin-top:2px}
+.chat-head .actions{display:flex;gap:6px}
+
+.token-pill{display:flex;align-items:center;gap:6px;background:#eff6ff;color:#1d4ed8;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;border:1px solid #bfdbfe}
+.token-pill .dot{width:6px;height:6px;border-radius:50%;background:#10b981}
+
+.chat-body{flex:1;overflow-y:auto;padding:24px}
+.msg-row{display:flex;gap:10px;margin-bottom:18px;max-width:780px}
+.msg-row.user{flex-direction:row-reverse;margin-left:auto}
+.msg-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px}
+.msg-avatar.user{background:linear-gradient(135deg,#10b981,#059669)}
+.msg-avatar.ai{background:linear-gradient(135deg,#2563eb,#1e40af)}
+.msg-bubble{padding:12px 16px;border-radius:12px;max-width:660px;font-size:13px;line-height:1.7;color:#1e293b}
+.msg-bubble.user{background:#2563eb;color:#fff;border-radius:12px 4px 12px 12px}
+.msg-bubble.ai{background:#fff;border:1px solid #e2e8f0;border-radius:4px 12px 12px 12px}
+.msg-bubble pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;margin:8px 0;overflow-x:auto;font-family:'Courier New',monospace;font-size:12px;line-height:1.5}
+.msg-bubble code{background:#f1f5f9;color:#dc2626;padding:1px 5px;border-radius:3px;font-size:12px;font-family:'Courier New',monospace}
+.msg-bubble pre code{background:none;color:inherit;padding:0}
+.msg-bubble.ai p{margin:6px 0}
+.msg-bubble.ai b{color:var(--primary)}
+.msg-meta{font-size:10px;color:var(--text-mute);margin-top:5px;display:flex;gap:10px;align-items:center}
+.msg-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.msg-action{padding:3px 9px;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;color:#64748b;cursor:pointer;background:#fff;display:inline-flex;align-items:center;gap:3px}
+.msg-action:hover{border-color:var(--accent);color:var(--accent)}
+.msg-action.liked{background:#fee2e2;border-color:#fecaca;color:#dc2626}
+
+/* 5 步辅导步骤条 */
+.step-flow{display:flex;gap:0;margin:10px 0 14px;padding:10px 14px;background:#f8fafc;border-radius:8px}
+.step-pill{flex:1;padding:6px 8px;text-align:center;font-size:10px;color:#94a3b8;position:relative;font-weight:500}
+.step-pill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);height:14px;width:1px;background:#e2e8f0}
+.step-pill:last-child::after{display:none}
+.step-pill.done{color:#10b981}
+.step-pill.done::before{content:'✓ '}
+.step-pill.current{color:var(--accent);font-weight:700;background:#dbeafe;border-radius:4px;padding:6px 8px}
+.step-pill.current::before{content:'▶ '}
+
+/* 输入区 */
+.chat-foot{padding:14px 22px 18px;background:#fff;border-top:1px solid var(--border);flex-shrink:0}
+.input-box{position:relative;background:#fff;border:1px solid #d1d5db;border-radius:10px;transition:border .15s}
+.input-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.input-box textarea{width:100%;padding:12px 100px 36px 14px;border:none;outline:none;resize:none;font-size:13px;font-family:inherit;background:transparent;min-height:54px;max-height:160px}
+.input-toolbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 10px;border-top:1px solid #f8fafc}
+.input-tools{display:flex;gap:4px}
+.input-tool{padding:5px 8px;border-radius:5px;cursor:pointer;font-size:12px;color:#64748b;display:flex;align-items:center;gap:4px}
+.input-tool:hover{background:#f1f5f9;color:var(--accent)}
+.input-send{position:absolute;right:10px;bottom:48px;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:500}
+.input-send:hover{background:var(--accent-hover)}
+.input-send:disabled{background:#cbd5e1;cursor:not-allowed}
+.quick-prompts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.quick-prompt{padding:5px 12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:14px;font-size:11px;color:#475569;cursor:pointer}
+.quick-prompt:hover{background:#dbeafe;border-color:#bfdbfe;color:var(--accent)}
+
+/* 右侧上下文 */
+.chat-context{width:280px;background:#fff;border-left:1px solid var(--border);overflow-y:auto;padding:18px;flex-shrink:0}
+.ctx-section{margin-bottom:20px}
+.ctx-section .title{font-size:12px;color:var(--text-mute);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ctx-card{padding:10px 12px;background:#f8fafc;border-radius:6px;font-size:12px;color:#475569;line-height:1.5}
+
+.kb-cite{padding:8px 10px;border-left:3px solid #fbbf24;background:#fffbeb;border-radius:0 6px 6px 0;font-size:11px;color:#92400e;margin-bottom:6px;cursor:pointer}
+.kb-cite .src{font-weight:600;font-size:10px;color:#d97706;margin-bottom:2px}
+.kb-cite:hover{background:#fef3c7}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- 左侧：会话列表 -->
+    <div class="chat-sidebar">
+      <div class="cs-head">
+        <div class="cs-search"><input placeholder="搜索历史对话"></div>
+      </div>
+
+      <div class="agent-pick">
+        <div class="label">当前智能体</div>
+        <div class="pick-card" onclick="toast('切换智能体','info')">
+          <div class="ico">⚙</div>
+          <div class="info">
+            <div class="nm">代码纠错（码上）</div>
+            <div class="meta">系统智能体 · 5 步辅导</div>
+          </div>
+          <span class="arrow">▼</span>
+        </div>
+      </div>
+
+      <div class="cs-list">
+        <div class="cs-group-label">今天</div>
+        <div class="cs-item active">
+          <div class="title">指针类型转换错误</div>
+          <div class="preview">为什么 int* 不能直接...</div>
+          <div class="meta"><span>14:22</span><span>5 步骤进行中</span></div>
+        </div>
+        <div class="cs-item">
+          <div class="title">数组越界问题</div>
+          <div class="preview">编译能过运行崩溃</div>
+          <div class="meta"><span>10:15</span><span>已完成</span></div>
+        </div>
+
+        <div class="cs-group-label">昨天</div>
+        <div class="cs-item">
+          <div class="title">malloc 内存泄漏</div>
+          <div class="preview">动态分配后忘记 free</div>
+          <div class="meta"><span>16:40</span><span>已完成</span></div>
+        </div>
+        <div class="cs-item">
+          <div class="title">链表反转算法</div>
+          <div class="preview">用递归怎么写</div>
+          <div class="meta"><span>09:30</span><span>已完成</span></div>
+        </div>
+
+        <div class="cs-group-label">更早</div>
+        <div class="cs-item">
+          <div class="title">scanf 输入卡死</div>
+          <div class="preview">空格和回车的处理</div>
+          <div class="meta"><span>05-19</span><span>已完成</span></div>
+        </div>
+        <div class="cs-item">
+          <div class="title">结构体对齐问题</div>
+          <div class="preview">sizeof 结果和预期不一致</div>
+          <div class="meta"><span>05-18</span><span>已完成</span></div>
+        </div>
+        <div class="cs-item">
+          <div class="title">printf 格式化输出</div>
+          <div class="preview">浮点数精度控制</div>
+          <div class="meta"><span>05-17</span><span>已完成</span></div>
+        </div>
+      </div>
+
+      <div class="cs-foot">
+        <button class="btn btn-primary" style="width:100%" onclick="toast('已开始新对话','success')">+ 新建对话</button>
+      </div>
+    </div>
+
+    <!-- 中间：消息流 -->
+    <div class="chat-main">
+      <div class="chat-head">
+        <div class="info">
+          <div class="ico">⚙</div>
+          <div>
+            <div class="nm">代码纠错（码上） <span class="badge badge-blue" style="margin-left:6px">系统智能体</span></div>
+            <div class="desc">5 步辅导：智能审题 → 代码分析 → 关键点拨 → 详细指导 → 正确代码</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="token-pill"><span class="dot"></span>剩余 62 万 Token</span>
+          <button class="btn btn-sm btn-outline">📤 分享对话</button>
+          <button class="btn btn-sm btn-outline">⚙</button>
+        </div>
+      </div>
+
+      <div class="chat-body" id="chat-body">
+        <!-- 用户提问 -->
+        <div class="msg-row user">
+          <div class="msg-avatar user">张</div>
+          <div>
+            <div class="msg-bubble user">这段代码报错 "incompatible pointer types"，但我不知道为什么：
+<pre style="background:rgba(0,0,0,.25);color:#fff;margin:8px 0;padding:10px;border-radius:6px">int main() {
+  int x = 10;
+  char *p = &x;
+  printf("%d", *p);
+  return 0;
+}</pre>能帮我看看问题吗？</div>
+            <div class="msg-meta" style="justify-content:flex-end">14:22</div>
+          </div>
+        </div>
+
+        <!-- AI 回复 + 5 步流程 -->
+        <div class="msg-row">
+          <div class="msg-avatar ai">⚙</div>
+          <div>
+            <div class="msg-bubble ai">
+              好问题！这是 C 语言指针类型不匹配的典型错误。我会按 5 步引导你理解问题，请跟着我的节奏一步步思考。
+
+              <div class="step-flow">
+                <div class="step-pill done">智能审题</div>
+                <div class="step-pill done">代码分析</div>
+                <div class="step-pill current">关键点拨</div>
+                <div class="step-pill">详细指导</div>
+                <div class="step-pill">正确代码</div>
+              </div>
+
+              <p><b>📋 第 1 步 · 智能审题</b><br>
+              你的目标是定义一个 <code>int</code> 变量 <code>x</code>，然后用指针访问它的值并打印。</p>
+
+              <p><b>🔍 第 2 步 · 代码分析</b><br>
+              代码第 3 行：<code>char *p = &x;</code><br>
+              这里 <code>&x</code> 的类型是 <code>int*</code>（指向 int 的指针），但你声明的 <code>p</code> 是 <code>char*</code>（指向 char 的指针）。<b>类型不一致</b>，所以编译器报错。</p>
+
+              <p><b>💡 第 3 步 · 关键点拨</b><br>
+              在 C 语言中，指针不只记录"地址"，还记录"该地址处数据的类型"。<br>
+              <code>int*</code> 知道每次跳 4 字节（在 32/64 位系统中 int 通常是 4 字节）<br>
+              <code>char*</code> 知道每次跳 1 字节<br>
+              这两种指针在内存解读规则上完全不同，<b>不能随便互转</b>。</p>
+
+              <p>👉 在继续前，你能先思考一下：要修复这个错误，你会怎么改？</p>
+              <p style="font-size:11px;color:var(--text-mute)">💬 回答后我会进入第 4 步「详细指导」</p>
+            </div>
+            <div class="msg-meta">
+              <span>14:22 · 1.8s · 用 286 Token</span>
+              <span>📚 引用 2 个知识库片段</span>
+            </div>
+            <div class="msg-actions">
+              <span class="msg-action liked" onclick="this.classList.toggle('liked')">👍 有帮助 (3)</span>
+              <span class="msg-action">👎 没帮上</span>
+              <span class="msg-action">📋 复制</span>
+              <span class="msg-action">🔁 重新生成</span>
+              <span class="msg-action">📤 分享到论坛</span>
+              <span class="msg-action" onclick="toast('已通知 王老师，约 4 小时内回复','success')">🆘 求助老师</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-foot">
+        <div class="quick-prompts">
+          <span class="quick-prompt" onclick="document.querySelector('textarea').value='我会把 char* 改成 int*'">💭 我会把 char* 改成 int*</span>
+          <span class="quick-prompt">💭 不太懂，能再讲讲指针类型吗</span>
+          <span class="quick-prompt">💭 直接告诉我答案</span>
+          <span class="quick-prompt">📊 画一张内存示意图</span>
+        </div>
+        <div class="input-box">
+          <textarea placeholder="输入你的回答或新问题... (Shift+Enter 换行，Enter 发送)"></textarea>
+          <button class="input-send" id="send-btn">发送 ↑</button>
+          <div class="input-toolbar">
+            <div class="input-tools">
+              <span class="input-tool" title="上传图片">📎</span>
+              <span class="input-tool" title="上传代码">📄</span>
+              <span class="input-tool" title="联网搜索">🌐</span>
+              <span class="input-tool" title="选择知识库">📚</span>
+              <span class="input-tool" title="语音输入">🎤</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-mute)">讯飞星火 V4.0 · 当前会话 1,420 Token</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：上下文 -->
+    <div class="chat-context">
+      <div class="ctx-section">
+        <div class="title">📊 学习进度</div>
+        <div class="ctx-card">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>当前会话</span><b>3 / 5 步</b></div>
+          <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="width:60%;height:100%;background:linear-gradient(90deg,#10b981,#22c55e)"></div></div>
+          <div style="font-size:11px;color:var(--text-mute);margin-top:6px">已完成：审题、分析<br>当前：关键点拨</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="title">📚 知识库引用</div>
+        <div class="kb-cite" onclick="toast('打开《C 语言核心概念》第 47 页','info')">
+          <div class="src">📕 C 语言核心概念 · P47</div>
+          <div>"指针变量除了记录地址，还携带类型信息，决定如何解读所指向的内存..."</div>
+        </div>
+        <div class="kb-cite" onclick="toast('打开《指针错误案例》案例 12','info')">
+          <div class="src">📗 指针错误案例 · 案例 12</div>
+          <div>"类型不兼容警告（incompatible pointer types）：在 GCC 中默认是警告而不是错误..."</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="title">🎯 关联知识点</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <span class="badge badge-blue">指针类型</span>
+          <span class="badge badge-blue">类型转换</span>
+          <span class="badge badge-blue">编译器警告</span>
+          <span class="badge badge-blue">内存对齐</span>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="title">👨‍🏫 班级信息</div>
+        <div class="ctx-card">
+          <div style="font-weight:600;color:var(--primary)">C 语言程序设计 · 1 班</div>
+          <div style="font-size:11px;margin-top:4px">授课老师：王老师<br>同班 42 人 · 同问 8 人</div>
+        </div>
+      </div>
+
+      <div class="ctx-section">
+        <div class="title">🔗 推荐操作</div>
+        <button class="btn btn-sm btn-outline" style="width:100%;margin-bottom:6px">📤 分享到论坛</button>
+        <button class="btn btn-sm btn-outline" style="width:100%;margin-bottom:6px">🆘 求助老师</button>
+        <button class="btn btn-sm btn-outline" style="width:100%">📑 添加到学习档案</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PAGE_CONFIG = { activeNav:'agent-use', title:'智能体使用', breadcrumb:['智能体','智能体使用'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// 输入框 Enter 发送
+const ta = document.querySelector('textarea');
+ta.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMsg();
+  }
+});
+document.getElementById('send-btn').addEventListener('click', sendMsg);
+function sendMsg(){
+  const v = ta.value.trim();
+  if(!v) return;
+  appendUser(v);
+  ta.value = '';
+  setTimeout(streamAI, 400);
+}
+function appendUser(text){
+  const body = document.getElementById('chat-body');
+  body.insertAdjacentHTML('beforeend', `
+    <div class="msg-row user">
+      <div class="msg-avatar user">张</div>
+      <div>
+        <div class="msg-bubble user">${text.replace(/</g,'&lt;')}</div>
+        <div class="msg-meta" style="justify-content:flex-end">${new Date().toTimeString().slice(0,5)}</div>
+      </div>
+    </div>
+  `);
+  body.scrollTop = body.scrollHeight;
+}
+function streamAI(){
+  const body = document.getElementById('chat-body');
+  const id = 'ai-' + Date.now();
+  body.insertAdjacentHTML('beforeend', `
+    <div class="msg-row">
+      <div class="msg-avatar ai">⚙</div>
+      <div>
+        <div class="msg-bubble ai" id="${id}"><span style="opacity:.6">▊正在思考...</span></div>
+      </div>
+    </div>
+  `);
+  body.scrollTop = body.scrollHeight;
+  setTimeout(() => {
+    document.getElementById(id).innerHTML = `<p><b>很好的思路！</b>把 <code>char*</code> 改成 <code>int*</code> 是正确方向。</p>
+    <p>修改后的代码：</p>
+    <pre><code>int main() {
+  int x = 10;
+  int *p = &x;     // ✓ 类型一致
+  printf("%d", *p);
+  return 0;
+}</code></pre>
+    <p>编译运行后会输出 <code>10</code>。要不要进入第 4 步「详细指导」深入了解指针类型的内存语义？</p>`;
+    body.scrollTop = body.scrollHeight;
+  }, 1200);
+}
+</script>
+</body>
+</html>

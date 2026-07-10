@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学习档案 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.archive-hero{background:linear-gradient(135deg,#1e3a5f 0%,#1e40af 50%,#2563eb 100%);color:#fff;padding:24px 28px;border-radius:14px;margin-bottom:18px;display:flex;gap:24px;align-items:center;position:relative;overflow:hidden}
+.archive-hero::after{content:'';position:absolute;right:-50px;top:-50px;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%)}
+.archive-avatar{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;backdrop-filter:blur(8px);position:relative;z-index:1}
+.archive-info{flex:1;position:relative;z-index:1}
+.archive-info .name{font-size:24px;font-weight:700}
+.archive-info .meta{font-size:13px;opacity:.85;margin-top:4px}
+.archive-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.atag{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;backdrop-filter:blur(4px)}
+.atag.学习习惯{background:rgba(96,165,250,.3);border:1px solid rgba(96,165,250,.5)}
+.atag.学习方法{background:rgba(52,211,153,.3);border:1px solid rgba(52,211,153,.5)}
+.atag.社区影响{background:rgba(196,181,253,.3);border:1px solid rgba(196,181,253,.5)}
+
+.archive-cta{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.archive-cta .btn-light{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(8px);white-space:nowrap}
+
+/* 主体网格 */
+.archive-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+
+/* 雷达图占位 */
+.radar-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.radar-svg{width:100%;height:280px}
+.radar-axis{stroke:#e2e8f0;stroke-width:1}
+.radar-poly-bg{fill:#dbeafe;fill-opacity:.3;stroke:#3b82f6;stroke-width:2}
+.radar-poly-cmp{fill:#fbbf24;fill-opacity:.15;stroke:#f59e0b;stroke-width:2;stroke-dasharray:4,3}
+.radar-label{font-size:11px;fill:#475569;font-weight:600}
+
+/* 学习曲线 */
+.curve-svg{width:100%;height:200px}
+.curve-line{fill:none;stroke:url(#cgrad);stroke-width:3}
+.curve-area{fill:url(#cgrad-fill);opacity:.25}
+.curve-axis{stroke:#e2e8f0}
+.curve-label{font-size:10px;fill:#94a3b8}
+
+/* 时间线 */
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#e2e8f0}
+.tl-item{position:relative;padding-bottom:14px}
+.tl-item::before{content:'';position:absolute;left:-18px;top:5px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--accent)}
+.tl-item.q::before{border-color:#10b981}
+.tl-item.share::before{border-color:#f59e0b}
+.tl-item.help::before{border-color:#ef4444}
+.tl-time{font-size:10px;color:var(--text-mute)}
+.tl-title{font-size:13px;font-weight:600;color:var(--primary);margin-top:2px}
+.tl-detail{font-size:12px;color:#475569;margin-top:3px;background:#f8fafc;padding:8px 10px;border-radius:6px}
+
+/* 智能体使用排行 */
+.rank-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed #f1f5f9;font-size:12px}
+.rank-row:last-child{border:0}
+.rank-row .num{width:22px;height:22px;border-radius:4px;background:#f1f5f9;color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.rank-row:nth-child(1) .num{background:#ef4444;color:#fff}
+.rank-row:nth-child(2) .num{background:#f59e0b;color:#fff}
+.rank-row:nth-child(3) .num{background:#facc15;color:#fff}
+.rank-row .ico{width:30px;height:30px;border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.rank-row .info{flex:1;min-width:0}
+.rank-row .info .nm{font-weight:600;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-row .info .meta{font-size:10px;color:var(--text-mute);margin-top:1px}
+.rank-row .v{font-weight:700;color:var(--accent)}
+
+/* 教师评语 */
+.review-card{background:#fef9c3;border-left:4px solid #f59e0b;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:10px}
+.review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.review-author{display:flex;align-items:center;gap:8px;font-size:12px}
+.review-author .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.review-content{font-size:13px;color:#78350f;line-height:1.7}
+
+/* 标签云 */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px}
+.tag-cloud span{padding:3px 8px;border-radius:10px;background:#f1f5f9;color:#64748b;font-size:11px;cursor:pointer}
+.tag-cloud span.size-3{font-size:14px;font-weight:600;background:#dbeafe;color:#1d4ed8}
+.tag-cloud span.size-2{font-size:12px;background:#e0e7ff;color:#4338ca}
+.tag-cloud span:hover{background:var(--accent);color:#fff}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- Hero -->
+    <div class="archive-hero">
+      <div class="archive-avatar">张</div>
+      <div class="archive-info">
+        <div class="name">张同学（学号 2024010001）</div>
+        <div class="meta">📚 计算机学院 · 软件工程 · 大二 · 2 班</div>
+        <div class="meta">📞 138****8000 · ✉️ zhang@bupt.edu.cn</div>
+        <div class="archive-tags">
+          <span class="atag 学习习惯">⏰ 高频学习者</span>
+          <span class="atag 学习习惯">☀️ 日间主力型</span>
+          <span class="atag 学习习惯">🔥 持续型</span>
+          <span class="atag 学习方法">💻 代码学习者</span>
+          <span class="atag 学习方法">🎯 独立解决型</span>
+          <span class="atag 学习方法">🔍 精准提问</span>
+          <span class="atag 社区影响">📢 社区活跃者</span>
+          <span class="atag 社区影响">💬 浅评达人</span>
+        </div>
+      </div>
+      <div class="archive-cta">
+        <button class="btn btn-light">📤 导出学习档案</button>
+        <button class="btn btn-light">📋 添加教师评语</button>
+        <button class="btn btn-light">📊 班级对比报告</button>
+      </div>
+    </div>
+
+    <!-- 顶部统计 -->
+    <div class="stats-row stats-5">
+      <div class="stat-card"><div class="lbl">已加入课程</div><div class="val">3</div></div>
+      <div class="stat-card"><div class="lbl">学习天数</div><div class="val">42</div><div class="trend trend-up">最近 7 天 +5</div></div>
+      <div class="stat-card"><div class="lbl">学习时长</div><div class="val">86.5h</div></div>
+      <div class="stat-card"><div class="lbl">累计提问</div><div class="val">158</div><div class="trend trend-up">↑ 12.4%</div></div>
+      <div class="stat-card"><div class="lbl">论坛互动</div><div class="val">86</div></div>
+    </div>
+
+    <!-- 上半部分：雷达 + 学习曲线 -->
+    <div class="archive-grid">
+      <div class="radar-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📊 学习能力雷达图</div>
+            <div class="card-sub">实线：本人 · 虚线：班级平均</div>
+          </div>
+        </div>
+        <svg class="radar-svg" viewBox="0 0 320 280">
+          <!-- 同心多边形 -->
+          <g transform="translate(160 140)">
+            <polygon points="0,-100 87,-50 87,50 0,100 -87,50 -87,-50" class="radar-axis" fill="none"/>
+            <polygon points="0,-75 65,-37 65,37 0,75 -65,37 -65,-37" class="radar-axis" fill="none"/>
+            <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25" class="radar-axis" fill="none"/>
+            <polygon points="0,-25 22,-12 22,12 0,25 -22,12 -22,-12" class="radar-axis" fill="none"/>
+            <line x1="0" y1="0" x2="0" y2="-100" class="radar-axis"/>
+            <line x1="0" y1="0" x2="87" y2="-50" class="radar-axis"/>
+            <line x1="0" y1="0" x2="87" y2="50" class="radar-axis"/>
+            <line x1="0" y1="0" x2="0" y2="100" class="radar-axis"/>
+            <line x1="0" y1="0" x2="-87" y2="50" class="radar-axis"/>
+            <line x1="0" y1="0" x2="-87" y2="-50" class="radar-axis"/>
+            <!-- 班级平均（虚线） -->
+            <polygon points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" class="radar-poly-cmp"/>
+            <!-- 本人（实线） -->
+            <polygon points="0,-90 78,-45 70,40 0,80 -65,38 -78,-45" class="radar-poly-bg"/>
+            <!-- 标签 -->
+            <text x="0" y="-110" text-anchor="middle" class="radar-label">学习活跃度</text>
+            <text x="100" y="-50" class="radar-label">提问质量</text>
+            <text x="100" y="55" class="radar-label">代码能力</text>
+            <text x="0" y="120" text-anchor="middle" class="radar-label">知识掌握</text>
+            <text x="-100" y="55" text-anchor="end" class="radar-label">论坛互动</text>
+            <text x="-100" y="-50" text-anchor="end" class="radar-label">独立思考</text>
+          </g>
+        </svg>
+        <div style="display:flex;justify-content:center;gap:16px;font-size:11px;color:var(--text-sub);margin-top:6px">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:3px;background:#3b82f6"></span>本人 87 分</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:3px;background:#f59e0b;border-top:1px dashed"></span>班级平均 60 分</span>
+        </div>
+      </div>
+
+      <div class="radar-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📈 学习活跃度曲线（近 30 天）</div>
+            <div class="card-sub">学习时长（分钟/天）</div>
+          </div>
+          <select class="form-control" style="width:120px;font-size:12px"><option>近 30 天</option><option>近 7 天</option><option>本学期</option></select>
+        </div>
+        <svg class="curve-svg" viewBox="0 0 600 220">
+          <defs>
+            <linearGradient id="cgrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#1e40af"/>
+            </linearGradient>
+            <linearGradient id="cgrad-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="40" y1="190" x2="580" y2="190" class="curve-axis"/>
+          <line x1="40" y1="20"  x2="40"  y2="190" class="curve-axis"/>
+          <text x="36" y="25" text-anchor="end" class="curve-label">120</text>
+          <text x="36" y="105" text-anchor="end" class="curve-label">60</text>
+          <text x="36" y="185" text-anchor="end" class="curve-label">0</text>
+          <path d="M 40 150 L 80 130 L 120 90 L 160 100 L 200 70 L 240 60 L 280 50 L 320 80 L 360 40 L 400 60 L 440 30 L 480 50 L 520 70 L 560 35"
+                class="curve-line"/>
+          <path d="M 40 150 L 80 130 L 120 90 L 160 100 L 200 70 L 240 60 L 280 50 L 320 80 L 360 40 L 400 60 L 440 30 L 480 50 L 520 70 L 560 35 L 560 190 L 40 190 Z"
+                class="curve-area"/>
+          <text x="40" y="210" class="curve-label">04-22</text>
+          <text x="240" y="210" class="curve-label">05-06</text>
+          <text x="440" y="210" class="curve-label">05-15</text>
+          <text x="560" y="210" class="curve-label" text-anchor="end">05-21</text>
+        </svg>
+        <div style="display:flex;justify-content:space-around;font-size:12px;color:var(--text-sub);padding:8px;background:#f8fafc;border-radius:6px;margin-top:10px">
+          <span>📊 平均：<b style="color:var(--primary)">68 min/天</b></span>
+          <span>🏆 最高：<b style="color:var(--success)">128 min</b>（05-19）</span>
+          <span>📈 趋势：<b class="trend-up">↑ 18%</b></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中间：智能体排行 + 标签云 -->
+    <div class="archive-grid">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🤖 智能体使用排行</div>
+            <div class="card-sub">本学期累计调用次数 TOP 6</div>
+          </div>
+        </div>
+        <div class="rank-row">
+          <div class="num">1</div>
+          <div class="ico" style="background:#2563eb">⚙</div>
+          <div class="info"><div class="nm">代码纠错（码上）</div><div class="meta">5 步辅导 · 系统智能体</div></div>
+          <div class="v">68 次</div>
+        </div>
+        <div class="rank-row">
+          <div class="num">2</div>
+          <div class="ico" style="background:#10b981">📖</div>
+          <div class="info"><div class="nm">代码解读（码上）</div><div class="meta">系统智能体</div></div>
+          <div class="v">42 次</div>
+        </div>
+        <div class="rank-row">
+          <div class="num">3</div>
+          <div class="ico" style="background:#f59e0b">💡</div>
+          <div class="info"><div class="nm">知识问答（码上）</div><div class="meta">系统智能体</div></div>
+          <div class="v">26 次</div>
+        </div>
+        <div class="rank-row">
+          <div class="num">4</div>
+          <div class="ico" style="background:#0ea5e9">👉</div>
+          <div class="info"><div class="nm">指针辅导专家</div><div class="meta">@王老师 校内</div></div>
+          <div class="v">14 次</div>
+        </div>
+        <div class="rank-row">
+          <div class="num">5</div>
+          <div class="ico" style="background:#1d4ed8">&lt;/&gt;</div>
+          <div class="info"><div class="nm">编程问答（码上）</div><div class="meta">系统智能体</div></div>
+          <div class="v">8 次</div>
+        </div>
+        <div class="rank-row">
+          <div class="num">6</div>
+          <div class="ico" style="background:#06b6d4">🌳</div>
+          <div class="info"><div class="nm">数据结构图解</div><div class="meta">@王老师 校内</div></div>
+          <div class="v">5 次</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🏷️ 学习兴趣标签云</div>
+            <div class="card-sub">基于提问、回答、收藏的智能识别</div>
+          </div>
+        </div>
+        <div class="tag-cloud">
+          <span class="size-3">指针</span>
+          <span class="size-3">C 语言</span>
+          <span class="size-2">链表</span>
+          <span class="size-2">递归</span>
+          <span class="size-2">内存模型</span>
+          <span class="size-2">数据结构</span>
+          <span>类型转换</span>
+          <span>malloc</span>
+          <span>scanf</span>
+          <span>结构体</span>
+          <span>函数指针</span>
+          <span>动态规划</span>
+          <span>栈</span>
+          <span>队列</span>
+          <span>二叉树</span>
+          <span>哈希</span>
+          <span>排序算法</span>
+          <span>编译警告</span>
+          <span>内存泄漏</span>
+        </div>
+
+        <h4 style="font-size:13px;color:var(--primary);margin:18px 0 10px">📌 课程对比</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:6px">
+            <div style="font-size:11px;color:var(--text-mute)">C 语言</div>
+            <div style="font-size:18px;font-weight:700;color:var(--success);margin-top:3px">A+</div>
+            <div style="font-size:10px;color:var(--text-sub);margin-top:2px">第 3 / 42 名</div>
+          </div>
+          <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:6px">
+            <div style="font-size:11px;color:var(--text-mute)">数据结构</div>
+            <div style="font-size:18px;font-weight:700;color:var(--accent);margin-top:3px">A</div>
+            <div style="font-size:10px;color:var(--text-sub);margin-top:2px">第 8 / 38 名</div>
+          </div>
+          <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:6px">
+            <div style="font-size:11px;color:var(--text-mute)">软件工程</div>
+            <div style="font-size:18px;font-weight:700;color:var(--warning);margin-top:3px">B+</div>
+            <div style="font-size:10px;color:var(--text-sub);margin-top:2px">第 18 / 52 名</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部：学习轨迹 + 教师评语 -->
+    <div class="archive-grid">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🕒 最近学习轨迹</div>
+            <div class="card-sub">提问 · 分享 · 求助 · 答题</div>
+          </div>
+          <a class="btn btn-sm btn-link">查看全部 →</a>
+        </div>
+        <div class="timeline">
+          <div class="tl-item q">
+            <div class="tl-time">今天 14:22</div>
+            <div class="tl-title">向「代码纠错」提问：指针类型转换错误</div>
+            <div class="tl-detail">5 步辅导进行中（3/5）· 已用 286 Token</div>
+          </div>
+          <div class="tl-item share">
+            <div class="tl-time">今天 14:30</div>
+            <div class="tl-title">分享对话到论坛 · 求助</div>
+            <div class="tl-detail">为什么 char* p = &x; 会报 incompatible pointer types? · 12 ❤️ · 5 💬</div>
+          </div>
+          <div class="tl-item help">
+            <div class="tl-time">今天 14:35</div>
+            <div class="tl-title">求助王老师</div>
+            <div class="tl-detail">王老师已收到通知，预计 4 小时内回复</div>
+          </div>
+          <div class="tl-item q">
+            <div class="tl-time">昨天 16:40</div>
+            <div class="tl-title">向「代码纠错」提问：malloc 内存泄漏</div>
+            <div class="tl-detail">5 步辅导已完成 · 评分 5 ⭐</div>
+          </div>
+          <div class="tl-item q">
+            <div class="tl-time">05-19 10:15</div>
+            <div class="tl-title">向「数据结构图解」提问：链表反转递归</div>
+            <div class="tl-detail">已完成 · 收藏对话</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📝 教师评语</div>
+            <div class="card-sub">来自授课老师与助教</div>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="openModal('m-review')">+ 添加评语</button>
+        </div>
+        <div class="review-card">
+          <div class="review-head">
+            <div class="review-author">
+              <div class="av">王</div>
+              <div>
+                <b style="color:var(--primary)">王老师</b>
+                <div style="font-size:10px;color:var(--text-sub)">C 语言程序设计 · 1 班</div>
+              </div>
+            </div>
+            <span style="font-size:11px;color:var(--text-mute)">2026-05-15</span>
+          </div>
+          <div class="review-content">学习态度积极，提问质量高，能在 AI 辅导后主动总结。建议在数据结构上多投入，链表递归类问题可以再多练习几道。</div>
+        </div>
+        <div class="review-card" style="background:#dbeafe;border-color:#3b82f6">
+          <div class="review-head">
+            <div class="review-author">
+              <div class="av">李</div>
+              <div>
+                <b style="color:var(--primary)">李老师</b>
+                <div style="font-size:10px;color:var(--text-sub)">数据结构 · A 班</div>
+              </div>
+            </div>
+            <span style="font-size:11px;color:var(--text-mute)">2026-04-28</span>
+          </div>
+          <div class="review-content" style="color:#1e40af">基础扎实，提问聚焦核心概念，是班里少数能用 AI 辅导后还能自己写出递归实现的同学。继续保持。</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 添加评语 -->
+<div class="modal-overlay" id="m-review">
+  <div class="modal">
+    <div class="modal-header"><h3>添加教师评语</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label><span class="req">*</span>所属课程班级</label>
+        <select class="form-control"><option>C 语言程序设计 · 1 班</option><option>数据结构 · A 班</option></select>
+      </div>
+      <div class="form-group"><label><span class="req">*</span>评语内容</label>
+        <textarea class="form-control" style="min-height:120px" placeholder="客观评价学生的学习表现，建议聚焦具体行为（≤500 字）" maxlength="500"></textarea>
+      </div>
+      <div class="form-group">
+        <label>可见性</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:13px"><input type="radio" name="vis" checked> 学生可见（鼓励性评语）</label>
+          <label style="font-size:13px"><input type="radio" name="vis"> 仅教师可见（内部记录）</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-review');toast('评语已保存','success')">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'archive', title:'学习档案', breadcrumb:['教学管理','学习档案'] };
+</script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班级管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.tip-bar{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:9px 14px;font-size:12px;color:#1e40af;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tip-bar .ico{font-size:14px}
+.action-icons{display:flex;gap:6px;align-items:center}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#64748b;transition:all .15s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn svg{width:14px;height:14px}
+.icon-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+.icon-btn.success:hover{border-color:var(--success);color:var(--success)}
+
+.benefit-tip{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(90deg,#fef9c3,#fef3c7);border-radius:8px;margin-bottom:14px;font-size:13px;color:#92400e}
+.benefit-tip .ico{font-size:18px}
+.benefit-tip a{color:#1d4ed8;font-weight:600;cursor:pointer;text-decoration:underline}
+
+.code-tag{display:inline-block;background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.5px}
+
+.teacher-list{font-size:12px;color:#475569}
+.teacher-list .more{color:var(--accent);cursor:pointer;font-weight:500}
+
+/* 选中项 chips */
+.chip-input{min-height:38px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;cursor:text}
+.chip-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.chip{background:#eff6ff;color:#1d4ed8;padding:3px 8px;border-radius:4px;font-size:11px;display:flex;align-items:center;gap:4px}
+.chip .x{cursor:pointer;color:#94a3b8;font-weight:bold}
+.chip-input input{border:none;outline:none;flex:1;min-width:100px;font-size:12px;padding:4px}
+
+.toggle{position:relative;display:inline-block;width:38px;height:20px}
+.toggle input{display:none}
+.toggle .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:10px;cursor:pointer;transition:.2s}
+.toggle .slider::before{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked + .slider{background:var(--accent)}
+.toggle input:checked + .slider::before{transform:translateX(18px)}
+
+.assign-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.assign-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:6px}
+.assign-card.pinned{background:#fef3c7;border-color:#fde68a;color:#92400e;font-weight:500}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- Tab -->
+    <div class="tabs">
+      <span class="tab active" data-view="teacher">教师视角</span>
+      <span class="tab" data-view="student">学生视角</span>
+    </div>
+
+    <!-- 教师版权益绑定提示 -->
+    <div class="benefit-tip">
+      <span class="ico">🎓</span>
+      <span>你的个人权益-教师版，已绑定 <b>3 个班级</b>，剩余可绑定 <b>2 个</b></span>
+      <a onclick="openModal('m-bind-benefit')">权益配置 →</a>
+    </div>
+
+    <!-- 筛选 -->
+    <div class="filter-bar">
+      <div class="filter-item"><label>授课学期</label>
+        <select class="form-control">
+          <option>2025-2026 第二学期</option>
+          <option>2025-2026 第一学期</option>
+          <option>2024-2025 第二学期</option>
+        </select>
+      </div>
+      <div class="filter-item"><label>课程</label>
+        <input class="form-control" placeholder="模糊搜索课程"></div>
+      <div class="filter-item"><label>班级</label>
+        <input class="form-control" placeholder="班级名称"></div>
+      <div class="filter-item"><label>状态</label>
+        <select class="form-control"><option>全部</option><option>未开课</option><option>已开课</option><option>已停课</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-outline" onclick="toast('已重置','info')">重置</button>
+        <button class="btn btn-primary" onclick="toast('已查询','success')">查询</button>
+      </div>
+    </div>
+
+    <!-- 操作区 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">班级列表</div>
+          <div class="card-sub">说明：请先点击 <b style="color:var(--success)">✓ 开课</b> 按钮，学生才能加入班级。如需修改班级信息，请先点击 <b style="color:var(--warning)">✕ 停课</b>，通过 <b style="color:var(--accent)">✏ 修改</b> 按钮修改，完成后再开课。</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="toast('打开批量导入弹窗','info')">📥 批量导入</button>
+          <button class="btn btn-primary" onclick="openModal('m-class')">+ 新增班级</button>
+        </div>
+      </div>
+
+      <div class="tip-bar">
+        <span class="ico">ℹ️</span>
+        <span>当前已绑定教师版权益的班级会显示 <span class="badge badge-yellow">教师版</span> 标签</span>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>课程名称</th>
+              <th>班级名称</th>
+              <th>班级码</th>
+              <th>授课老师</th>
+              <th>助教</th>
+              <th>授课学期</th>
+              <th>学生人数</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-purple">实训</span> C语言程序设计</td>
+              <td>1班 <span class="badge badge-yellow">教师版</span></td>
+              <td><span class="code-tag">A1B2</span></td>
+              <td>王老师</td>
+              <td>李同学, 张同学</td>
+              <td>2025-2026 第二学期</td>
+              <td>42 / 50</td>
+              <td><span class="badge badge-green">已开课</span></td>
+              <td>
+                <div class="action-icons">
+                  <span class="icon-btn" title="修改" onclick="toast('已开课班级需先停课才能修改','warning')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+                  <span class="icon-btn success" title="学生管理" onclick="openModal('m-students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg></span>
+                  <span class="icon-btn" title="查看详情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></span>
+                  <span class="icon-btn danger" title="停课" onclick="if(confirm('确定停课，停课后学生无法再加入班级。'))toast('已停课','success')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">实训</span> 数据结构</td>
+              <td>A班 <span class="badge badge-yellow">教师版</span></td>
+              <td><span class="code-tag">D5E7</span></td>
+              <td>李老师</td>
+              <td>—</td>
+              <td>2025-2026 第二学期</td>
+              <td>38 / 40</td>
+              <td><span class="badge badge-green">已开课</span></td>
+              <td>
+                <div class="action-icons">
+                  <span class="icon-btn" title="修改"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+                  <span class="icon-btn success" title="学生管理" onclick="openModal('m-students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg></span>
+                  <span class="icon-btn" title="查看"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></span>
+                  <span class="icon-btn danger" title="停课"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Python程序设计</td>
+              <td>2班</td>
+              <td><span class="text-mute" style="font-size:11px">未生成</span></td>
+              <td>赵老师, 钱老师 <span class="teacher-list more">+1</span></td>
+              <td>—</td>
+              <td>2025-2026 第二学期</td>
+              <td>0 / 60</td>
+              <td><span class="badge badge-gray">未开课</span></td>
+              <td>
+                <div class="action-icons">
+                  <span class="icon-btn" title="修改" onclick="openModal('m-class')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+                  <span class="icon-btn" title="学生管理" onclick="openModal('m-students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/></svg></span>
+                  <span class="icon-btn" title="查看"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="icon-btn success" title="开课" onclick="if(confirm('确定开课，开课后学生可通过班级码加入班级。'))toast('已开课，班级码：F8K3','success')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="icon-btn danger" title="删除" onclick="if(confirm('确定删除班级？'))toast('已删除','success')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>软件工程</td>
+              <td>实训班 <span class="badge badge-yellow">教师版</span></td>
+              <td><span class="code-tag">P9Q4</span></td>
+              <td>张老师</td>
+              <td>—</td>
+              <td>2024-2025 第二学期</td>
+              <td>52 / 60</td>
+              <td><span class="badge badge-orange">已停课</span></td>
+              <td>
+                <div class="action-icons">
+                  <span class="icon-btn" title="修改" onclick="openModal('m-class')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/></svg></span>
+                  <span class="icon-btn" title="学生管理" onclick="openModal('m-students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/></svg></span>
+                  <span class="icon-btn" title="查看"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="icon-btn" title="开课不可用：历史学期" onclick="toast('该班级的授课学期不是当前学期，无法开课','warning')" style="opacity:.4;cursor:not-allowed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span class="icon-btn danger" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-sub)">
+        <span>共 28 条记录</span>
+        <div style="display:flex;gap:4px">
+          <span class="btn btn-sm btn-outline">‹</span>
+          <span class="btn btn-sm btn-primary">1</span>
+          <span class="btn btn-sm btn-outline">2</span>
+          <span class="btn btn-sm btn-outline">3</span>
+          <span class="btn btn-sm btn-outline">›</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 新增/修改班级 弹窗 -->
+<div class="modal-overlay" id="m-class">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3>新增班级</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label><span class="req">*</span>课程名称</label>
+          <select class="form-control"><option>请选择课程</option><option>C语言程序设计</option><option>数据结构</option><option>Python程序设计</option></select>
+          <div class="form-hint">来自课程管理已生效的课程</div>
+        </div>
+        <div class="form-group">
+          <label><span class="req">*</span>班级名称</label>
+          <input class="form-control" placeholder="请输入班级名称（长度40）">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>实训班级</label>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+            <label class="toggle"><input type="checkbox"><span class="slider"></span></label>
+            <span class="form-hint" style="margin:0">打开时，学生可在班级发布智能体</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>班级码</label>
+          <div class="form-control" style="background:#f8fafc;color:var(--text-mute)">开课后自动生成 4 位唯一码</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label><span class="req">*</span>授课老师</label>
+          <div class="chip-input">
+            <span class="chip">王老师 (T1001)<span class="x">×</span></span>
+            <input placeholder="搜索学工号/姓名">
+          </div>
+          <div class="form-hint">最多可选择 10 条数据</div>
+        </div>
+        <div class="form-group">
+          <label><span class="req">*</span>授课学期</label>
+          <select class="form-control"><option>2025-2026 第二学期</option><option>2026-2027 第一学期</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>助教老师</label>
+          <div class="chip-input">
+            <input placeholder="从教师/学生中搜索学工号或姓名">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>班级人数</label>
+          <input class="form-control" type="number" placeholder="请输入数字" value="50">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>绑定智能体</label>
+        <div class="chip-input">
+          <span class="chip" style="background:#fef3c7;color:#92400e">📌 代码纠错（码上）<span class="x">×</span></span>
+          <span class="chip" style="background:#fef3c7;color:#92400e">📌 代码解读（码上）<span class="x">×</span></span>
+          <span class="chip" style="background:#fef3c7;color:#92400e">📌 知识问答（码上）<span class="x">×</span></span>
+          <span class="chip" style="background:#fef3c7;color:#92400e">📌 编程问答（码上）<span class="x">×</span></span>
+          <span class="chip">数据结构图解 (@王老师)<span class="x">×</span></span>
+          <input placeholder="搜索智能体名称">
+        </div>
+        <div class="form-hint">最多选择 30 个智能体；置顶 4 个为系统预制智能体</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>代码生成（仅代码纠错）</label>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+            <span class="form-hint" style="margin:0">关闭时，代码纠错-五步骤的「正确代码」不显示</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>学院</label>
+          <input class="form-control" placeholder="根据第一个授课老师自动带入" value="计算机学院">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-class');toast('班级保存成功','success')">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 学生管理弹窗 -->
+<div class="modal-overlay" id="m-students">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3>学生管理 · C语言程序设计 / 1班</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input class="form-control" placeholder="批量粘贴学号（一行一个或逗号分隔，长度限制 5000）">
+        <button class="btn btn-primary" style="white-space:nowrap" onclick="toast('已添加 12 个学生','success')">+ 添加学生</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th width="40"><input type="checkbox"></th><th>学号</th><th>姓名</th><th>加入时间</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"></td><td>2024010001</td><td>张同学</td><td>2026-02-22</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010002</td><td>李同学</td><td>2026-02-22</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010003</td><td>王同学</td><td>2026-02-23</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010004</td><td>赵同学</td><td>2026-02-25</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 教师版权益绑定 -->
+<div class="modal-overlay" id="m-bind-benefit">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>个人权益-教师版 · 班级绑定</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="benefit-tip">
+        <span class="ico">🎓</span>
+        <span>已绑定 <b>3 / 5</b> 个班级</span>
+      </div>
+      <div style="font-size:13px;color:#475569;margin-bottom:8px">勾选要绑定的班级（取消勾选即解绑）：</div>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px;border-radius:6px;cursor:pointer;background:#f8fafc;margin-bottom:6px"><input type="checkbox" checked> C语言程序设计 / 1班 <span class="badge badge-green" style="margin-left:auto">已绑</span></label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px;border-radius:6px;cursor:pointer;background:#f8fafc;margin-bottom:6px"><input type="checkbox" checked> 数据结构 / A班 <span class="badge badge-green" style="margin-left:auto">已绑</span></label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px;border-radius:6px;cursor:pointer;background:#f8fafc;margin-bottom:6px"><input type="checkbox" checked> 软件工程 / 实训班 <span class="badge badge-green" style="margin-left:auto">已绑</span></label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px;border-radius:6px;cursor:pointer;margin-bottom:6px"><input type="checkbox"> Python程序设计 / 2班</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px;border-radius:6px;cursor:not-allowed;opacity:.5;margin-bottom:6px" title="正在使用教师 王老师(T1001) 的教师版权益，无法再次绑定"><input type="checkbox" disabled> 计算机网络 / 1班 <span class="badge badge-gray" style="margin-left:auto">不可绑</span></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-bind-benefit');toast('权益绑定已更新','success')">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'classmgr', title:'班级管理', breadcrumb:['教学管理','班级管理'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+document.querySelectorAll('.tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    toast(`已切换到「${t.textContent}」`, 'info');
+  });
+});
+</script>
+</body>
+</html>

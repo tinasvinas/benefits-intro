@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学生列表 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.profile-tag{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.profile-tag.学习习惯{background:#dbeafe;color:#1d4ed8}
+.profile-tag.学习方法{background:#d1fae5;color:#065f46}
+.profile-tag.社区影响{background:#e0f2fe;color:#075985}
+
+.profile-card{display:flex;gap:16px;padding:18px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border-radius:10px}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#1e3a8a);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0}
+.profile-info .name{font-size:18px;font-weight:700;color:var(--primary)}
+.profile-info .meta{font-size:12px;color:var(--text-sub);margin-top:4px}
+
+.metric-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center}
+.metric-card .v{font-size:18px;font-weight:700;color:var(--primary)}
+.metric-card .l{font-size:11px;color:var(--text-sub);margin-top:2px}
+.metric-card.compare{display:flex;justify-content:space-around;align-items:center;text-align:left}
+.metric-card.compare .col{flex:1}
+.metric-card.compare .col + .col{border-left:1px solid #f1f5f9;padding-left:10px}
+.metric-card.compare .v{font-size:16px}
+.metric-card.compare .v.mine{color:var(--accent)}
+.metric-card.compare .v.avg{color:#64748b}
+.metric-card.compare .v.max{color:var(--success)}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="tabs">
+      <span class="tab active">班级绑定</span>
+      <span class="tab">实训发布</span>
+    </div>
+
+    <!-- 筛选 -->
+    <div class="filter-bar">
+      <div class="filter-item"><label><span style="color:var(--danger)">*</span>授课学期</label>
+        <select class="form-control"><option>2025-2026 第二学期</option></select>
+      </div>
+      <div class="filter-item"><label><span style="color:var(--danger)">*</span>课程</label>
+        <select class="form-control"><option>C语言程序设计</option><option>数据结构</option></select>
+      </div>
+      <div class="filter-item"><label><span style="color:var(--danger)">*</span>班级</label>
+        <select class="form-control"><option>1班</option><option>2班</option></select>
+      </div>
+      <div class="filter-item"><label>统计维度</label>
+        <select class="form-control"><option>全部智能体</option><option>代码纠错</option></select>
+      </div>
+      <div class="filter-item"><label>时间</label>
+        <select class="form-control"><option>近 7 天</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-outline">重置</button>
+        <button class="btn btn-primary" onclick="toast('已查询','success')">查询</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">C语言程序设计 / 1班 · 学生指标</div>
+          <div class="card-sub">合计行置顶；点击姓名查看个人信息与用户画像</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline">📋 导出记录</button>
+          <button class="btn btn-primary">📤 导出</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>学工号</th>
+              <th>姓名</th>
+              <th>登录次数</th>
+              <th>访问次数</th>
+              <th>提问帖</th>
+              <th>回答次数</th>
+              <th>求助次数</th>
+              <th>分享论坛</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="summary-row">
+              <td>合计</td><td>—</td><td>1,280</td><td>2,150</td><td>480</td><td>1,420</td><td>32</td><td>26</td><td>—</td>
+            </tr>
+            <tr><td>2024010001</td><td><a class="btn-link" onclick="openModal('m-profile')">张同学</a></td><td>56</td><td>92</td><td>22</td><td>68</td><td>2</td><td>1</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010002</td><td><a class="btn-link" onclick="openModal('m-profile')">李同学</a></td><td>48</td><td>78</td><td>18</td><td>52</td><td>1</td><td>2</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010003</td><td><a class="btn-link" onclick="openModal('m-profile')">王同学</a></td><td>42</td><td>65</td><td>15</td><td>45</td><td>0</td><td>0</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010004</td><td><a class="btn-link">赵同学</a></td><td>38</td><td>62</td><td>14</td><td>42</td><td>3</td><td>1</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010005</td><td><a class="btn-link">钱同学</a></td><td>35</td><td>58</td><td>12</td><td>38</td><td>1</td><td>2</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010006</td><td><a class="btn-link">孙同学</a></td><td>32</td><td>52</td><td>10</td><td>32</td><td>2</td><td>0</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010007</td><td><a class="btn-link">周同学</a></td><td>28</td><td>45</td><td>9</td><td>28</td><td>0</td><td>1</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+            <tr><td>2024010008</td><td><a class="btn-link">吴同学</a></td><td>22</td><td>38</td><td>7</td><td>20</td><td>1</td><td>0</td><td><button class="btn btn-sm btn-link">详情</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 学生画像弹窗 -->
+<div class="modal-overlay" id="m-profile">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3>学习档案 · 张同学</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-card">
+        <div class="profile-avatar">张</div>
+        <div class="profile-info" style="flex:1">
+          <div class="name">张同学</div>
+          <div class="meta">学工号 2024010001 · 计算机学院 · 软件工程 · 大二</div>
+          <div class="meta">📞 138****8000 · ✉️ zhang@bupt.edu.cn</div>
+          <div class="profile-tags">
+            <span class="profile-tag 学习习惯">高频学习者</span>
+            <span class="profile-tag 学习习惯">日间主力型</span>
+            <span class="profile-tag 学习习惯">持续型</span>
+            <span class="profile-tag 学习方法">代码学习者</span>
+            <span class="profile-tag 学习方法">独立解决型</span>
+            <span class="profile-tag 学习方法">精准提问</span>
+            <span class="profile-tag 社区影响">社区活跃者</span>
+            <span class="profile-tag 社区影响">浅评达人</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-title mt-20 mb-12">📊 累计学习统计</div>
+      <div class="stats-row stats-4">
+        <div class="metric-card"><div class="v">3</div><div class="l">课程数量</div></div>
+        <div class="metric-card"><div class="v">42</div><div class="l">学习天数</div></div>
+        <div class="metric-card"><div class="v">86.5h</div><div class="l">学习时长</div></div>
+        <div class="metric-card"><div class="v">158</div><div class="l">累计提问</div></div>
+      </div>
+
+      <div class="card-title mt-20 mb-12">🆚 班级对比（提问帖数量）</div>
+      <div class="stats-row stats-3">
+        <div class="metric-card compare">
+          <div class="col"><div class="l">我的</div><div class="v mine">22</div></div>
+        </div>
+        <div class="metric-card compare">
+          <div class="col"><div class="l">班级平均</div><div class="v avg">12</div></div>
+        </div>
+        <div class="metric-card compare">
+          <div class="col"><div class="l">班级最大</div><div class="v max">28</div></div>
+        </div>
+      </div>
+
+      <div class="card-title mt-20 mb-12">🏷️ TOP 5 智能体使用</div>
+      <div style="font-size:12px">
+        <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f1f5f9"><span>代码纠错（码上）</span><b>68 次</b></div>
+        <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f1f5f9"><span>代码解读（码上）</span><b>42 次</b></div>
+        <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f1f5f9"><span>知识问答（码上）</span><b>26 次</b></div>
+        <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f1f5f9"><span>指针辅导专家</span><b>14 次</b></div>
+        <div class="flex-between" style="padding:6px 0"><span>编程问答（码上）</span><b>8 次</b></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'students', title:'学生列表', breadcrumb:['教学管理','学生列表'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+document.querySelectorAll('.tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

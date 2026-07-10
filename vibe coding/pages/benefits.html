@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的权益 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+/* 权益页专属样式 */
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:20px;margin-bottom:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;color:#1e3a5f}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-outline{background:#fff;border:1px solid #cbd5e1;color:#475569}.btn-outline:hover{border-color:#2563eb;color:#2563eb}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;color:#64748b;font-weight:600;padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#334155}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-purple{background:#ede9fe;color:#6d28d9}
+.badge-orange{background:#ffedd5;color:#9a3412}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-red{background:#fee2e2;color:#b91c1c}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:15px;font-weight:600;color:#1e3a5f}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;line-height:1}.modal-close:hover{color:#475569}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px}
+#toast-wrap{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;color:#fff;animation:slideIn .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:240px}
+.toast.success{background:#10b981}.toast.error{background:#ef4444}.toast.info{background:#3b82f6}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.log-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9}
+.log-item:last-child{border-bottom:none}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.log-dot.upgrade{background:#2563eb}.log-dot.add{background:#10b981}.log-dot.expire{background:#ef4444}.log-dot.create{background:#8b5cf6}
+.log-meta{font-size:11px;color:#94a3b8;margin-top:2px}
+/* ===== 功能受限提醒弹窗 ===== */
+.limit-alert-body{padding:32px 28px 8px;text-align:center}
+.limit-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px}
+.limit-icon.token{background:#fef2f2}
+.limit-icon.doc{background:#eff6ff}
+.limit-icon.tool{background:#fff7ed}
+.limit-icon.teaching{background:#f5f3ff}
+.limit-title{font-size:17px;font-weight:700;color:#1e3a5f;margin:0 0 8px}
+.limit-desc{font-size:13px;color:#64748b;line-height:1.6;margin:0 0 8px}
+/* ===== 付费工具悬浮列表 ===== */
+#paid-tools-pop{display:none;position:fixed;z-index:1500;width:320px;max-height:360px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+#paid-tools-pop.open{display:block}
+.pt-head{padding:12px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e3a5f;display:flex;justify-content:space-between;align-items:center}
+.pt-head .pt-close{background:none;border:none;font-size:16px;color:#94a3b8;cursor:pointer;line-height:1}
+.pt-item{padding:10px 14px;border-bottom:1px solid #f8fafc}
+.pt-item:last-child{border-bottom:none}
+.pt-name{font-size:13px;font-weight:600;color:#1e3a5f;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pt-cost{font-size:11px;color:#9a3412;background:#ffedd5;padding:1px 7px;border-radius:10px;white-space:nowrap;font-weight:600}
+.pt-desc{font-size:11px;color:#94a3b8;margin-top:3px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+    <!-- 用户切换（演示用） -->
+    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:13px;color:#64748b">切换用户视角：</span>
+      <select id="current-user-select" onchange="switchUser(this.value)" style="border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12px;color:#475569;cursor:pointer;outline:none"></select>
+    </div>
+    <div id="profile-content"></div>
+
+    <!-- ===== 功能受限弹窗 · 样式与交互演示 ===== -->
+    <div class="card" style="margin-top:8px">
+      <div class="card-header" style="margin-bottom:6px">
+        <div>
+          <span class="card-title">功能受限提醒 · 样式与交互演示</span>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px">当用户触达各项配额上限时，系统会弹出对应的受限提醒。点击下方按钮预览三种弹窗。</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-outline btn-sm" onclick="showLimitAlert('token')">① Token 已用完</button>
+        <button class="btn btn-outline btn-sm" onclick="showLimitAlert('doc')">② 知识库文档已达上限</button>
+        <button class="btn btn-outline btn-sm" onclick="showLimitAlert('tool')">③ 工具使用次数已达上限</button>
+        <button class="btn btn-outline btn-sm" onclick="showLimitAlert('teaching')">④ 教学管理无访问权益</button>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast-wrap"></div>
+<!-- Profile Benefit Learn More Modal -->
+<div class="modal-overlay" id="profile-learnmore-modal">
+  <div class="modal" style="width:620px">
+    <div class="modal-header"><h3 id="profile-learnmore-title">了解更多权益</h3><button class="modal-close" onclick="closeModal('profile-learnmore-modal')">×</button></div>
+    <div class="modal-body" id="profile-learnmore-body"></div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('profile-learnmore-modal')">关闭</button></div>
+  </div>
+</div>
+<!-- Profile Benefit Open Detail Modal -->
+<div class="modal-overlay" id="profile-opendetail-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-header"><h3 id="profile-opendetail-title">开通详情</h3><button class="modal-close" onclick="closeModal('profile-opendetail-modal')">×</button></div>
+    <div class="modal-body" id="profile-opendetail-body"></div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('profile-opendetail-modal')">关闭</button></div>
+  </div>
+</div>
+<!-- Benefit Detail Modal -->
+<div class="modal-overlay" id="benefit-detail-modal">
+  <div class="modal" style="width:620px">
+    <div class="modal-header"><h3 id="benefit-detail-title">权益功能详情</h3><button class="modal-close" onclick="closeModal('benefit-detail-modal')">×</button></div>
+    <div class="modal-body" id="benefit-detail-body"></div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('benefit-detail-modal')">关闭</button></div>
+  </div>
+</div>
+<!-- 付费工具悬浮列表 -->
+<div id="paid-tools-pop"></div>
+<!-- ===== 功能受限提醒弹窗 ===== -->
+<div class="modal-overlay" id="limit-alert-modal">
+  <div class="modal" style="width:440px">
+    <div class="limit-alert-body">
+      <div class="limit-icon" id="limit-icon">⚠️</div>
+      <h3 class="limit-title" id="limit-title">功能受限</h3>
+      <p class="limit-desc" id="limit-desc"></p>
+    </div>
+    <div class="modal-footer" style="gap:10px">
+      <button class="btn btn-outline" onclick="closeModal('limit-alert-modal')">知道了</button>
+      <button class="btn btn-primary" id="limit-action-btn" onclick="limitAlertAction()">去查看我的权益→</button>
+    </div>
+  </div>
+</div>
+<script>
+// ===== DATA =====
+const BENEFIT_LABELS={free:'免费版',basic:'基础版',vip:'VIP',svip:'SVIP',teacher_plan:'教师版',plan_a:'A套餐',plan_b:'B套餐',plan_c:'C套餐',none:'无'};
+const BENEFIT_TOKENS={free:0,basic:1000000,vip:5000000,svip:18000000,teacher_plan:50000000,plan_a:1000000,plan_b:5000000,plan_c:18000000,none:0};
+const CORP_FEATURES={
+  free:  {agentCount:0,knowledgeDocs:50,knowledgeStorage:'50MB',customLLM:false,paidTools:0,classBinding:false,teaching:false,classCount:0,workspaceCount:0,workspaceMember:0,teacherAccounts:'无限制',studentAccounts:'无限制',shareToForum:false},
+  basic: {agentCount:5,knowledgeDocs:50,knowledgeStorage:'50MB',customLLM:false,paidTools:5,classBinding:false,teaching:false,classCount:0,workspaceCount:0,workspaceMember:0,teacherAccounts:'无限制',studentAccounts:'无限制',shareToForum:true},
+  vip:   {agentCount:50,knowledgeDocs:500,knowledgeStorage:'5GB',customLLM:true,paidTools:100,classBinding:true,teaching:true,classCount:60,workspaceCount:20,workspaceMember:100,teacherAccounts:20,studentAccounts:1500,shareToForum:true},
+  svip:  {agentCount:200,knowledgeDocs:1000,knowledgeStorage:'20GB',customLLM:true,paidTools:1000,classBinding:true,teaching:true,classCount:'无限制',workspaceCount:'无限制',workspaceMember:'无限制',teacherAccounts:'无限制',studentAccounts:'无限制',shareToForum:true},
+};
+const PERS_FEATURES={
+  none:         {agentCount:0,knowledgeDocs:0,knowledgeStorage:'0',customLLM:false,paidTools:0,classBinding:false,teaching:false,classCount:0,workspaceCount:0,workspaceMember:0,shareToForum:false},
+  teacher_plan: {agentCount:200,knowledgeDocs:1000,knowledgeStorage:'20GB',customLLM:true,paidTools:1000,classBinding:true,teaching:true,classCount:'无限制',workspaceCount:'无限制',workspaceMember:'无限制',shareToForum:true},
+  plan_a:       {agentCount:5,knowledgeDocs:50,knowledgeStorage:'50MB',customLLM:false,paidTools:5,classBinding:true,teaching:true,classCount:60,workspaceCount:0,workspaceMember:0,shareToForum:true},
+  plan_b:       {agentCount:50,knowledgeDocs:500,knowledgeStorage:'5GB',customLLM:true,paidTools:100,classBinding:true,teaching:true,classCount:60,workspaceCount:20,workspaceMember:100,shareToForum:true},
+  plan_c:       {agentCount:200,knowledgeDocs:1000,knowledgeStorage:'20GB',customLLM:true,paidTools:1000,classBinding:true,teaching:true,classCount:'无限制',workspaceCount:'无限制',workspaceMember:'无限制',shareToForum:true},
+};
+const ROLE_LABELS={student:'学生',teacher:'教师',admin:'管理员'};
+let schools=[
+  {id:1,name:'北京实验中学',benefit:'svip',startDate:'2026-01-01',endDate:'2026-12-31',used:320000,note:'重点合作学校',usedAgents:156,usedKnowledgeDocs:680,usedPaidTools:742,usedClassCount:38,usedTeacherAccounts:18,usedStudentAccounts:1120,usedKnowledgeStorage:14200,addonTotal:100000000,addonUsed:42000000},
+  {id:2,name:'上海中学',benefit:'vip',startDate:'2026-01-01',endDate:'2026-12-31',used:5000000,note:'企业Token已用完',usedAgents:32,usedKnowledgeDocs:210,usedPaidTools:55,usedClassCount:22,usedTeacherAccounts:12,usedStudentAccounts:480,usedKnowledgeStorage:2800,addonTotal:100000000,addonUsed:8000000},
+  {id:3,name:'广州附中',benefit:'basic',startDate:'2026-01-01',endDate:'2026-12-31',used:45000,note:'企业工具额度已用完',usedAgents:4,usedKnowledgeDocs:38,usedPaidTools:5,usedClassCount:0,usedTeacherAccounts:8,usedStudentAccounts:320,usedKnowledgeStorage:32,addonTotal:0,addonUsed:0},
+  {id:4,name:'深圳高中',benefit:'free',startDate:'2026-01-01',endDate:'2026-12-31',used:8000,note:'免费版·不含Token与工具额度',usedAgents:0,usedKnowledgeDocs:12,usedPaidTools:0,usedClassCount:0,usedTeacherAccounts:5,usedStudentAccounts:210,usedKnowledgeStorage:18,addonTotal:0,addonUsed:0},
+  {id:5,name:'成都七中',benefit:'vip',startDate:'2025-03-01',endDate:'2025-12-31',used:210000,note:'企业权益已过期',usedAgents:28,usedKnowledgeDocs:180,usedPaidTools:40,usedClassCount:18,usedTeacherAccounts:9,usedStudentAccounts:350,usedKnowledgeStorage:3600,addonTotal:0,addonUsed:0},
+];
+let schoolBenefitHistory={
+  1:[{benefit:'basic',startDate:'2024-01-01',endDate:'2024-12-31',status:'expired',operator:'Admin',operateTime:'2024-01-05 10:00'},{benefit:'vip',startDate:'2025-01-01',endDate:'2025-12-31',status:'expired',operator:'Admin',operateTime:'2025-01-02 09:30'},{benefit:'svip',startDate:'2026-01-01',endDate:'2026-12-31',status:'active',operator:'Admin',operateTime:'2026-01-10 09:00'}],
+  2:[{benefit:'basic',startDate:'2024-06-01',endDate:'2024-12-31',status:'expired',operator:'Admin',operateTime:'2024-06-01 14:00'},{benefit:'vip',startDate:'2026-01-01',endDate:'2026-12-31',status:'active',operator:'Admin',operateTime:'2026-02-15 14:20'}],
+  3:[{benefit:'basic',startDate:'2026-01-01',endDate:'2026-12-31',status:'active',operator:'Admin',operateTime:'2026-01-01 08:00'}],
+  4:[{benefit:'free',startDate:'2026-01-01',endDate:'2026-12-31',status:'active',operator:'Admin',operateTime:'2026-01-01 08:00'}],
+  5:[{benefit:'vip',startDate:'2025-03-01',endDate:'2025-12-31',status:'expired',operator:'Admin',operateTime:'2025-03-01 10:00'}],
+};
+let accounts=[
+  {id:1,name:'张老师',role:'teacher',school:'北京实验中学',benefit:'teacher_plan',startDate:'2026-01-01',endDate:'2026-12-31',used:35000,usedAgents:42,usedKnowledgeDocs:180,usedPaidTools:230,usedClassCount:3,usedKnowledgeStorage:8200,addonTotal:500000,addonUsed:120000},
+  {id:2,name:'李同学',role:'student',school:'北京实验中学',benefit:'plan_b',startDate:'2025-01-01',endDate:'2025-12-31',used:12000,usedAgents:8,usedKnowledgeDocs:45,usedPaidTools:12,usedClassCount:2,usedKnowledgeStorage:2100,addonTotal:200000,addonUsed:0},
+  {id:3,name:'王同学',role:'student',school:'上海中学',benefit:'plan_a',startDate:'2026-01-01',endDate:'2026-12-31',used:8000,usedAgents:3,usedKnowledgeDocs:22,usedPaidTools:4,usedClassCount:1,usedKnowledgeStorage:28,addonTotal:0,addonUsed:0},
+  {id:4,name:'Admin',role:'admin',school:'',benefit:'none',startDate:'',endDate:'',used:0,usedAgents:0,usedKnowledgeDocs:0,usedPaidTools:0,usedClassCount:0,usedKnowledgeStorage:0,addonTotal:0,addonUsed:0},
+  {id:5,name:'陈老师',role:'teacher',school:'广州附中',benefit:'teacher_plan',startDate:'2026-01-01',endDate:'2026-12-31',used:55000,usedAgents:68,usedKnowledgeDocs:320,usedPaidTools:580,usedClassCount:5,usedKnowledgeStorage:15800,addonTotal:1000000,addonUsed:380000},
+  {id:6,name:'刘同学',role:'student',school:'广州附中',benefit:'plan_c',startDate:'2026-01-01',endDate:'2026-12-31',used:120000,usedAgents:95,usedKnowledgeDocs:620,usedPaidTools:410,usedClassCount:8,usedKnowledgeStorage:9600,addonTotal:300000,addonUsed:290000},
+  {id:7,name:'赵同学',role:'student',school:'深圳高中',benefit:'none',startDate:'',endDate:'',used:0,usedAgents:0,usedKnowledgeDocs:5,usedPaidTools:0,usedClassCount:0,usedKnowledgeStorage:8,addonTotal:0,addonUsed:0},
+  {id:8,name:'孙老师',role:'teacher',school:'成都七中',benefit:'none',startDate:'',endDate:'',used:0,usedAgents:0,usedKnowledgeDocs:30,usedPaidTools:0,usedClassCount:0,usedKnowledgeStorage:120,addonTotal:0,addonUsed:0},
+];
+let changeLogs=[
+  {id:1,type:'create',target:'北京实验中学',detail:'创建学校，开通 SVIP 权益',time:'2025-01-10 09:00'},
+  {id:2,type:'create',target:'张老师',detail:'创建账户，开通教师版权益',time:'2025-01-10 09:30'},
+  {id:3,type:'upgrade',target:'上海中学',detail:'企业权益从基础版升档至 VIP，旧 Token 清零',time:'2025-02-15 14:20'},
+  {id:4,type:'add',target:'李同学',detail:'新增个人权益 B套餐，有效期至 2025-12-31',time:'2025-03-01 10:00'},
+  {id:5,type:'expire',target:'深圳高中',detail:'免费版权益即将到期，剩余 Token 2000',time:'2025-03-28 08:00'},
+  {id:6,type:'upgrade',target:'陈老师',detail:'个人权益从 A套餐升档至教师版，旧 Token 清零',time:'2025-04-05 16:45'},
+];
+let currentUserId=1;
+
+// ===== UTILS =====
+function now(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+// ===== USER SWITCH =====
+function initUserSelect(){
+  const sel=document.getElementById('current-user-select');
+  sel.innerHTML=accounts.map(a=>`<option value="${a.id}">${a.name}（${ROLE_LABELS[a.role]}）</option>`).join('');
+  sel.value=currentUserId;
+}
+function switchUser(id){
+  currentUserId=parseInt(id);
+  renderProfile();
+}
+
+// ===== FORMATTERS =====
+// 卡片内的小型用量进度条（带标签）
+function usageBar(label, used, limit){
+  const u=used||0;
+  if(limit===0||limit===false||limit==='0'||limit===undefined||limit===null){
+    return `<div style="margin-top:6px"><div style="font-size:11px;color:#94a3b8">${label}：<span style="color:#cbd5e1">不支持</span></div></div>`;
+  }
+  if(limit==='无限制'){
+    return `<div style="margin-top:6px"><div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden"><div style="width:6%;height:100%;background:#10b981;border-radius:2px"></div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${label} ${u.toLocaleString()} / 无限制</div></div>`;
+  }
+  const l=typeof limit==='number'?limit:0;
+  const pct=l?Math.min(100,Math.round(u/l*100)):0;
+  const color=pct>=90?'#ef4444':pct>=70?'#f59e0b':'#2563eb';
+  return `<div style="margin-top:6px"><div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${color};border-radius:2px"></div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${label} ${u.toLocaleString()} / ${l.toLocaleString()} 次</div></div>`;
+}
+function fmtVal(v){
+  if(v===false||v===0||v==='0')return '<span style="color:#ef4444">❌ 不支持</span>';
+  if(v===true)return '<span style="color:#10b981">✅ 支持</span>';
+  if(v==='无限制')return '<span style="color:#10b981">✅ 无限制</span>';
+  if(typeof v==='number')return '<span style="color:#10b981">✅ '+v.toLocaleString()+'</span>';
+  return '<span style="color:#10b981">✅ '+v+'</span>';
+}
+function fmtUsage(used,limit){
+  if(limit===false||limit===0||limit==='0') return '<span style="color:#ef4444">❌ 不支持</span>';
+  if(limit===true) return '<span style="color:#10b981">✅ 支持</span>';
+  if(limit==='无限制') return `<span style="color:#64748b">${(used||0).toLocaleString()} 已用</span> <span style="color:#94a3b8">/ 无限制</span>`;
+  const u=used||0, l=typeof limit==='number'?limit:0;
+  if(l===0) return '<span style="color:#ef4444">❌ 不支持</span>';
+  const pct=Math.min(100,Math.round(u/l*100));
+  const color=pct>=90?'#ef4444':pct>=70?'#f59e0b':'#2563eb';
+  return `<div style="display:flex;align-items:center;gap:8px">
+    <div style="flex:1;min-width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:${color};border-radius:3px"></div>
+    </div>
+    <span style="font-size:12px;color:#475569;white-space:nowrap">${u.toLocaleString()} / ${l.toLocaleString()}</span>
+    <span style="font-size:11px;color:${color};font-weight:600">${pct}%</span>
+  </div>`;
+}
+function parseStorageMB(s){
+  if(!s||s==='0') return 0;
+  const m=String(s).match(/^([\d.]+)\s*(MB|GB|TB)?$/i);
+  if(!m) return 0;
+  const n=parseFloat(m[1]), unit=(m[2]||'MB').toUpperCase();
+  return unit==='GB'?n*1024:unit==='TB'?n*1024*1024:n;
+}
+function fmtStorageUsage(usedMB, limitStr){
+  if(!limitStr||limitStr==='0') return '<span style="color:#ef4444">❌ 不支持</span>';
+  if(limitStr==='无限制') return `<span style="color:#64748b">${usedMB||0} MB 已用</span> <span style="color:#94a3b8">/ 无限制</span>`;
+  const l=parseStorageMB(limitStr), u=usedMB||0;
+  if(l===0) return '<span style="color:#ef4444">❌ 不支持</span>';
+  const pct=Math.min(100,Math.round(u/l*100));
+  const color=pct>=90?'#ef4444':pct>=70?'#f59e0b':'#2563eb';
+  const fmt=v=>v>=1024?(v/1024).toFixed(1)+'GB':v+'MB';
+  return `<div style="display:flex;align-items:center;gap:8px">
+    <div style="flex:1;min-width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:${color};border-radius:3px"></div>
+    </div>
+    <span style="font-size:12px;color:#475569;white-space:nowrap">${fmt(u)} / ${limitStr}</span>
+    <span style="font-size:11px;color:${color};font-weight:600">${pct}%</span>
+  </div>`;
+}
+function buildFeatureTable(f, tokenTotal, usageData, showToken=true){
+  const u=usageData||{};
+  const rows=[];
+  rows.push(
+    ['知识库文档数量', fmtUsage(u.usedKnowledgeDocs, f.knowledgeDocs), ''],
+    ['新增模型',   fmtVal(f.customLLM), ''],
+    ['教学管理',       fmtVal(f.teaching), ''],
+    ['班级数量（每学期）', fmtUsage(u.usedClassCount, f.classCount), ''],
+  );
+  return `<table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead><tr>
+      <th style="background:#f8fafc;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;width:160px">功能项</th>
+      <th style="background:#f8fafc;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">已用 / 限额</th>
+    </tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'}">
+      <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#475569;white-space:nowrap">${r[0]}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">${r[1]}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+// ===== PROFILE RENDER =====
+function renderProfile(){
+  const u=accounts.find(a=>a.id===currentUserId);
+  if(!u){document.getElementById('profile-content').innerHTML='<div style="color:#94a3b8;padding:40px;text-align:center">用户不存在</div>';return;}
+  const now2=new Date().toISOString().slice(0,10);
+  const school=schools.find(s=>s.name===u.school);
+  const isAdmin=u.role==='admin';
+  const corpBenefit=school?school.benefit:null;
+  const corpTokenTotal=corpBenefit?BENEFIT_TOKENS[corpBenefit]:0;
+  const corpTokenUsed=school?school.used:0;
+  const corpPct=corpTokenTotal?Math.min(100,Math.round(corpTokenUsed/corpTokenTotal*100)):0;
+  const corpActive=school&&school.startDate<=now2&&school.endDate>=now2;
+  // 企业权益是否已用完：Token 额度耗尽 或 工具使用次数耗尽
+  const corpToolTotal=corpBenefit?CORP_FEATURES[corpBenefit].paidTools:0;
+  const corpToolUsed=school?school.usedPaidTools||0:0;
+  const corpTokenUsedUp=corpTokenTotal>0&&corpTokenUsed>=corpTokenTotal;
+  const corpToolUsedUp=typeof corpToolTotal==='number'&&corpToolTotal>0&&corpToolUsed>=corpToolTotal;
+  const persBenefit=u.benefit;
+  const persTokenTotal=BENEFIT_TOKENS[persBenefit]||0;
+  const persTokenUsed=u.used||0;
+  const persPct=persTokenTotal?Math.min(100,Math.round(persTokenUsed/persTokenTotal*100)):0;
+  const persExpired=u.endDate&&u.endDate<now2;
+  const persActive=u.startDate&&u.startDate<=now2&&(!u.endDate||u.endDate>=now2);
+  const consumeOrder=u.role==='teacher'
+    ?'① 教师企业权益 → ② 教师个人权益(教师版) → ③ 教师增量包 → ④ 学生企业权益 → ⑤ 学生个人权益 → ⑥ 学生增量包（学生在班级里使用智能体优先消耗教师 Token）'
+    :'① 企业权益 → ② 个人权益 → ③ 增量包';
+  const cf=corpBenefit?CORP_FEATURES[corpBenefit]:null;
+  const pf=PERS_FEATURES[persBenefit]||PERS_FEATURES.none;
+  function mergeMax(a,b,key){
+    const av=a?a[key]:0, bv=b[key];
+    if(av==='无限制'||bv==='无限制') return '无限制';
+    if(av===true||bv===true) return true;
+    if(av===false&&bv===false) return false;
+    const an=typeof av==='number'?av:0, bn=typeof bv==='number'?bv:0;
+    return Math.max(an,bn);
+  }
+  const ef={
+    agentCount:mergeMax(cf,pf,'agentCount'),
+    knowledgeDocs:mergeMax(cf,pf,'knowledgeDocs'),
+    knowledgeStorage:(()=>{const order=['0','50MB','5GB','20GB','无限制'];const ai=order.indexOf(cf?cf.knowledgeStorage:'0'),bi=order.indexOf(pf.knowledgeStorage);return order[Math.max(ai,bi)]||'50MB'})(),
+    paidTools:mergeMax(cf,pf,'paidTools'),
+    customLLM:mergeMax(cf,pf,'customLLM'),
+    classBinding:mergeMax(cf,pf,'classBinding'),
+    teaching:mergeMax(cf,pf,'teaching'),
+    classCount:mergeMax(cf,pf,'classCount'),
+    workspaceCount:mergeMax(cf,pf,'workspaceCount'),
+    workspaceMember:mergeMax(cf,pf,'workspaceMember'),
+    shareToForum:mergeMax(cf,pf,'shareToForum'),
+  };
+  const effectiveTokenTotal=corpTokenTotal+persTokenTotal;
+  const roleClass={student:'badge-blue',teacher:'badge-purple',admin:'badge-orange'}[u.role]||'badge-gray';
+  const benefitBadgeClass={teacher_plan:'badge-purple',plan_a:'badge-blue',plan_b:'badge-green',plan_c:'badge-orange',none:'badge-gray'}[persBenefit]||'badge-gray';
+  const corpBadgeClass={free:'badge-gray',basic:'badge-blue',vip:'badge-purple',svip:'badge-orange'}[corpBenefit]||'badge-gray';
+
+  document.getElementById('profile-content').innerHTML=`
+    <div class="card" style="display:flex;align-items:center;gap:20px;padding:24px">
+      <div style="width:56px;height:56px;background:#1e3a5f;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0">${u.name[0]}</div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:#1e3a5f;margin-bottom:6px">${u.name} <span class="badge ${roleClass}" style="font-size:12px">${ROLE_LABELS[u.role]}</span>${isAdmin?'<span class="badge badge-orange" style="margin-left:6px;font-size:12px">不受权益限制</span>':''}</div>
+        <div style="font-size:13px;color:#64748b">所属学校：${u.school||'未绑定'}</div>
+      </div>
+      ${isAdmin?'<div style="font-size:13px;color:#94a3b8;font-style:italic">Admin 账户不受权益控制，可使用全部功能</div>':`
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="location.href='benefits-intro.html'">了解更多权益</button>
+        <button class="btn btn-outline btn-sm" onclick="showBenefitDetail(${u.id})">查看开通详情</button>
+      </div>`}
+    </div>
+    ${isAdmin?'':`
+    <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe">
+      <div style="font-size:13px;color:#1d4ed8"><b>Token 消耗顺序：</b>${consumeOrder}</div>
+      <div style="font-size:13px;color:#1d4ed8;margin-top:6px"><b>权益变更规则：</b>升档/再购后旧权益立即失效，未用 Token 清零，新权益重新计算。</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;color:#94a3b8;font-weight:500;letter-spacing:.5px">企业权益</div>
+        <div style="font-size:22px;font-weight:700;color:#1e3a5f">${corpBenefit?BENEFIT_LABELS[corpBenefit]:'暂无'}${corpBenefit&&!corpActive?' <span class="badge badge-red" style="font-size:11px;vertical-align:middle">已过期</span>':''}</div>
+        <div style="font-size:12px;color:#64748b">${school?school.startDate+' ~ '+school.endDate:'未绑定学校'}</div>
+        ${corpBenefit?(corpActive?(()=>{
+          const pill=(hasQuota,usedUp,label)=>!hasQuota
+            ?`<div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;background:#f1f5f9;padding:4px 10px;border-radius:6px;align-self:flex-start"><span>—</span>${label}：不含额度</div>`
+            :usedUp
+            ?`<div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#b91c1c;background:#fee2e2;padding:4px 10px;border-radius:6px;align-self:flex-start"><span>⚠️</span>${label}：已用完</div>`
+            :`<div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#065f46;background:#d1fae5;padding:4px 10px;border-radius:6px;align-self:flex-start"><span>✓</span>${label}：正在使用</div>`;
+          return `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+            ${pill(corpTokenTotal>0,corpTokenUsedUp,'Token')}
+            ${pill(typeof corpToolTotal==='number'&&corpToolTotal>0,corpToolUsedUp,'工具使用次数')}
+          </div>`;
+        })():`<div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;background:#f1f5f9;padding:4px 10px;border-radius:6px;align-self:flex-start"><span>⏱</span>权益已到期，请续费</div>`):''}
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;color:#94a3b8;font-weight:500;letter-spacing:.5px">个人权益</div>
+        <div style="font-size:22px;font-weight:700;color:#1e3a5f">${persBenefit!=='none'?BENEFIT_LABELS[persBenefit]:'暂无'}${persBenefit!=='none'&&persExpired?' <span class="badge badge-red" style="font-size:11px;vertical-align:middle">已过期</span>':''}</div>
+        <div style="font-size:12px;color:#64748b">${persBenefit!=='none'?(u.startDate||'-')+' ~ '+(u.endDate||'-'):'将使用企业 Token额度'}</div>
+        ${persBenefit!=='none'?`<div style="margin-top:4px"><div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden"><div style="width:${persPct}%;height:100%;background:${persPct>=90?'#ef4444':persPct>=70?'#f59e0b':'#2563eb'};border-radius:2px"></div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${persTokenUsed.toLocaleString()} / ${persTokenTotal.toLocaleString()} Token</div></div>`:''}
+        ${persBenefit!=='none'?usageBar('工具使用次数', u.usedPaidTools||0, pf.paidTools):''}
+        ${persBenefit!=='none'?`<button class="btn btn-outline btn-sm" style="margin-top:8px;align-self:flex-start" onclick="togglePaidTools(event)">查看付费工具</button>`:''}
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;color:#94a3b8;font-weight:500;letter-spacing:.5px">增量包</div>
+        ${(()=>{
+          const persAddonTotal=u.addonTotal||0;
+          const persAddonUsed=u.addonUsed||0;
+          const totalRemain=persAddonTotal-persAddonUsed;
+          const hasAny=persAddonTotal>0;
+          const bar=(label,used,total)=>{
+            if(total<=0)return `<div style="margin-top:8px"><div style="font-size:11px;color:#cbd5e1">${label}：未购买</div></div>`;
+            const p=Math.min(100,Math.round(used/total*100));
+            const c=p>=90?'#ef4444':p>=70?'#f59e0b':'#2563eb';
+            return `<div style="margin-top:8px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:3px"><span>${label}</span><span>${(total-used).toLocaleString()} 剩余</span></div>
+              <div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden"><div style="width:${p}%;height:100%;background:${c};border-radius:2px"></div></div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:3px">${used.toLocaleString()} / ${total.toLocaleString()} Token · ${p}%</div>
+            </div>`;
+          };
+          return `
+            <div style="font-size:22px;font-weight:700;color:#1e3a5f">${hasAny?totalRemain.toLocaleString():'暂无'}</div>
+            <div style="font-size:12px;color:#64748b">${hasAny?'剩余可用 Token（个人增量包）':'未购买增量包'}</div>
+            ${bar('个人增量包',persAddonUsed,persAddonTotal)}`;
+        })()}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="margin-bottom:12px">
+        <span class="card-title">功能权限（企业 + 个人取最大值）</span>
+      </div>
+      ${buildFeatureTable(ef, effectiveTokenTotal, {
+        usedToken: corpTokenUsed + persTokenUsed,
+        usedAgents: (school?school.usedAgents||0:0) + (u.usedAgents||0),
+        usedKnowledgeDocs: (school?school.usedKnowledgeDocs||0:0) + (u.usedKnowledgeDocs||0),
+        usedKnowledgeStorage: (school?school.usedKnowledgeStorage||0:0) + (u.usedKnowledgeStorage||0),
+        usedPaidTools: (school?school.usedPaidTools||0:0) + (u.usedPaidTools||0),
+        usedClassCount: u.usedClassCount||0,
+        usedWorkspaceCount: u.usedWorkspaceCount||0,
+        usedWorkspaceMember: u.usedWorkspaceMember||0,
+        usedTeacherAccounts: school?school.usedTeacherAccounts||0:0,
+        usedStudentAccounts: school?school.usedStudentAccounts||0:0,
+      }, false)}
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">我的权益变更记录</span></div>
+      <div id="profile-log-list">
+        ${(()=>{
+          const myLogs=changeLogs.filter(l=>l.target===u.name).reverse();
+          const typeLabel={upgrade:'升档',add:'新增',expire:'失效',create:'创建'};
+          return myLogs.length?myLogs.map(l=>`
+            <div class="log-item">
+              <div class="log-dot ${l.type}"></div>
+              <div><div style="font-size:13px">${l.detail}</div>
+              <div class="log-meta">${typeLabel[l.type]||l.type} · ${l.time}</div></div>
+            </div>`).join(''):'<div style="color:#94a3b8;font-size:13px;padding:16px 0;text-align:center">暂无变更记录</div>';
+        })()}
+      </div>
+    </div>
+    `}
+  `;
+}
+// ===== PROFILE MODALS =====
+const BADGE_MAP={free:'badge-gray',basic:'badge-blue',vip:'badge-purple',svip:'badge-orange',teacher_plan:'badge-purple',plan_a:'badge-blue',plan_b:'badge-green',plan_c:'badge-orange',none:'badge-gray'};
+// 切换弹窗内的标签页
+function switchModalTab(modalId, tabKey, btn){
+  const root=document.getElementById(modalId);
+  root.querySelectorAll('[data-tab-btn]').forEach(b=>{b.style.color='#64748b';b.style.borderBottomColor='transparent';b.style.fontWeight='500';});
+  root.querySelectorAll('[data-tab-pane]').forEach(p=>{p.style.display='none';});
+  btn.style.color='#2563eb';btn.style.borderBottomColor='#2563eb';btn.style.fontWeight='600';
+  const pane=root.querySelector(`[data-tab-pane="${tabKey}"]`);
+  if(pane)pane.style.display='block';
+}
+function tabBarHTML(modalId, tabs){
+  return `<div style="display:flex;gap:4px;border-bottom:1px solid #e2e8f0;margin-bottom:16px">
+    ${tabs.map((t,i)=>`<button data-tab-btn onclick="switchModalTab('${modalId}','${t.key}',this)" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid ${i===0?'#2563eb':'transparent'};color:${i===0?'#2563eb':'#64748b'};font-size:13px;font-weight:${i===0?'600':'500'};cursor:pointer;transition:all .2s">${t.label}</button>`).join('')}
+  </div>`;
+}
+// 单个权益的功能权益表（了解更多）
+function benefitFeatureTableHTML(benefitKey, type){
+  const f=type==='corp'?(CORP_FEATURES[benefitKey]||CORP_FEATURES.free):(PERS_FEATURES[benefitKey]||PERS_FEATURES.none);
+  const token=BENEFIT_TOKENS[benefitKey]||0;
+  const label=BENEFIT_LABELS[benefitKey]||benefitKey;
+  const head=`<div style="margin-bottom:12px"><span class="badge ${BADGE_MAP[benefitKey]||'badge-gray'}">${label}</span></div>`;
+  const tokenRow=token?`<tr><td style="padding:8px 12px;color:#475569;white-space:nowrap">Token 额度</td><td style="padding:8px 12px"><span style="color:#10b981;font-weight:600">${(token/10000).toFixed(0)}万 / 月</span></td></tr>`:'';
+  const rows=[
+    ['知识库文档数量', fmtVal(f.knowledgeDocs)],
+    ['新增模型',   fmtVal(f.customLLM)],
+    ['教学管理',       fmtVal(f.teaching)],
+    ['班级数量（每学期）', fmtVal(f.classCount)],
+  ];
+  return head+`<table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead><tr>
+      <th style="background:#f8fafc;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;width:160px">功能项</th>
+      <th style="background:#f8fafc;padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">权益内容</th>
+    </tr></thead>
+    <tbody>${tokenRow}${rows.map((r,i)=>`<tr style="background:${(i+!!tokenRow)%2?'#f8fafc':'#fff'}">
+      <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#475569;white-space:nowrap">${r[0]}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9">${r[1]}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+// 了解更多权益（企业 + 个人 标签页）
+function showBenefitLearnMore(userId){
+  const u=accounts.find(a=>a.id===userId);if(!u)return;
+  const school=schools.find(s=>s.name===u.school);
+  const corpBenefit=school?school.benefit:null;
+  const persBenefit=u.benefit;
+  const modalId='profile-learnmore-modal';
+  const corpPane=corpBenefit?benefitFeatureTableHTML(corpBenefit,'corp'):'<div style="color:#94a3b8;padding:24px;text-align:center;font-size:13px">未绑定学校，暂无企业权益</div>';
+  const persPane=persBenefit!=='none'?benefitFeatureTableHTML(persBenefit,'pers'):'<div style="color:#94a3b8;padding:24px;text-align:center;font-size:13px">暂无个人权益，将使用企业权益 Token</div>';
+  document.getElementById('profile-learnmore-title').textContent='了解更多权益';
+  document.getElementById('profile-learnmore-body').innerHTML=
+    tabBarHTML(modalId,[{key:'corp',label:'企业权益'},{key:'pers',label:'个人权益'}])+
+    `<div data-tab-pane="corp" style="display:block">${corpPane}</div>
+     <div data-tab-pane="pers" style="display:none">${persPane}</div>`;
+  openModal(modalId);
+}
+// 各类开通详情内容片段
+function corpDetailHTML(u){
+  const school=schools.find(s=>s.name===u.school);
+  if(!school)return '<div style="color:#94a3b8;padding:24px;text-align:center;font-size:13px">未绑定学校，暂无企业权益</div>';
+  const hist=(schoolBenefitHistory[school.id]||[]).slice().reverse();
+  const badgeMap={free:'badge-gray',basic:'badge-blue',vip:'badge-purple',svip:'badge-orange'};
+  const statusMap={active:'<span class="badge badge-green">生效</span>',expired:'<span class="badge badge-gray">已失效</span>'};
+  return `<div style="margin-bottom:12px;font-size:13px;color:#64748b">以下为所属学校「${school.name}」的权益开通历史：</div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+      <thead><tr>
+        <th style="background:#f8fafc;padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">档位</th>
+        <th style="background:#f8fafc;padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">有效期</th>
+        <th style="background:#f8fafc;padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">状态</th>
+        <th style="background:#f8fafc;padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b">操作时间</th>
+      </tr></thead>
+      <tbody>${hist.length?hist.map((h,i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'}">
+        <td style="padding:8px 10px;border-bottom:1px solid #f1f5f9"><span class="badge ${badgeMap[h.benefit]||'badge-gray'}">${BENEFIT_LABELS[h.benefit]}</span></td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#475569">${h.startDate} ~ ${h.endDate}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f1f5f9">${statusMap[h.status]||h.status}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#94a3b8">${h.operateTime}</td>
+      </tr>`).join(''):'<tr><td colspan="4" style="padding:16px;text-align:center;color:#94a3b8">暂无记录</td></tr>'}</tbody>
+    </table>`;
+}
+function persDetailHTML(u){
+  if(u.benefit==='none')return '<div style="color:#94a3b8;padding:24px;text-align:center;font-size:13px">暂无个人权益</div>';
+  const now2=new Date().toISOString().slice(0,10);
+  const expired=u.endDate&&u.endDate<now2;
+  const statusBadge=expired?'<span class="badge badge-red">已过期</span>':'<span class="badge badge-green">生效</span>';
+  return `<table style="width:100%;font-size:13px;border-collapse:collapse">
+      <tbody>
+        <tr style="background:#fff"><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8;width:120px">权益类型</td><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9"><span class="badge ${BADGE_MAP[u.benefit]||'badge-gray'}">${BENEFIT_LABELS[u.benefit]}</span></td></tr>
+        <tr style="background:#f8fafc"><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8">有效期</td><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#475569">${u.startDate||'-'} ~ ${u.endDate||'-'}</td></tr>
+        <tr style="background:#fff"><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8">Token 配额</td><td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#475569">${(BENEFIT_TOKENS[u.benefit]||0).toLocaleString()}</td></tr>
+        <tr style="background:#fff"><td style="padding:10px 12px;color:#94a3b8">状态</td><td style="padding:10px 12px">${statusBadge}</td></tr>
+      </tbody>
+    </table>`;
+}
+function addonDetailHTML(u){
+  const school=schools.find(s=>s.name===u.school);
+  const sTotal=school?school.addonTotal||0:0, sUsed=school?school.addonUsed||0:0;
+  const pTotal=u.addonTotal||0, pUsed=u.addonUsed||0;
+  if(sTotal<=0&&pTotal<=0)return '<div style="color:#94a3b8;padding:24px;text-align:center;font-size:13px">未购买增量包</div>';
+  const block=(label,total,used)=>{
+    if(total<=0)return `<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:8px">${label}</div><div style="font-size:12px;color:#94a3b8;padding:10px 12px;background:#f8fafc;border-radius:6px">未购买</div></div>`;
+    const remain=total-used;
+    const pct=Math.min(100,Math.round(used/total*100));
+    const c=pct>=90?'#ef4444':pct>=70?'#f59e0b':'#2563eb';
+    return `<div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:8px">${label}</div>
+      <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <tbody>
+          <tr style="background:#fff"><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8;width:120px">总额度</td><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#475569">${total.toLocaleString()} Token</td></tr>
+          <tr style="background:#f8fafc"><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8">已消耗</td><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#475569">${used.toLocaleString()} Token</td></tr>
+          <tr style="background:#fff"><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#94a3b8">剩余</td><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;color:#10b981;font-weight:600">${remain.toLocaleString()} Token</td></tr>
+          <tr style="background:#f8fafc"><td style="padding:8px 12px;color:#94a3b8">使用进度</td><td style="padding:8px 12px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${c};border-radius:3px"></div></div>
+              <span style="font-size:12px;color:#475569">${pct}%</span>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>`;
+  };
+  return block('🏫 学校增量包',sTotal,sUsed)+block('👤 个人增量包',pTotal,pUsed);
+}
+// 查看开通详情（企业 + 个人 + 增量包 标签页）
+function showBenefitDetail(userId){
+  const u=accounts.find(a=>a.id===userId);if(!u)return;
+  const modalId='profile-opendetail-modal';
+  document.getElementById('profile-opendetail-title').textContent='查看开通详情';
+  document.getElementById('profile-opendetail-body').innerHTML=
+    tabBarHTML(modalId,[{key:'corp',label:'企业权益'},{key:'pers',label:'个人权益'},{key:'addon',label:'增量包'}])+
+    `<div data-tab-pane="corp" style="display:block">${corpDetailHTML(u)}</div>
+     <div data-tab-pane="pers" style="display:none">${persDetailHTML(u)}</div>
+     <div data-tab-pane="addon" style="display:none">${addonDetailHTML(u)}</div>`;
+  openModal(modalId);
+}
+
+// ===== 付费工具列表 =====
+const PAID_TOOLS=[
+  {name:'AI 绘图（文生图）',cost:'每次 1 次额度',cat:'多媒体',desc:'根据文字描述生成图片，支持多种风格'},
+  {name:'AI 视频生成',cost:'每次 5 次额度',cat:'多媒体',desc:'根据脚本或图片生成短视频片段'},
+  {name:'语音合成（TTS）',cost:'每次 1 次额度',cat:'多媒体',desc:'将文本转为自然语音，支持多音色'},
+  {name:'联网搜索',cost:'每次 1 次额度',cat:'信息检索',desc:'实时检索互联网获取最新信息'},
+  {name:'文档解析（OCR）',cost:'每次 1 次额度',cat:'文档处理',desc:'识别图片/PDF 中的文字与表格'},
+  {name:'深度研究',cost:'每次 3 次额度',cat:'信息检索',desc:'多轮检索并生成带引用的研究报告'},
+  {name:'代码执行沙箱',cost:'每次 2 次额度',cat:'开发工具',desc:'在隔离环境中运行代码并返回结果'},
+  {name:'数据可视化',cost:'每次 1 次额度',cat:'文档处理',desc:'将数据自动生成图表'},
+];
+function togglePaidTools(e){
+  e.stopPropagation();
+  const pop=document.getElementById('paid-tools-pop');
+  const btn=e.currentTarget;
+  if(pop.classList.contains('open')){pop.classList.remove('open');return;}
+  pop.innerHTML=`
+    <div class="pt-head"><span>付费工具（消耗工具使用次数）</span><button class="pt-close" onclick="document.getElementById('paid-tools-pop').classList.remove('open')">×</button></div>
+    ${PAID_TOOLS.map(t=>`<div class="pt-item">
+      <div class="pt-name"><span>${t.name}</span></div>
+    </div>`).join('')}`;
+  // 先显示以便测量尺寸
+  pop.classList.add('open');
+  const r=btn.getBoundingClientRect();
+  const pw=pop.offsetWidth, ph=pop.offsetHeight;
+  let left=r.left, top=r.bottom+6;
+  if(left+pw>window.innerWidth-12) left=window.innerWidth-pw-12;
+  if(top+ph>window.innerHeight-12) top=Math.max(12, r.top-ph-6);
+  pop.style.left=left+'px';
+  pop.style.top=top+'px';
+}
+document.addEventListener('click',e=>{
+  const pop=document.getElementById('paid-tools-pop');
+  if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)) pop.classList.remove('open');
+});
+
+// ===== 功能受限提醒弹窗 =====
+const LIMIT_ALERTS={
+  token:{
+    icon:'⚠️', iconClass:'token', title:'Token 已用完',
+    desc:'无法继续调用大模型。你可以购买增量包或升级权益。',
+    actionLabel:'去查看我的权益→'
+  },
+  doc:{
+    icon:'📄', iconClass:'doc', title:'知识库文档数已达上限',
+    desc:'你可以删除文档后再上传或升级权益。',
+    actionLabel:'去查看我的权益→'
+  },
+  tool:{
+    icon:'🛠️', iconClass:'tool', title:'工具使用额度已达上限',
+    desc:'无法继续使用，你可以升级权益。',
+    actionLabel:'去查看我的权益→'
+  },
+  teaching:{
+    icon:'🎓', iconClass:'teaching', title:'暂无教学管理访问权益',
+    desc:'当前权益不包含教学管理功能。你可以升级权益使用。',
+    actionLabel:'去查看我的权益→'
+  },
+};
+let currentLimitType=null;
+function showLimitAlert(type){
+  const cfg=LIMIT_ALERTS[type]; if(!cfg) return;
+  currentLimitType=type;
+  const icon=document.getElementById('limit-icon');
+  icon.textContent=cfg.icon;
+  icon.className='limit-icon '+cfg.iconClass;
+  document.getElementById('limit-title').textContent=cfg.title;
+  document.getElementById('limit-desc').textContent=cfg.desc;
+  document.getElementById('limit-action-btn').textContent=cfg.actionLabel;
+  openModal('limit-alert-modal');
+}
+function limitAlertAction(){
+  closeModal('limit-alert-modal');
+  if(currentLimitType==='token'){
+    toast('已跳转至增量包购买（演示）','info');
+  }else{
+    location.href='benefits-intro.html';
+  }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded',()=>{initUserSelect();renderProfile();});
+</script>
+<script>
+const PAGE_CONFIG = { activeNav:'benefits', title:'我的权益', breadcrumb:['权益与运营','我的权益'], breadcrumbLinks:['',''] };
+</script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

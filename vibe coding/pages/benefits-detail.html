@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>权益详情 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+/* ======== Hero ======== */
+.detail-hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.hero-card{background:#fff;border-radius:12px;padding:18px 22px;box-shadow:0 1px 3px rgba(0,0,0,.05);position:relative;overflow:hidden;border:1px solid transparent}
+.hero-card.org{background:linear-gradient(135deg,#1e3a5f,#1e40af);color:#fff}
+.hero-card.personal{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff}
+.hero-card .lvl{font-size:22px;font-weight:700}
+.hero-card .lbl{font-size:11px;opacity:.85;margin-top:2px}
+.hero-card .desc{font-size:11px;opacity:.85;margin-top:8px}
+.hero-card .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2)}
+.hero-card .stats .item .v{font-size:16px;font-weight:700}
+.hero-card .stats .item .l{font-size:11px;opacity:.85;margin-top:1px}
+
+/* ======== Tab ======== */
+.detail-tabs{display:flex;gap:4px;background:#fff;border-radius:10px;padding:6px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.detail-tab{flex:1;padding:10px 16px;text-align:center;font-size:13px;color:#64748b;cursor:pointer;border-radius:6px;transition:all .15s}
+.detail-tab:hover{background:#f8fafc}
+.detail-tab.active{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;font-weight:600}
+
+/* ======== Pane ======== */
+.detail-pane{display:none}
+.detail-pane.active{display:block;animation:fadeIn .25s ease}
+
+/* ======== 配额对比表 ======== */
+.compare-section{background:#fff;border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.compare-table{width:100%;font-size:13px}
+.compare-table th{text-align:left;padding:10px 14px;background:#f8fafc;color:var(--text-sub);font-weight:600;font-size:12px}
+.compare-table td{padding:14px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.compare-table tr:last-child td{border-bottom:0}
+.compare-table .item-name{font-weight:600;color:var(--primary)}
+.compare-table .item-hint{font-size:11px;color:var(--text-mute);margin-top:3px}
+.compare-cell{display:flex;flex-direction:column;gap:6px}
+
+.cell-progress{display:flex;flex-direction:column;gap:4px}
+.cell-progress .pg-text{display:flex;justify-content:space-between;font-size:12px}
+.cell-progress .pg-text b{color:var(--primary);font-weight:700}
+.cell-progress .pg-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.cell-progress .pg-fill{height:100%;border-radius:3px}
+.pg-fill.org{background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.pg-fill.personal{background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.pg-fill.danger{background:linear-gradient(90deg,#ef4444,#dc2626)}
+
+.cell-unlimited{color:var(--success);font-weight:600;font-size:12px}
+.cell-unlimited::before{content:'∞ '}
+.cell-yes{color:var(--success);font-weight:600;font-size:12px}
+.cell-yes::before{content:'✅ '}
+.cell-no{color:var(--danger);font-size:12px}
+.cell-no::before{content:'❌ '}
+.cell-fixed{color:#475569;font-size:12px}
+.cell-na{color:#cbd5e1;font-size:12px;font-style:italic}
+.cell-effective{background:#ecfdf5;padding:8px 10px;border-radius:6px;border-left:3px solid #10b981}
+.cell-effective .max-tag{display:inline-block;background:#10b981;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;margin-right:6px}
+
+/* ======== 显示类型示例区 ======== */
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.type-card{padding:14px 16px;background:#f8fafc;border-radius:8px;border-left:3px solid var(--accent)}
+.type-card .type-tag{display:inline-block;background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:8px}
+.type-card .type-name{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:8px}
+.type-card .type-demo{padding:8px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;margin-top:6px}
+.type-card .type-rule{font-size:11px;color:var(--text-mute);margin-top:8px;padding-top:8px;border-top:1px dashed #e2e8f0}
+
+/* ======== 历史 timeline ======== */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#e2e8f0}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item::before{content:'';position:absolute;left:-20px;top:6px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--accent)}
+.tl-item.up::before{border-color:var(--success)}
+.tl-item.down::before{border-color:var(--danger)}
+.tl-item.expire::before{border-color:var(--warning)}
+.tl-time{font-size:11px;color:var(--text-mute);margin-bottom:3px}
+.tl-title{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.tl-detail{font-size:12px;color:#475569;background:#f8fafc;padding:10px 12px;border-radius:6px;margin-top:6px}
+.tl-detail .row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #e2e8f0}
+.tl-detail .row:last-child{border:0}
+.tl-detail .row .l{color:var(--text-mute)}
+
+/* ======== 增量包 ======== */
+.pack-table{width:100%;font-size:13px}
+.pack-table th{padding:10px 12px;background:#f8fafc;color:var(--text-sub);font-size:12px;text-align:left;font-weight:600}
+.pack-table td{padding:12px;border-bottom:1px solid #f1f5f9}
+.pack-token-bar{display:flex;flex-direction:column;gap:3px;min-width:160px}
+.pack-token-bar .pg-bar{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.pack-token-bar .pg-fill{height:100%;background:#10b981}
+.pack-token-bar .text{font-size:11px;color:var(--text-sub);display:flex;justify-content:space-between}
+
+/* ======== help icon ======== */
+.help-pop{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#f1f5f9;color:#64748b;border-radius:50%;font-size:11px;cursor:help;font-weight:600;margin-left:4px}
+.tip-wrap{position:relative;display:inline-block}
+.tip-wrap .tip-box{display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;width:240px;font-weight:400;line-height:1.5;z-index:10}
+.tip-wrap:hover .tip-box{display:block}
+
+.section-title{font-size:14px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:8px}
+.section-sub{font-size:11px;color:var(--text-mute);margin-top:2px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- ===== 双 Hero ===== -->
+    <div class="detail-hero">
+      <div class="hero-card org">
+        <div class="lbl">📘 企业权益 · 北京邮电大学</div>
+        <div class="lvl">SVIP</div>
+        <div class="desc">学校开通 · 全校师生共享配额池 · 2024-08-15 开通 · 至 2026-12-31</div>
+        <div class="stats">
+          <div class="item"><div class="v">3.2M / 18M</div><div class="l">学校累计 Token</div></div>
+          <div class="item"><div class="v">38 / ∞</div><div class="l">教师账户</div></div>
+          <div class="item"><div class="v">2,156 / ∞</div><div class="l">学生账户</div></div>
+          <div class="item"><div class="v">SUPPORT</div><div class="l">视觉大模型</div></div>
+        </div>
+      </div>
+      <div class="hero-card personal">
+        <div class="lbl">📙 个人权益 · 白小乐</div>
+        <div class="lvl">教师版</div>
+        <div class="desc">管理员开通 · 仅本账号可用 · 2026-03-15 开通 · 至 2027-03-15</div>
+        <div class="stats">
+          <div class="item"><div class="v">62W / 80W</div><div class="l">教师版 Token</div></div>
+          <div class="item"><div class="v">3 / 5</div><div class="l">班级数量</div></div>
+          <div class="item"><div class="v">SUPPORT</div><div class="l">智能体发布到全国</div></div>
+          <div class="item"><div class="v">SUPPORT</div><div class="l">实训班级</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Tab ===== -->
+    <div class="detail-tabs">
+      <div class="detail-tab active" data-pane="quota">📊 权益配额对比</div>
+      <div class="detail-tab" data-pane="func">⚙️ 功能权限</div>
+      <div class="detail-tab" data-pane="history">📜 变更历史</div>
+      <div class="detail-tab" data-pane="pack">📦 增量包记录</div>
+      <div class="detail-tab" data-pane="types">🎨 显示类型说明</div>
+    </div>
+
+    <!-- ===== Pane: 配额对比 ===== -->
+    <div class="detail-pane active" id="pane-quota">
+      <div class="compare-section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">📊 配额对比表
+              <span class="tip-wrap"><span class="help-pop">?</span><span class="tip-box">最终生效配额 = 企业权益与个人权益的最大值。下表绿色行即为最终生效值。</span></span>
+            </div>
+            <div class="section-sub">企业 vs 个人 vs 实际生效（取最大值）</div>
+          </div>
+        </div>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th width="22%">权益项</th>
+              <th width="24%">企业权益（SVIP）</th>
+              <th width="24%">个人权益（教师版）</th>
+              <th width="30%">实际生效</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 1. 进度条类型 -->
+            <tr>
+              <td>
+                <div class="item-name">个人 Token 上限</div>
+                <div class="item-hint">📊 进度条 · 已用 / 上限</div>
+              </td>
+              <td>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 32 万</span><b>100 万</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:32%"></div></div>
+                </div>
+              </td>
+              <td>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 18 万</span><b>80 万</b></div>
+                  <div class="pg-bar"><div class="pg-fill personal" style="width:22%"></div></div>
+                </div>
+              </td>
+              <td class="cell-effective">
+                <span class="max-tag">MAX</span>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 32 万</span><b>100 万</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:32%"></div></div>
+                </div>
+                <div class="item-hint">取企业权益（更高），来源：SVIP</div>
+              </td>
+            </tr>
+
+            <!-- 2. 已用-无限制 -->
+            <tr>
+              <td>
+                <div class="item-name">教师账户数量</div>
+                <div class="item-hint">∞ 已用 / 无限制</div>
+              </td>
+              <td>
+                <span class="cell-unlimited">38 已用 / 无限制</span>
+              </td>
+              <td>
+                <span class="cell-na">不适用（个人权益不含此项）</span>
+              </td>
+              <td class="cell-effective">
+                <span class="max-tag">MAX</span>
+                <span class="cell-unlimited">38 已用 / 无限制</span>
+                <div class="item-hint">来源：企业权益 SVIP</div>
+              </td>
+            </tr>
+
+            <!-- 3. 班级数量进度条 -->
+            <tr>
+              <td>
+                <div class="item-name">班级数量（每学期 / 人）</div>
+                <div class="item-hint">📊 进度条 + 配额来源对比</div>
+              </td>
+              <td>
+                <span class="cell-fixed">不限制</span>
+              </td>
+              <td>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已绑 3 个</span><b>5 个</b></div>
+                  <div class="pg-bar"><div class="pg-fill personal" style="width:60%"></div></div>
+                </div>
+              </td>
+              <td class="cell-effective">
+                <span class="max-tag">MAX</span>
+                <span class="cell-unlimited">已绑 3 个 / 不限制</span>
+                <div class="item-hint">企业权益更宽松，覆盖个人权益的 5 个限制</div>
+              </td>
+            </tr>
+
+            <!-- 4. 文生图固定额度 -->
+            <tr>
+              <td>
+                <div class="item-name">文生图额度</div>
+                <div class="item-hint">📌 固定数额（每月）</div>
+              </td>
+              <td>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 8 张</span><b>20 张/月</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:40%"></div></div>
+                </div>
+              </td>
+              <td>
+                <span class="cell-fixed">10 张/月</span>
+              </td>
+              <td class="cell-effective">
+                <span class="max-tag">MAX</span>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 8 张</span><b>20 张/月</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:40%"></div></div>
+                </div>
+                <div class="item-hint">取企业权益（20 张更高）</div>
+              </td>
+            </tr>
+
+            <!-- 5. 知识库数量 -->
+            <tr>
+              <td>
+                <div class="item-name">知识库文档数量（每人）</div>
+                <div class="item-hint">📊 进度条</div>
+              </td>
+              <td>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 32 个</span><b>50 个</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:64%"></div></div>
+                </div>
+              </td>
+              <td>
+                <span class="cell-fixed">30 个</span>
+              </td>
+              <td class="cell-effective">
+                <span class="max-tag">MAX</span>
+                <div class="cell-progress">
+                  <div class="pg-text"><span>已用 32 个</span><b>50 个</b></div>
+                  <div class="pg-bar"><div class="pg-fill org" style="width:64%"></div></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== Pane: 功能权限 ===== -->
+    <div class="detail-pane" id="pane-func">
+      <div class="compare-section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">⚙️ 功能权限对比
+              <span class="tip-wrap"><span class="help-pop">?</span><span class="tip-box">支持/不支持取并集 — 任一权益支持即生效</span></span>
+            </div>
+            <div class="section-sub">支持 / 不支持类（4 种展示类型之一）</div>
+          </div>
+        </div>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th width="34%">功能项</th>
+              <th width="22%">企业权益（SVIP）</th>
+              <th width="22%">个人权益（教师版）</th>
+              <th width="22%">实际生效</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><div class="item-name">自定义大模型</div><div class="item-hint">可注册学校自有大模型</div></td><td><span class="cell-yes">支持</span></td><td><span class="cell-yes">支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span><div class="item-hint">两者都支持</div></td></tr>
+            <tr><td><div class="item-name">视觉大模型</div></td><td><span class="cell-yes">支持</span></td><td><span class="cell-no">不支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span><div class="item-hint">来自企业权益</div></td></tr>
+            <tr><td><div class="item-name">教学管理（我的班级、学生列表）</div></td><td><span class="cell-yes">支持</span></td><td><span class="cell-yes">支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span></td></tr>
+            <tr><td><div class="item-name">学习档案 · 用户画像</div></td><td><span class="cell-yes">支持</span></td><td><span class="cell-no">不支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span></td></tr>
+            <tr><td><div class="item-name">智能体发布到全国</div></td><td><span class="cell-no">不支持</span></td><td><span class="cell-yes">支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span><div class="item-hint">来自个人权益（教师版独有）</div></td></tr>
+            <tr><td><div class="item-name">实训班级 · 学生发布智能体</div></td><td><span class="cell-no">不支持</span></td><td><span class="cell-yes">支持</span></td><td class="cell-effective"><span class="max-tag">OR</span><span class="cell-yes">支持</span></td></tr>
+            <tr><td><div class="item-name">驾驶舱 · 全国版</div></td><td><span class="cell-no">不支持</span></td><td><span class="cell-no">不支持</span></td><td><span class="cell-no">不支持</span><div class="item-hint">需升档至更高档位</div></td></tr>
+            <tr><td><div class="item-name">运营分析（仅系统租户）</div></td><td><span class="cell-no">不支持</span></td><td><span class="cell-no">不支持</span></td><td><span class="cell-no">不支持</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== Pane: 变更历史 ===== -->
+    <div class="detail-pane" id="pane-history">
+      <div class="compare-section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">📜 权益变更时间线</div>
+            <div class="section-sub">所有与本账户相关的变更，按时间倒序</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select class="form-control" style="width:140px;font-size:12px">
+              <option>全部类型</option>
+              <option>开通</option>
+              <option>升档</option>
+              <option>失效</option>
+              <option>增量包</option>
+            </select>
+            <button class="btn btn-sm btn-outline">📤 导出</button>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="tl-item up">
+            <div class="tl-time">2026-03-15 14:22</div>
+            <div class="tl-title">⬆️ 个人权益升档：基础版 → 教师版</div>
+            <div class="tl-detail">
+              <div class="row"><span class="l">操作类型</span><span>升档</span></div>
+              <div class="row"><span class="l">开通方式</span><span>管理员开通</span></div>
+              <div class="row"><span class="l">操作人</span><span>buptadmin（学校管理员）</span></div>
+              <div class="row"><span class="l">新档位</span><span><b>教师版</b>（2026-03-15 ~ 2027-03-15）</span></div>
+              <div class="row"><span class="l">原档位</span><span>基础版（剩余 18,000 Token 已清零）</span></div>
+              <div class="row"><span class="l">备注</span><span>升档后旧权益立即失效</span></div>
+            </div>
+          </div>
+
+          <div class="tl-item up">
+            <div class="tl-time">2026-05-08 10:15</div>
+            <div class="tl-title">➕ 个人增量包：+ 200,000 Token</div>
+            <div class="tl-detail">
+              <div class="row"><span class="l">操作类型</span><span>新增增量包</span></div>
+              <div class="row"><span class="l">来源</span><span>管理员开通</span></div>
+              <div class="row"><span class="l">操作人</span><span>admin（系统管理员）</span></div>
+              <div class="row"><span class="l">额度</span><span><b>+ 200,000 Token</b></span></div>
+              <div class="row"><span class="l">有效期</span><span>永久有效（直到耗尽）</span></div>
+            </div>
+          </div>
+
+          <div class="tl-item down">
+            <div class="tl-time">2026-03-15 14:22</div>
+            <div class="tl-title">⬇️ 个人权益失效：基础版（被升档替代）</div>
+            <div class="tl-detail">
+              <div class="row"><span class="l">操作类型</span><span>自动失效</span></div>
+              <div class="row"><span class="l">触发原因</span><span>升档至教师版（旧权益立即失效）</span></div>
+              <div class="row"><span class="l">剩余 Token 清零</span><span><b style="color:var(--danger)">18,000 Token → 0</b></span></div>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-time">2024-09-01 09:00</div>
+            <div class="tl-title">🎉 首次开通：个人权益 · 基础版</div>
+            <div class="tl-detail">
+              <div class="row"><span class="l">操作类型</span><span>首次开通</span></div>
+              <div class="row"><span class="l">开通方式</span><span>管理员开通</span></div>
+              <div class="row"><span class="l">操作人</span><span>buptadmin（学校管理员）</span></div>
+              <div class="row"><span class="l">档位</span><span>基础版</span></div>
+              <div class="row"><span class="l">有效期</span><span>2024-09-01 ~ 2026-03-15</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Pane: 增量包记录 ===== -->
+    <div class="detail-pane" id="pane-pack">
+      <div class="compare-section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">📦 增量包记录
+              <span class="tip-wrap"><span class="help-pop">?</span><span class="tip-box">增量包按"开通时间倒序"消耗。升档时未消耗增量包保留，已消耗部分清零。</span></span>
+            </div>
+            <div class="section-sub">按开通时间倒序使用，升档不影响未消耗增量包</div>
+          </div>
+        </div>
+
+        <table class="pack-table">
+          <thead>
+            <tr><th>包名 / 类型</th><th>所属</th><th>额度</th><th>使用情况</th><th>开通时间</th><th>状态</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>个人 Token 增量包 · 200K</b><div class="item-hint">优先消耗</div></td>
+              <td><span class="badge badge-purple">个人</span></td>
+              <td>200,000 Token</td>
+              <td>
+                <div class="pack-token-bar">
+                  <div class="pg-bar"><div class="pg-fill" style="width:0%"></div></div>
+                  <div class="text"><span>0</span><span>200,000</span></div>
+                </div>
+              </td>
+              <td>2026-05-08 10:15</td>
+              <td><span class="badge badge-green">未消耗</span></td>
+            </tr>
+            <tr>
+              <td><b>学校 Token 增量包 · 1M</b><div class="item-hint">学校共享</div></td>
+              <td><span class="badge badge-blue">企业</span></td>
+              <td>1,000,000 Token</td>
+              <td>
+                <div class="pack-token-bar">
+                  <div class="pg-bar"><div class="pg-fill" style="width:62%"></div></div>
+                  <div class="text"><span>620,000</span><span>1,000,000</span></div>
+                </div>
+              </td>
+              <td>2026-04-12 09:30</td>
+              <td><span class="badge badge-yellow">部分消耗</span></td>
+            </tr>
+            <tr>
+              <td><b>学校 Token 增量包 · 500K</b><div class="item-hint">已耗尽</div></td>
+              <td><span class="badge badge-blue">企业</span></td>
+              <td>500,000 Token</td>
+              <td>
+                <div class="pack-token-bar">
+                  <div class="pg-bar"><div class="pg-fill" style="width:100%;background:#ef4444"></div></div>
+                  <div class="text"><span>500,000</span><span>500,000</span></div>
+                </div>
+              </td>
+              <td>2026-02-28 14:00</td>
+              <td><span class="badge badge-gray">已耗尽</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== Pane: 显示类型说明 ===== -->
+    <div class="detail-pane" id="pane-types">
+      <div class="compare-section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">🎨 4 种展示类型说明</div>
+            <div class="section-sub">需求文档定义的权益开通详情展示规范</div>
+          </div>
+        </div>
+
+        <div class="type-grid">
+          <div class="type-card" style="border-left-color:#3b82f6">
+            <div class="type-tag" style="background:#dbeafe;color:#1d4ed8">类型 1</div>
+            <div class="type-name">📊 进度条（已用 / 上限）</div>
+            <div class="type-demo">
+              <div class="cell-progress">
+                <div class="pg-text"><span>已用 320,000</span><b>1,000,000 Token</b></div>
+                <div class="pg-bar"><div class="pg-fill org" style="width:32%"></div></div>
+              </div>
+            </div>
+            <div class="type-rule">📌 应用：可量化、有上限的指标。颜色按比例：&lt;60% 蓝；60-90% 橙；&gt;90% 红</div>
+          </div>
+
+          <div class="type-card" style="border-left-color:#10b981">
+            <div class="type-tag" style="background:#d1fae5;color:#065f46">类型 2</div>
+            <div class="type-name">∞ 已用 / 无限制</div>
+            <div class="type-demo">
+              <span class="cell-unlimited">38 已用 / 无限制</span>
+            </div>
+            <div class="type-rule">📌 应用：账户数量、班级数量等。仅展示已用，不显示进度条</div>
+          </div>
+
+          <div class="type-card" style="border-left-color:#0ea5e9">
+            <div class="type-tag" style="background:#e0f2fe;color:#075985">类型 3</div>
+            <div class="type-name">✅ 支持 / ❌ 不支持</div>
+            <div class="type-demo">
+              <div style="display:flex;gap:14px">
+                <span class="cell-yes">支持</span>
+                <span class="cell-no">不支持</span>
+              </div>
+            </div>
+            <div class="type-rule">📌 应用：功能权限类，如"自定义大模型""驾驶舱"</div>
+          </div>
+
+          <div class="type-card" style="border-left-color:#f59e0b">
+            <div class="type-tag" style="background:#fef3c7;color:#92400e">类型 4</div>
+            <div class="type-name">📌 固定说明</div>
+            <div class="type-demo">
+              <span class="cell-fixed">每月 20 张</span><br>
+              <span class="cell-fixed" style="margin-top:4px;display:inline-block">每学期 5 个班级</span>
+            </div>
+            <div class="type-rule">📌 应用：固定数额、不需进度条的说明类</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-section">
+        <div class="section-title mb-12">📖 业务规则参考</div>
+        <table class="compare-table">
+          <thead><tr><th>规则</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><b>取最大值</b></td><td>个人 Token 上限、文生图、知识库等量化指标，最终值 = MAX(企业, 个人)</td></tr>
+            <tr><td><b>取并集</b></td><td>功能支持类（视觉大模型、智能体发布等），任一权益支持即视为支持</td></tr>
+            <tr><td><b>升档清零</b></td><td>升档/再购个人权益后，旧权益立即失效，未消耗 Token 清零</td></tr>
+            <tr><td><b>增量包保留</b></td><td>升档不影响未消耗的增量包，已消耗部分清零</td></tr>
+            <tr><td><b>消耗顺序</b></td><td>普通用户：企业 Token → 个人 Token → 个人增量包<br>教师版：在普通基础上叠加 学生 Token 三层</td></tr>
+            <tr><td><b>到期处理</b></td><td>到期当日 23:59:59 失效；过期后仍可登录，但部分功能（智能体调用、班级新增等）受限</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PAGE_CONFIG = { activeNav:'benefits', title:'权益详情', breadcrumb:['权益与运营','<a href="benefits.html">我的权益</a>','权益详情'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// Tab 切换
+document.querySelectorAll('.detail-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.detail-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.detail-pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-' + t.dataset.pane).classList.add('active');
+  });
+});
+
+// 锚点跳转支持
+window.addEventListener('load', () => {
+  const hash = location.hash.replace('#','');
+  if(hash){
+    const tab = document.querySelector(`.detail-tab[data-pane="${hash}"]`);
+    if(tab) tab.click();
+  }
+});
+</script>
+</body>
+</html>

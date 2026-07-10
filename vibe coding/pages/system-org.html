@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>组织管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.org-tree-tip{padding:14px 18px;background:#eff6ff;border-radius:8px;margin-bottom:14px;font-size:12px;color:#1e40af;display:flex;align-items:center;gap:10px}
+.code-tag{display:inline-block;background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:'Courier New',monospace;font-size:11px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="org-tree-tip">
+      <span>🌳</span>
+      <span>组织树（学院、专业管理）将在后续版本支持，本版本聚焦学校管理员维护</span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item"><label>账户</label><input class="form-control" placeholder="模糊搜索登录名/昵称"></div>
+      <div class="filter-item"><label>姓名</label><input class="form-control" placeholder="模糊搜索"></div>
+      <div class="filter-actions">
+        <button class="btn btn-outline">重置</button>
+        <button class="btn btn-primary">查询</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">学校管理员列表</div>
+          <div class="card-sub">默认创建的 admin 学校管理员无法删除</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('m-org-admin')">+ 新增学校管理员</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>登录名</th>
+              <th>学工号</th>
+              <th>昵称</th>
+              <th>账户类型</th>
+              <th>姓名</th>
+              <th>学校</th>
+              <th>联系电话</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><b>buptadmin</b></td><td>—</td><td>buptadmin</td><td><span class="badge badge-orange">学校管理员·主</span></td><td>学校管理员</td><td>北京邮电大学</td><td>—</td><td>系统创建，不可删除</td><td><button class="btn btn-sm btn-link">修改</button> <button class="btn btn-sm btn-link">查看</button> <button class="btn btn-sm btn-link">重置密码</button></td></tr>
+            <tr><td>bupt1234</td><td>1234</td><td>白小乐</td><td><span class="badge badge-blue">学校管理员</span></td><td>白小乐</td><td>北京邮电大学</td><td>138****8000</td><td>—</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-org-admin')">修改</button> <button class="btn btn-sm btn-link">查看</button> <button class="btn btn-sm btn-link">重置密码</button> <button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="if(confirm('确定删除账户？'))toast('已删除','success')">删除</button></td></tr>
+            <tr><td>bupt5678</td><td>5678</td><td>王副管</td><td><span class="badge badge-blue">学校管理员</span></td><td>王副管</td><td>北京邮电大学</td><td>139****1234</td><td>新增管理员</td><td><button class="btn btn-sm btn-link">修改</button> <button class="btn btn-sm btn-link">查看</button> <button class="btn btn-sm btn-link">重置密码</button> <button class="btn btn-sm btn-link" style="color:var(--danger)">删除</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 新增学校管理员 -->
+<div class="modal-overlay" id="m-org-admin">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>新增学校管理员</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="card-title mb-12">🪪 账户信息</div>
+      <div class="form-group"><label>账户类型</label><input class="form-control" value="学校管理员" readonly></div>
+      <div class="form-group"><label>学校</label><input class="form-control" value="北京邮电大学" readonly></div>
+      <div class="form-group"><label><span class="req">*</span>学工号</label>
+        <input class="form-control" placeholder="字母或数字，长度40，每个学校唯一">
+        <div class="form-hint">登录名将自动生成：bupt + 学工号</div>
+      </div>
+      <div class="form-group"><label>昵称</label><input class="form-control" placeholder="不填默认为学工号"></div>
+      <div class="form-group"><label>初始密码</label><input class="form-control" placeholder="不填默认：bupt + 学工号"></div>
+
+      <div class="card-title mt-16 mb-12">📞 联系人信息</div>
+      <div class="form-row">
+        <div class="form-group"><label><span class="req">*</span>姓名</label><input class="form-control"></div>
+        <div class="form-group"><label>性别</label><div style="padding:8px 0"><label style="margin-right:14px"><input type="radio" name="g3"> 男</label><label><input type="radio" name="g3"> 女</label></div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>联系电话</label><input class="form-control" placeholder="11位"></div>
+        <div class="form-group"><label>联系邮箱</label><input class="form-control"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-org-admin');toast('新增成功','success')">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'org', title:'组织管理', breadcrumb:['系统管理','组织管理'] };
+</script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

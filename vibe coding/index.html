@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>权益介绍 · 初发 Trufar</title>
+<style>
+:root {
+  color-scheme: light;
+  --primary: #C4612F;
+  --primary-hover: #A94E22;
+  --accent: #C4612F;
+  --bg-main: #F7F4EF;
+  --bg-surface: #FBF9F5;
+  --bg-white: #FFFFFF;
+  --border: #E7E1D7;
+  --text-main: #1F2421;
+  --text-sub: #5C635D;
+  --text-mute: #9CA3A0;
+  --success: #2E7D32;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 300;
+  background: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  padding: 32px 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.intro-banner {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  border-radius: 14px;
+  padding: 32px 40px;
+  margin-bottom: 24px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.intro-banner .t {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.intro-banner .s {
+  font-size: 15px;
+  opacity: 0.95;
+  line-height: 1.7;
+  max-width: 900px;
+}
+
+.intro-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-white);
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border);
+}
+
+.intro-tab {
+  flex: 1;
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-sub);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.intro-tab:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.intro-tab.active {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.intro-pane {
+  display: none;
+}
+
+.intro-pane.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cmp-wrap {
+  background: var(--bg-white);
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+.cmp-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.cmp-sub {
+  font-size: 14px;
+  color: var(--text-mute);
+  margin-bottom: 24px;
+}
+
+.cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 680px;
+}
+
+.cmp-table th,
+.cmp-table td {
+  padding: 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cmp-table thead th {
+  background: var(--bg-surface);
+  color: var(--text-sub);
+  font-weight: 600;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+}
+
+.cmp-table th.row-head,
+.cmp-table td.row-head {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-main);
+  background: #fcfdff;
+  white-space: nowrap;
+}
+
+.cmp-table tr:hover td {
+  background: var(--bg-surface);
+}
+
+.cmp-table tr:hover td.row-head {
+  background: #f1f5f9;
+}
+
+.cmp-table th.tier {
+  font-size: 14px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.cmp-table th.tier .tag {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+  padding: 3px 0;
+}
+
+.tag.free { color: #64748b; }
+.tag.basic { color: #3730a3; }
+.tag.vip { color: #1d4ed8; }
+.tag.svip { color: #b45309; }
+
+.cmp-table th.svip-col {
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+}
+
+.cmp-table td.svip-col {
+  background: #fffbf5;
+}
+
+.cmp-table tr:hover td.svip-col {
+  background: #fff3e6;
+}
+
+.grp td {
+  background: #eef2f7;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: left;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.yes { color: var(--success); font-weight: 600; }
+.no { color: #cbd5e1; }
+.num { color: var(--text-main); font-weight: 600; }
+.unlim { color: var(--success); font-weight: 700; }
+.price-row td { font-weight: 700; color: var(--primary); }
+.price-row .amt { font-size: 16px; }
+.price-row .per { font-size: 12px; color: var(--text-mute); font-weight: 500; }
+.tbd { color: var(--text-mute); font-style: italic; }
+
+.pack-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.pack-card {
+  background: var(--bg-white);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+}
+
+.pack-card.personal {
+  border-top-color: #0ea5e9;
+}
+
+.pack-card .pk-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pack-card .pk-ico { font-size: 24px; }
+
+.pack-card .pk-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 14px;
+}
+
+.pack-card .pk-row:last-child { border-bottom: 0; }
+.pack-card .pk-row .l { color: var(--text-sub); }
+.pack-card .pk-row .v { font-weight: 700; color: var(--primary); }
+.pack-card .pk-row .v.big { font-size: 20px; color: var(--success); }
+
+.pack-note {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-top: 24px;
+  padding: 18px 20px;
+  background: var(--bg-surface);
+  border-radius: 10px;
+  line-height: 1.7;
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 760px) {
+  body { padding: 20px 16px; }
+  .intro-banner { padding: 24px 20px; }
+  .intro-banner .t { font-size: 22px; }
+  .intro-banner .s { font-size: 14px; }
+  .intro-tabs { flex-direction: column; gap: 6px; }
+  .cmp-wrap { padding: 20px; }
+  .pack-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="intro-banner">
+    <div class="t">💎 权益介绍</div>
+    <div class="s">了解企业权益、个人权益与增量包的完整内容。企业权益由学校统一开通、全校师生共享；个人权益由个人按月订阅；最终可用配额 = 企业权益与个人权益取最大值，叠加增量包。</div>
+    <div style="margin-top: 16px;">
+      <label for="excel-upload" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);">
+        📁 上传 Excel 配置文件
+      </label>
+      <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display: none;">
+      <button id="reset-config" style="display: inline-block; padding: 10px 20px; margin-left: 12px; background: rgba(255,255,255,0.1); color: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);">
+        🔄 恢复默认
+      </button>
+      <span id="upload-status" style="margin-left: 12px; font-size: 13px; opacity: 0.9;"></span>
+      <a href="./benefits_config.xlsx" download style="margin-left: 12px; color: white; text-decoration: underline; font-size: 13px; opacity: 0.9;">下载模板</a>
+    </div>
+  </div>
+
+  <div class="intro-tabs">
+    <div class="intro-tab active" data-pane="corp">🏫 企业权益</div>
+    <div class="intro-tab" data-pane="pers">👤 个人权益</div>
+    <div class="intro-tab" data-pane="addon">📦 增量包</div>
+  </div>
+
+  <div class="intro-pane active" id="pane-corp">
+    <div class="cmp-wrap">
+      <div class="cmp-title">企业权益 · 档位对比</div>
+      <div class="cmp-sub">由学校统一开通，全校师生共享配额池（百万 Token = 10 元）</div>
+      <table class="cmp-table" id="corp-table"></table>
+    </div>
+  </div>
+
+  <div class="intro-pane" id="pane-pers">
+    <div class="cmp-wrap">
+      <div class="cmp-title">个人权益 · 套餐对比</div>
+      <div class="cmp-sub">由个人按月订阅，与企业权益叠加取最大值</div>
+      <table class="cmp-table" id="pers-table"></table>
+    </div>
+  </div>
+
+  <div class="intro-pane" id="pane-addon">
+    <div class="pack-grid" id="addon-grid"></div>
+    <div class="pack-note" id="addon-note"></div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const BENEFITS_CONFIG = {
+  corporate: {
+    tiers: [
+      { key: 'free', name: '免费版', tag: 'FREE', tagClass: 'free', highlight: false },
+      { key: 'trial', name: '体验版', tag: '试用', tagClass: 'basic', highlight: false },
+      { key: 'vip', name: 'VIP', tag: '团队版', tagClass: 'vip', highlight: false },
+      { key: 'vip1', name: 'VIP1', tag: '学院版', tagClass: 'vip', highlight: false },
+      { key: 'svip', name: 'SVIP', tag: '学校版', tagClass: 'svip', highlight: true }
+    ],
+    rows: [
+      { type: 'price', label: '价格与时长', values: { free: '-', trial: '年包待定', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' } },
+      { type: 'group', label: 'Token 配额' },
+      { type: 'data', label: '学校累计 Token', values: { free: 0, trial: 10000000, vip: 50000000, vip1: 500000000, svip: 2000000000 } },
+      { type: 'group', label: '功能权益' },
+      { type: 'data', label: '付费工具使用次数', values: { free: 0, trial: 100, vip: 2000, vip1: 20000, svip: 80000 } },
+      { type: 'data', label: '知识库文档数量/人', values: { free: 5, trial: 50, vip: 500, vip1: 500, svip: 1000 } },
+      { type: 'data', label: '新增模型', values: { free: false, trial: false, vip: true, vip1: true, svip: true } },
+      { type: 'data', label: '教学管理', values: { free: false, trial: true, vip: true, vip1: true, svip: true } },
+      { type: 'group', label: '班级配额' },
+      { type: 'data', label: '学校班级总数量（每学期）', values: { free: false, trial: 30, vip: 200, vip1: 200, svip: '无限制' } },
+      { type: 'data', label: '班级数量/人（每学期）', values: { free: false, trial: 1, vip: 10, vip1: 10, svip: '无限制' } },
+      { type: 'group', label: '账户数量' },
+      { type: 'data', label: '账户数量 · 教师', values: { free: '无限制', trial: 10, vip: 1, vip1: 30, svip: '无限制' } },
+      { type: 'data', label: '账户数量 · 学生', values: { free: '无限制', trial: 100, vip: 100, vip1: 1500, svip: '无限制' } },
+      { type: 'data', label: '账户数量 · 运营', values: { free: '无限制', trial: false, vip: 1, vip1: 1, svip: '无限制' } }
+    ]
+  },
+  personal: {
+    tiers: [
+      { key: 'teacher', name: '教师版', tag: '教师专属', tagClass: 'svip', highlight: false },
+      { key: 'a', name: 'A 套餐', tag: '入门', tagClass: 'basic', highlight: false },
+      { key: 'b', name: 'B 套餐', tag: '进阶', tagClass: 'vip', highlight: false },
+      { key: 'c', name: 'C 套餐', tag: '高阶', tagClass: 'vip', highlight: false }
+    ],
+    rows: [
+      { type: 'price', label: '价格与时长', values: { teacher: 'xx 元/月', a: 'A 元/月', b: 'B 元/月', c: 'C 元/月' } },
+      { type: 'group', label: 'Token 配额' },
+      { type: 'data', label: '个人 Token', values: { teacher: 50000000, a: 1000000, b: 5000000, c: 18000000 } },
+      { type: 'group', label: '功能权益' },
+      { type: 'data', label: '内置工具 · 文生图', values: { teacher: '1000 张', a: '10 张', b: '100 张', c: '1000 张' } },
+      { type: 'data', label: '知识库文档数量', values: { teacher: 1000, a: 100, b: 500, c: 1000 } },
+      { type: 'data', label: '自定义大模型', values: { teacher: true, a: true, b: true, c: true } },
+      { type: 'data', label: '教学管理', values: { teacher: true, a: true, b: true, c: true } },
+      { type: 'data', label: '班级数量（每学期）', values: { teacher: '无限制', a: 5, b: 10, c: '无限制' } }
+    ]
+  },
+  addon: {
+    packages: [
+      { key: 'school', name: '学校增量包', icon: '🏫', class: '', items: [
+        { label: '价格', value: '待定' },
+        { label: '学校累计 Token', value: '1 亿', highlight: true }
+      ]},
+      { key: 'personal', name: '个人增量包', icon: '👤', class: 'personal', items: [
+        { label: '价格', value: '待定' },
+        { label: 'Token/人', value: '1000 万', highlight: true }
+      ]}
+    ],
+    note: '💡 增量包用于在权益配额用尽后补充 Token。升档不影响未消耗的增量包，已消耗部分清零。消耗顺序：企业 Token → 个人 Token → 个人增量包。'
+  }
+};
+
+function renderCorporateTable() {
+  const { tiers, rows } = BENEFITS_CONFIG.corporate;
+  const colCount = tiers.length + 1;
+  let html = '<thead><tr><th class="row-head">类别</th>';
+  tiers.forEach(tier => {
+    const highlightClass = tier.highlight ? 'svip-col' : '';
+    html += `<th class="tier ${highlightClass}">${tier.name}<span class="tag ${tier.tagClass}">${tier.tag}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    if (row.type === 'group') {
+      html += `<tr class="grp"><td colspan="${colCount}">${row.label}</td></tr>`;
+    } else if (row.type === 'price') {
+      html += '<tr class="price-row"><td class="row-head">' + row.label + '</td>';
+      tiers.forEach(tier => {
+        const val = row.values[tier.key];
+        const highlightClass = tier.highlight ? 'svip-col' : '';
+        if (val === '-') {
+          html += `<td class="${highlightClass}">${val}</td>`;
+        } else if (val.includes('待定')) {
+          html += `<td class="${highlightClass}"><span class="tbd">${val}</span></td>`;
+        } else {
+          const parts = val.split(' ');
+          html += `<td class="${highlightClass}"><span class="amt">${parts[0]}</span><span class="per"> ${parts[1]}</span></td>`;
+        }
+      });
+      html += '</tr>';
+    } else if (row.type === 'data') {
+      html += '<tr><td class="row-head">' + row.label + '</td>';
+      tiers.forEach(tier => {
+        const val = row.values[tier.key];
+        const highlightClass = tier.highlight ? 'svip-col' : '';
+        html += `<td class="${highlightClass}">${formatValue(val)}</td>`;
+      });
+      html += '</tr>';
+    }
+  });
+  html += '</tbody>';
+  document.getElementById('corp-table').innerHTML = html;
+}
+
+function renderPersonalTable() {
+  const { tiers, rows } = BENEFITS_CONFIG.personal;
+  const colCount = tiers.length + 1;
+  let html = '<thead><tr><th class="row-head">类别</th>';
+  tiers.forEach(tier => {
+    html += `<th class="tier">${tier.name}<span class="tag ${tier.tagClass}">${tier.tag}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    if (row.type === 'group') {
+      html += `<tr class="grp"><td colspan="${colCount}">${row.label}</td></tr>`;
+    } else if (row.type === 'price') {
+      html += '<tr class="price-row"><td class="row-head">' + row.label + '</td>';
+      tiers.forEach(tier => {
+        const val = row.values[tier.key];
+        if (val.includes('待定') || val.includes('元/月')) {
+          html += `<td><span class="tbd">${val}</span></td>`;
+        } else {
+          const parts = val.split(' ');
+          html += `<td><span class="amt">${parts[0]}</span><span class="per"> ${parts[1]}</span></td>`;
+        }
+      });
+      html += '</tr>';
+    } else if (row.type === 'data') {
+      html += '<tr><td class="row-head">' + row.label + '</td>';
+      tiers.forEach(tier => {
+        const val = row.values[tier.key];
+        html += `<td>${formatValue(val)}</td>`;
+      });
+      html += '</tr>';
+    }
+  });
+  html += '</tbody>';
+  document.getElementById('pers-table').innerHTML = html;
+}
+
+function renderAddonPackages() {
+  const { packages, note } = BENEFITS_CONFIG.addon;
+  let html = '';
+  packages.forEach(pkg => {
+    html += `<div class="pack-card ${pkg.class}">`;
+    html += `<div class="pk-name"><span class="pk-ico">${pkg.icon}</span>${pkg.name}</div>`;
+    pkg.items.forEach(item => {
+      const valueClass = item.highlight ? 'v big' : 'v';
+      const displayValue = item.value.includes('待定') ? `<span class="tbd">${item.value}</span>` : item.value;
+      html += `<div class="pk-row"><span class="l">${item.label}</span><span class="${valueClass}">${displayValue}</span></div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('addon-grid').innerHTML = html;
+  document.getElementById('addon-note').innerHTML = note;
+}
+
+function formatValue(val) {
+  if (val === true) return '<span class="yes">支持</span>';
+  if (val === false) return '<span class="no">不支持</span>';
+  if (val === 0) return '<span class="no">0</span>';
+  if (val === '无限制') return '<span class="unlim">无限制</span>';
+  if (typeof val === 'string' && val.includes('张')) return '<span class="yes">' + val + '</span>';
+  if (typeof val === 'string') return '<span class="yes">' + val + '</span>';
+  if (typeof val === 'number') return '<span class="num">' + val.toLocaleString() + '</span>';
+  return val;
+}
+
+function saveConfigToLocal() {
+  try {
+    localStorage.setItem('benefits_config', JSON.stringify(BENEFITS_CONFIG));
+    return true;
+  } catch (error) {
+    console.error('保存配置失败:', error);
+    return false;
+  }
+}
+
+function loadConfigFromLocal() {
+  try {
+    const saved = localStorage.getItem('benefits_config');
+    if (saved) {
+      const config = JSON.parse(saved);
+      Object.assign(BENEFITS_CONFIG, config);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('加载配置失败:', error);
+    return false;
+  }
+}
+
+function clearLocalConfig() {
+  localStorage.removeItem('benefits_config');
+}
+
+function parseExcelData(workbook) {
+  try {
+    const corpSheet = workbook.Sheets['企业权益'];
+    if (corpSheet) {
+      const corpData = XLSX.utils.sheet_to_json(corpSheet, { header: 1 });
+      if (corpData.length > 1) {
+        const headers = corpData[0];
+        BENEFITS_CONFIG.corporate.tiers = headers.slice(1).map((name, idx) => ({
+          key: 'tier' + idx,
+          name: name,
+          tag: name,
+          tagClass: idx === headers.length - 2 ? 'svip' : 'vip',
+          highlight: idx === headers.length - 2
+        }));
+        BENEFITS_CONFIG.corporate.rows = [];
+        for (let i = 1; i < corpData.length; i++) {
+          const row = corpData[i];
+          const label = row[0];
+          if (!label) continue;
+          if (label.startsWith('===')) {
+            BENEFITS_CONFIG.corporate.rows.push({ type: 'group', label: label.replace(/===/g, '').trim() });
+          } else {
+            const values = {};
+            BENEFITS_CONFIG.corporate.tiers.forEach((tier, idx) => {
+              let val = row[idx + 1];
+              if (val === '支持') val = true;
+              if (val === '不支持') val = false;
+              values[tier.key] = val;
+            });
+            const rowType = label.includes('价格') ? 'price' : 'data';
+            BENEFITS_CONFIG.corporate.rows.push({ type: rowType, label: label, values: values });
+          }
+        }
+      }
+    }
+    const persSheet = workbook.Sheets['个人权益'];
+    if (persSheet) {
+      const persData = XLSX.utils.sheet_to_json(persSheet, { header: 1 });
+      if (persData.length > 1) {
+        const headers = persData[0];
+        BENEFITS_CONFIG.personal.tiers = headers.slice(1).map((name, idx) => ({
+          key: 'tier' + idx, name: name, tag: name, tagClass: idx === 0 ? 'svip' : 'vip', highlight: false
+        }));
+        BENEFITS_CONFIG.personal.rows = [];
+        for (let i = 1; i < persData.length; i++) {
+          const row = persData[i];
+          const label = row[0];
+          if (!label) continue;
+          if (label.startsWith('===')) {
+            BENEFITS_CONFIG.personal.rows.push({ type: 'group', label: label.replace(/===/g, '').trim() });
+          } else {
+            const values = {};
+            BENEFITS_CONFIG.personal.tiers.forEach((tier, idx) => {
+              let val = row[idx + 1];
+              if (val === '支持') val = true;
+              if (val === '不支持') val = false;
+              values[tier.key] = val;
+            });
+            const rowType = label.includes('价格') ? 'price' : 'data';
+            BENEFITS_CONFIG.personal.rows.push({ type: rowType, label: label, values: values });
+          }
+        }
+      }
+    }
+    const addonSheet = workbook.Sheets['增量包'];
+    if (addonSheet) {
+      const addonData = XLSX.utils.sheet_to_json(addonSheet, { header: 1 });
+      BENEFITS_CONFIG.addon.packages = [];
+      for (let i = 1; i < addonData.length; i++) {
+        const row = addonData[i];
+        if (!row[0] || row[0].includes('说明')) break;
+        BENEFITS_CONFIG.addon.packages.push({
+          key: 'pkg' + i, name: row[0], icon: row[1] || '📦', class: row[0].includes('个人') ? 'personal' : '',
+          items: [
+            { label: '价格', value: row[2] || '待定' },
+            { label: row[0].includes('学校') ? '学校累计 Token' : 'Token/人', value: row[3] || '-', highlight: true }
+          ]
+        });
+      }
+      for (let i = 0; i < addonData.length; i++) {
+        if (addonData[i][0] && addonData[i][0].includes('💡')) {
+          BENEFITS_CONFIG.addon.note = addonData[i][0];
+          break;
+        }
+      }
+    }
+    saveConfigToLocal();
+    return true;
+  } catch (error) {
+    console.error('解析 Excel 失败:', error);
+    return false;
+  }
+}
+
+document.getElementById('excel-upload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('upload-status');
+  statusEl.textContent = '正在读取...';
+  statusEl.style.color = 'rgba(255,255,255,0.9)';
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      if (parseExcelData(workbook)) {
+        renderCorporateTable();
+        renderPersonalTable();
+        renderAddonPackages();
+        statusEl.textContent = '✅ 已保存，刷新后仍然生效';
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      } else {
+        statusEl.textContent = '❌ 解析失败';
+      }
+    } catch (error) {
+      console.error('读取 Excel 失败:', error);
+      statusEl.textContent = '❌ 读取失败';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('reset-config').addEventListener('click', () => {
+  if (confirm('确定要恢复默认配置吗？这将清除所有自定义数据。')) {
+    clearLocalConfig();
+    location.reload();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 先尝试从本地存储加载配置
+  const hasLocalConfig = loadConfigFromLocal();
+
+  renderCorporateTable();
+  renderPersonalTable();
+  renderAddonPackages();
+
+  // 如果有本地配置，显示提示
+  if (hasLocalConfig) {
+    const statusEl = document.getElementById('upload-status');
+    statusEl.textContent = '✨ 已加载自定义配置';
+    statusEl.style.color = 'rgba(255,255,255,0.9)';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  }
+});
+
+document.querySelectorAll('.intro-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.intro-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.intro-pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-' + t.dataset.pane).classList.add('active');
+  });
+});
+
+window.addEventListener('load', () => {
+  const hash = location.hash.replace('#','');
+  if(hash){
+    const tab = document.querySelector(`.intro-tab[data-pane="${hash}"]`);
+    if(tab) tab.click();
+  }
+});
+</script>
+</body>
+</html>
