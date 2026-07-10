@@ -300,17 +300,6 @@ body {
   <div class="intro-banner">
     <div class="t">💎 权益介绍</div>
     <div class="s">了解企业权益、个人权益与增量包的完整内容。企业权益由学校统一开通、全校师生共享；个人权益由个人按月订阅；最终可用配额 = 企业权益与个人权益取最大值，叠加增量包。</div>
-    <div style="margin-top: 16px;">
-      <label for="excel-upload" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);">
-        📁 上传 Excel 配置文件
-      </label>
-      <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display: none;">
-      <button id="reset-config" style="display: inline-block; padding: 10px 20px; margin-left: 12px; background: rgba(255,255,255,0.1); color: white; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);">
-        🔄 恢复默认
-      </button>
-      <span id="upload-status" style="margin-left: 12px; font-size: 13px; opacity: 0.9;"></span>
-      <a href="../benefits_config.xlsx" download style="margin-left: 12px; color: white; text-decoration: underline; font-size: 13px; opacity: 0.9;">下载模板</a>
-    </div>
   </div>
 
   <div class="intro-tabs">
@@ -342,9 +331,13 @@ body {
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+// =============================================
+// 权益配置数据 - 修改这里的数据即可更新页面
+// =============================================
+
 const BENEFITS_CONFIG = {
+  // 企业权益配置
   corporate: {
     tiers: [
       { key: 'free', name: '免费版', tag: 'FREE', tagClass: 'free', highlight: false },
@@ -354,23 +347,69 @@ const BENEFITS_CONFIG = {
       { key: 'svip', name: 'SVIP', tag: '学校版', tagClass: 'svip', highlight: true }
     ],
     rows: [
-      { type: 'price', label: '价格与时长', values: { free: '-', trial: '年包待定', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' } },
+      {
+        type: 'price',
+        label: '价格与时长',
+        values: { free: '-', trial: '年包待定', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' }
+      },
       { type: 'group', label: 'Token 配额' },
-      { type: 'data', label: '学校累计 Token', values: { free: 0, trial: 10000000, vip: 50000000, vip1: 500000000, svip: 2000000000 } },
+      {
+        type: 'data',
+        label: '学校累计 Token',
+        values: { free: 0, trial: 10000000, vip: 50000000, vip1: 500000000, svip: 2000000000 }
+      },
       { type: 'group', label: '功能权益' },
-      { type: 'data', label: '付费工具使用次数', values: { free: 0, trial: 100, vip: 2000, vip1: 20000, svip: 80000 } },
-      { type: 'data', label: '知识库文档数量/人', values: { free: 5, trial: 50, vip: 500, vip1: 500, svip: 1000 } },
-      { type: 'data', label: '新增模型', values: { free: false, trial: false, vip: true, vip1: true, svip: true } },
-      { type: 'data', label: '教学管理', values: { free: false, trial: true, vip: true, vip1: true, svip: true } },
+      {
+        type: 'data',
+        label: '付费工具使用次数',
+        values: { free: 0, trial: 100, vip: 2000, vip1: 20000, svip: 80000 }
+      },
+      {
+        type: 'data',
+        label: '知识库文档数量/人',
+        values: { free: 5, trial: 50, vip: 500, vip1: 500, svip: 1000 }
+      },
+      {
+        type: 'data',
+        label: '新增模型',
+        values: { free: false, trial: false, vip: true, vip1: true, svip: true }
+      },
+      {
+        type: 'data',
+        label: '教学管理',
+        values: { free: true, trial: true, vip: true, vip1: true, svip: true }
+      },
       { type: 'group', label: '班级配额' },
-      { type: 'data', label: '学校班级总数量（每学期）', values: { free: false, trial: 30, vip: 200, vip1: 200, svip: '无限制' } },
-      { type: 'data', label: '班级数量/人（每学期）', values: { free: false, trial: 1, vip: 10, vip1: 10, svip: '无限制' } },
+      {
+        type: 'data',
+        label: '学校班级总数量（每学期）',
+        values: { free: false, trial: 30, vip: 200, vip1: 200, svip: '无限制' }
+      },
+      {
+        type: 'data',
+        label: '班级数量/人（每学期）',
+        values: { free: false, trial: 1, vip: 10, vip1: 10, svip: '无限制' }
+      },
       { type: 'group', label: '账户数量' },
-      { type: 'data', label: '账户数量 · 教师', values: { free: '无限制', trial: 10, vip: 1, vip1: 30, svip: '无限制' } },
-      { type: 'data', label: '账户数量 · 学生', values: { free: '无限制', trial: 100, vip: 100, vip1: 1500, svip: '无限制' } },
-      { type: 'data', label: '账户数量 · 运营', values: { free: '无限制', trial: false, vip: 1, vip1: 1, svip: '无限制' } }
+      {
+        type: 'data',
+        label: '账户数量 · 教师',
+        values: { free: '无限制', trial: 10, vip: 1, vip1: 30, svip: '无限制' }
+      },
+      {
+        type: 'data',
+        label: '账户数量 · 学生',
+        values: { free: '无限制', trial: 100, vip: 100, vip1: 1500, svip: '无限制' }
+      },
+      {
+        type: 'data',
+        label: '账户数量 · 运营',
+        values: { free: '无限制', trial: false, vip: 1, vip1: 1, svip: '无限制' }
+      }
     ]
   },
+
+  // 个人权益配置
   personal: {
     tiers: [
       { key: 'teacher', name: '教师版', tag: '教师专属', tagClass: 'svip', highlight: false },
@@ -379,41 +418,89 @@ const BENEFITS_CONFIG = {
       { key: 'c', name: 'C 套餐', tag: '高阶', tagClass: 'vip', highlight: false }
     ],
     rows: [
-      { type: 'price', label: '价格与时长', values: { teacher: 'xx 元/月', a: 'A 元/月', b: 'B 元/月', c: 'C 元/月' } },
+      {
+        type: 'price',
+        label: '价格与时长',
+        values: { teacher: 'xx 元/月', a: 'A 元/月', b: 'B 元/月', c: 'C 元/月' }
+      },
       { type: 'group', label: 'Token 配额' },
-      { type: 'data', label: '个人 Token', values: { teacher: 50000000, a: 1000000, b: 5000000, c: 18000000 } },
+      {
+        type: 'data',
+        label: '个人 Token',
+        values: { teacher: 50000000, a: 1000000, b: 5000000, c: 18000000 }
+      },
       { type: 'group', label: '功能权益' },
-      { type: 'data', label: '内置工具 · 文生图', values: { teacher: '1000 张', a: '10 张', b: '100 张', c: '1000 张' } },
-      { type: 'data', label: '知识库文档数量', values: { teacher: 1000, a: 100, b: 500, c: 1000 } },
-      { type: 'data', label: '自定义大模型', values: { teacher: true, a: true, b: true, c: true } },
-      { type: 'data', label: '教学管理', values: { teacher: true, a: true, b: true, c: true } },
-      { type: 'data', label: '班级数量（每学期）', values: { teacher: '无限制', a: 5, b: 10, c: '无限制' } }
+      {
+        type: 'data',
+        label: '内置工具 · 文生图',
+        values: { teacher: '1000 张', a: '10 张', b: '100 张', c: '1000 张' }
+      },
+      {
+        type: 'data',
+        label: '知识库文档数量',
+        values: { teacher: 1000, a: 100, b: 500, c: 1000 }
+      },
+      {
+        type: 'data',
+        label: '自定义大模型',
+        values: { teacher: true, a: true, b: true, c: true }
+      },
+      {
+        type: 'data',
+        label: '教学管理',
+        values: { teacher: true, a: true, b: true, c: true }
+      },
+      {
+        type: 'data',
+        label: '班级数量（每学期）',
+        values: { teacher: '无限制', a: 5, b: 10, c: '无限制' }
+      }
     ]
   },
+
+  // 增量包配置
   addon: {
     packages: [
-      { key: 'school', name: '学校增量包', icon: '🏫', class: '', items: [
-        { label: '价格', value: '待定' },
-        { label: '学校累计 Token', value: '1 亿', highlight: true }
-      ]},
-      { key: 'personal', name: '个人增量包', icon: '👤', class: 'personal', items: [
-        { label: '价格', value: '待定' },
-        { label: 'Token/人', value: '1000 万', highlight: true }
-      ]}
+      {
+        key: 'school',
+        name: '学校增量包',
+        icon: '🏫',
+        class: '',
+        items: [
+          { label: '价格', value: '待定' },
+          { label: '学校累计 Token', value: '1 亿', highlight: true }
+        ]
+      },
+      {
+        key: 'personal',
+        name: '个人增量包',
+        icon: '👤',
+        class: 'personal',
+        items: [
+          { label: '价格', value: '待定' },
+          { label: 'Token/人', value: '1000 万', highlight: true }
+        ]
+      }
     ],
-    note: '💡 增量包用于在权益配额用尽后补充 Token。升档不影响未消耗的增量包，已消耗部分清零。消耗顺序：企业 Token → 个人 Token → 个人增量包。'
+    note: '💡 增量包用于在权益配额用尽后补充 Token。升档不影响未消耗的增量包,已消耗部分清零。消耗顺序：企业 Token → 个人 Token → 个人增量包。'
   }
 };
+
+// =============================================
+// 渲染函数（无需修改）
+// =============================================
 
 function renderCorporateTable() {
   const { tiers, rows } = BENEFITS_CONFIG.corporate;
   const colCount = tiers.length + 1;
+
   let html = '<thead><tr><th class="row-head">类别</th>';
   tiers.forEach(tier => {
     const highlightClass = tier.highlight ? 'svip-col' : '';
     html += `<th class="tier ${highlightClass}">${tier.name}<span class="tag ${tier.tagClass}">${tier.tag}</span></th>`;
   });
   html += '</tr></thead><tbody>';
+
   rows.forEach(row => {
     if (row.type === 'group') {
       html += `<tr class="grp"><td colspan="${colCount}">${row.label}</td></tr>`;
@@ -442,6 +529,7 @@ function renderCorporateTable() {
       html += '</tr>';
     }
   });
+
   html += '</tbody>';
   document.getElementById('corp-table').innerHTML = html;
 }
@@ -449,11 +537,13 @@ function renderCorporateTable() {
 function renderPersonalTable() {
   const { tiers, rows } = BENEFITS_CONFIG.personal;
   const colCount = tiers.length + 1;
+
   let html = '<thead><tr><th class="row-head">类别</th>';
   tiers.forEach(tier => {
     html += `<th class="tier">${tier.name}<span class="tag ${tier.tagClass}">${tier.tag}</span></th>`;
   });
   html += '</tr></thead><tbody>';
+
   rows.forEach(row => {
     if (row.type === 'group') {
       html += `<tr class="grp"><td colspan="${colCount}">${row.label}</td></tr>`;
@@ -478,12 +568,14 @@ function renderPersonalTable() {
       html += '</tr>';
     }
   });
+
   html += '</tbody>';
   document.getElementById('pers-table').innerHTML = html;
 }
 
 function renderAddonPackages() {
   const { packages, note } = BENEFITS_CONFIG.addon;
+
   let html = '';
   packages.forEach(pkg => {
     html += `<div class="pack-card ${pkg.class}">`;
@@ -495,6 +587,7 @@ function renderAddonPackages() {
     });
     html += '</div>';
   });
+
   document.getElementById('addon-grid').innerHTML = html;
   document.getElementById('addon-note').innerHTML = note;
 }
@@ -510,180 +603,19 @@ function formatValue(val) {
   return val;
 }
 
-function saveConfigToLocal() {
-  try {
-    localStorage.setItem('benefits_config', JSON.stringify(BENEFITS_CONFIG));
-    return true;
-  } catch (error) {
-    console.error('保存配置失败:', error);
-    return false;
-  }
-}
-
-function loadConfigFromLocal() {
-  try {
-    const saved = localStorage.getItem('benefits_config');
-    if (saved) {
-      const config = JSON.parse(saved);
-      Object.assign(BENEFITS_CONFIG, config);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('加载配置失败:', error);
-    return false;
-  }
-}
-
-function clearLocalConfig() {
-  localStorage.removeItem('benefits_config');
-}
-
-function parseExcelData(workbook) {
-  try {
-    const corpSheet = workbook.Sheets['企业权益'];
-    if (corpSheet) {
-      const corpData = XLSX.utils.sheet_to_json(corpSheet, { header: 1 });
-      if (corpData.length > 1) {
-        const headers = corpData[0];
-        BENEFITS_CONFIG.corporate.tiers = headers.slice(1).map((name, idx) => ({
-          key: 'tier' + idx,
-          name: name,
-          tag: name,
-          tagClass: idx === headers.length - 2 ? 'svip' : 'vip',
-          highlight: idx === headers.length - 2
-        }));
-        BENEFITS_CONFIG.corporate.rows = [];
-        for (let i = 1; i < corpData.length; i++) {
-          const row = corpData[i];
-          const label = row[0];
-          if (!label) continue;
-          if (label.startsWith('===')) {
-            BENEFITS_CONFIG.corporate.rows.push({ type: 'group', label: label.replace(/===/g, '').trim() });
-          } else {
-            const values = {};
-            BENEFITS_CONFIG.corporate.tiers.forEach((tier, idx) => {
-              let val = row[idx + 1];
-              if (val === '支持') val = true;
-              if (val === '不支持') val = false;
-              values[tier.key] = val;
-            });
-            const rowType = label.includes('价格') ? 'price' : 'data';
-            BENEFITS_CONFIG.corporate.rows.push({ type: rowType, label: label, values: values });
-          }
-        }
-      }
-    }
-    const persSheet = workbook.Sheets['个人权益'];
-    if (persSheet) {
-      const persData = XLSX.utils.sheet_to_json(persSheet, { header: 1 });
-      if (persData.length > 1) {
-        const headers = persData[0];
-        BENEFITS_CONFIG.personal.tiers = headers.slice(1).map((name, idx) => ({
-          key: 'tier' + idx, name: name, tag: name, tagClass: idx === 0 ? 'svip' : 'vip', highlight: false
-        }));
-        BENEFITS_CONFIG.personal.rows = [];
-        for (let i = 1; i < persData.length; i++) {
-          const row = persData[i];
-          const label = row[0];
-          if (!label) continue;
-          if (label.startsWith('===')) {
-            BENEFITS_CONFIG.personal.rows.push({ type: 'group', label: label.replace(/===/g, '').trim() });
-          } else {
-            const values = {};
-            BENEFITS_CONFIG.personal.tiers.forEach((tier, idx) => {
-              let val = row[idx + 1];
-              if (val === '支持') val = true;
-              if (val === '不支持') val = false;
-              values[tier.key] = val;
-            });
-            const rowType = label.includes('价格') ? 'price' : 'data';
-            BENEFITS_CONFIG.personal.rows.push({ type: rowType, label: label, values: values });
-          }
-        }
-      }
-    }
-    const addonSheet = workbook.Sheets['增量包'];
-    if (addonSheet) {
-      const addonData = XLSX.utils.sheet_to_json(addonSheet, { header: 1 });
-      BENEFITS_CONFIG.addon.packages = [];
-      for (let i = 1; i < addonData.length; i++) {
-        const row = addonData[i];
-        if (!row[0] || row[0].includes('说明')) break;
-        BENEFITS_CONFIG.addon.packages.push({
-          key: 'pkg' + i, name: row[0], icon: row[1] || '📦', class: row[0].includes('个人') ? 'personal' : '',
-          items: [
-            { label: '价格', value: row[2] || '待定' },
-            { label: row[0].includes('学校') ? '学校累计 Token' : 'Token/人', value: row[3] || '-', highlight: true }
-          ]
-        });
-      }
-      for (let i = 0; i < addonData.length; i++) {
-        if (addonData[i][0] && addonData[i][0].includes('💡')) {
-          BENEFITS_CONFIG.addon.note = addonData[i][0];
-          break;
-        }
-      }
-    }
-    saveConfigToLocal();
-    return true;
-  } catch (error) {
-    console.error('解析 Excel 失败:', error);
-    return false;
-  }
-}
-
-document.getElementById('excel-upload').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const statusEl = document.getElementById('upload-status');
-  statusEl.textContent = '正在读取...';
-  statusEl.style.color = 'rgba(255,255,255,0.9)';
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    try {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      if (parseExcelData(workbook)) {
-        renderCorporateTable();
-        renderPersonalTable();
-        renderAddonPackages();
-        statusEl.textContent = '✅ 已保存，刷新后仍然生效';
-        setTimeout(() => { statusEl.textContent = ''; }, 3000);
-      } else {
-        statusEl.textContent = '❌ 解析失败';
-      }
-    } catch (error) {
-      console.error('读取 Excel 失败:', error);
-      statusEl.textContent = '❌ 读取失败';
-    }
-  };
-  reader.readAsArrayBuffer(file);
-});
-
-document.getElementById('reset-config').addEventListener('click', () => {
-  if (confirm('确定要恢复默认配置吗？这将清除所有自定义数据。')) {
-    clearLocalConfig();
-    location.reload();
-  }
-});
+// =============================================
+// 初始化
+// =============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 先尝试从本地存储加载配置
-  const hasLocalConfig = loadConfigFromLocal();
-
   renderCorporateTable();
   renderPersonalTable();
   renderAddonPackages();
-
-  // 如果有本地配置，显示提示
-  if (hasLocalConfig) {
-    const statusEl = document.getElementById('upload-status');
-    statusEl.textContent = '✨ 已加载自定义配置';
-    statusEl.style.color = 'rgba(255,255,255,0.9)';
-    setTimeout(() => { statusEl.textContent = ''; }, 3000);
-  }
 });
+
+// =============================================
+// Tab 切换
+// =============================================
 
 document.querySelectorAll('.intro-tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -694,6 +626,7 @@ document.querySelectorAll('.intro-tab').forEach(t => {
   });
 });
 
+// 支持锚点直达指定 Tab
 window.addEventListener('load', () => {
   const hash = location.hash.replace('#','');
   if(hash){
