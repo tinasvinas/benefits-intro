@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.model-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.model-card:hover{border-color:#bfdbfe;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.model-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0;font-weight:700}
+.model-info{flex:1}
+.model-name{font-size:14px;font-weight:600;color:var(--primary)}
+.model-meta{font-size:11px;color:var(--text-mute);margin-top:3px;display:flex;gap:10px}
+.model-stats{text-align:right}
+.model-stats .v{font-size:18px;font-weight:700;color:var(--accent)}
+.model-stats .l{font-size:11px;color:var(--text-mute);margin-top:2px}
+
+.fail-rate{display:inline-flex;align-items:center;gap:4px}
+.fail-rate.high{color:var(--danger)}
+.fail-rate.mid{color:var(--warning)}
+.fail-rate.low{color:var(--success)}
+
+.chart-mock{display:flex;align-items:flex-end;gap:6px;height:120px;padding:10px 0}
+.chart-bar{flex:1;background:linear-gradient(180deg,#60a5fa,#2563eb);border-radius:3px 3px 0 0;position:relative;min-height:8px}
+.chart-bar:hover{background:linear-gradient(180deg,#1e40af,#1e3a8a)}
+.chart-bar::after{content:attr(data-v);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:#475569;font-weight:600}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="tabs">
+      <span class="tab active" data-pane="list">模型列表</span>
+      <span class="tab" data-pane="monitor">模型监控</span>
+    </div>
+
+    <!-- 模型列表 -->
+    <div class="pane" id="pane-list">
+      <div class="filter-bar">
+        <div class="filter-item"><label>模型</label><input class="form-control" placeholder="模型名称模糊搜索"></div>
+        <div class="filter-item"><label>来源标签</label>
+          <select class="form-control"><option>全部</option><option>系统</option><option>学校</option><option>空间</option></select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-primary">+ 添加模型供应商</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">系统/学校 已注册模型</div>
+            <div class="card-sub">学校管理员可为学校添加模型，全校用户可用</div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-icon" style="background:linear-gradient(135deg,#2563eb,#1e3a8a)">SF</div>
+          <div class="model-info">
+            <div class="model-name">讯飞星火 V4.0 <span class="badge badge-blue" style="margin-left:6px">系统</span></div>
+            <div class="model-meta">
+              <span>类型：文本大模型</span>
+              <span>·</span>
+              <span>更新时间：2026-04-15</span>
+              <span>·</span>
+              <span>状态：✅ 已授权</span>
+            </div>
+          </div>
+          <div class="model-stats">
+            <div class="v">2,856 万</div>
+            <div class="l">累计调用 Token</div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-icon" style="background:linear-gradient(135deg,#10b981,#06b6d4)">QW</div>
+          <div class="model-info">
+            <div class="model-name">qwq-32b · 视觉 <span class="badge badge-blue" style="margin-left:6px">系统</span> <span class="badge badge-purple" style="margin-left:4px">视觉</span></div>
+            <div class="model-meta">
+              <span>类型：视觉大模型</span>
+              <span>·</span>
+              <span>更新时间：2026-05-01</span>
+              <span>·</span>
+              <span>状态：✅ 已授权</span>
+            </div>
+          </div>
+          <div class="model-stats">
+            <div class="v">128 万</div>
+            <div class="l">累计调用 Token</div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316)">DS</div>
+          <div class="model-info">
+            <div class="model-name">DeepSeek-V3 <span class="badge badge-orange" style="margin-left:6px">学校</span></div>
+            <div class="model-meta">
+              <span>类型：文本大模型 · 长文本</span>
+              <span>·</span>
+              <span>更新时间：2026-05-10</span>
+              <span>·</span>
+              <span>状态：✅ 已授权</span>
+            </div>
+          </div>
+          <div class="model-stats">
+            <div class="v">486 万</div>
+            <div class="l">累计调用 Token</div>
+            <div style="margin-top:6px"><button class="btn btn-sm btn-link">设置</button></div>
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-icon" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">GLM</div>
+          <div class="model-info">
+            <div class="model-name">GLM-4 <span class="badge badge-orange" style="margin-left:6px">学校</span></div>
+            <div class="model-meta">
+              <span>类型：文本大模型</span>
+              <span>·</span>
+              <span>更新时间：2026-05-12</span>
+              <span>·</span>
+              <span>状态：⚠️ 授权失败</span>
+            </div>
+          </div>
+          <div class="model-stats">
+            <div style="margin-top:6px"><button class="btn btn-sm btn-outline">重新授权</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模型监控 -->
+    <div class="pane" id="pane-monitor" style="display:none">
+      <div class="filter-bar">
+        <div class="filter-item"><label>模型</label>
+          <select class="form-control"><option>全部</option><option>讯飞星火 V4.0</option><option>qwq-32b</option><option>DeepSeek-V3</option></select>
+        </div>
+        <div class="filter-item"><label>日期</label>
+          <select class="form-control"><option>近 7 天</option><option>当日</option><option>近 30 天</option><option>全部</option></select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-primary">查询</button>
+        </div>
+      </div>
+
+      <div class="stats-row stats-5">
+        <div class="stat-card"><div class="lbl">调用次数</div><div class="val">128,456</div><div class="trend trend-up">↑ 12.3%</div></div>
+        <div class="stat-card"><div class="lbl">失败次数</div><div class="val">1,256</div><div class="trend trend-up">↑ 3.2%</div></div>
+        <div class="stat-card"><div class="lbl">失败率</div><div class="val"><span class="fail-rate low">0.98%</span></div></div>
+        <div class="stat-card"><div class="lbl">调用量（Token）</div><div class="val">3,470 万</div></div>
+        <div class="stat-card"><div class="lbl">平均调用时长</div><div class="val">1.22 s</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">每日调用趋势</div>
+          <select class="form-control" style="width:160px;font-size:12px"><option>调用次数</option><option>失败次数</option></select>
+        </div>
+        <div class="chart-mock">
+          <div class="chart-bar" style="height:60%" data-v="11.2k"></div>
+          <div class="chart-bar" style="height:75%" data-v="14.8k"></div>
+          <div class="chart-bar" style="height:55%" data-v="10.1k"></div>
+          <div class="chart-bar" style="height:80%" data-v="15.6k"></div>
+          <div class="chart-bar" style="height:90%" data-v="18.4k"></div>
+          <div class="chart-bar" style="height:70%" data-v="13.2k"></div>
+          <div class="chart-bar" style="height:95%" data-v="19.6k"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">模型详情统计</div>
+            <div class="card-sub">按模型 + 学校分组，支持指标排序</div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>模型</th><th>调用次数 ↓</th><th>失败次数</th><th>失败率</th><th>调用量（Token）</th><th>平均调用时长</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>讯飞星火 V4.0</b> <span class="badge badge-blue">系统</span></td><td>86,420</td><td>620</td><td><span class="fail-rate low">0.72%</span></td><td>2,180 万</td><td>1.18 s</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-monitor')">监控详情</button> <button class="btn btn-sm btn-link">日志</button></td></tr>
+              <tr><td><b>DeepSeek-V3</b> <span class="badge badge-orange">学校</span></td><td>28,650</td><td>420</td><td><span class="fail-rate mid">1.47%</span></td><td>986 万</td><td>1.36 s</td><td><button class="btn btn-sm btn-link">监控详情</button> <button class="btn btn-sm btn-link">日志</button></td></tr>
+              <tr><td><b>qwq-32b</b> <span class="badge badge-blue">系统</span> <span class="badge badge-purple">视觉</span></td><td>13,386</td><td>216</td><td><span class="fail-rate mid">1.61%</span></td><td>304 万</td><td>2.84 s</td><td><button class="btn btn-sm btn-link">监控详情</button> <button class="btn btn-sm btn-link">日志</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 监控详情 -->
+<div class="modal-overlay" id="m-monitor">
+  <div class="modal xl">
+    <div class="modal-header">
+      <h3>监控详情 · 讯飞星火 V4.0</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="filter-bar" style="margin-bottom:14px;padding:10px 12px">
+        <div class="filter-item"><label>模型</label><select class="form-control"><option>讯飞星火 V4.0</option></select></div>
+        <div class="filter-item"><label>时间</label><input class="form-control" value="2026-05-14 ~ 2026-05-20"></div>
+        <div class="filter-actions">
+          <button class="btn btn-sm btn-outline">📤 导出</button>
+        </div>
+      </div>
+      <div class="form-hint mb-12">维度：日 + 学校 + 模型 + 场景</div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>日期</th><th>调用次数</th><th>失败次数</th><th>失败率</th><th>调用量</th><th>平均调用时长</th></tr></thead>
+          <tbody>
+            <tr><td>2026-05-20</td><td>15,260</td><td>108</td><td><span class="fail-rate low">0.71%</span></td><td>3.86 万</td><td>1.18 s</td></tr>
+            <tr><td>2026-05-19</td><td>13,840</td><td>92</td><td><span class="fail-rate low">0.66%</span></td><td>3.52 万</td><td>1.21 s</td></tr>
+            <tr><td>2026-05-18</td><td>12,420</td><td>86</td><td><span class="fail-rate low">0.69%</span></td><td>3.18 万</td><td>1.15 s</td></tr>
+            <tr><td>2026-05-17</td><td>11,860</td><td>78</td><td><span class="fail-rate low">0.66%</span></td><td>3.02 万</td><td>1.14 s</td></tr>
+            <tr><td>2026-05-16</td><td>13,260</td><td>104</td><td><span class="fail-rate low">0.78%</span></td><td>3.42 万</td><td>1.22 s</td></tr>
+            <tr><td>2026-05-15</td><td>10,680</td><td>72</td><td><span class="fail-rate low">0.67%</span></td><td>2.78 万</td><td>1.16 s</td></tr>
+            <tr><td>2026-05-14</td><td>9,100</td><td>80</td><td><span class="fail-rate mid">0.88%</span></td><td>2.36 万</td><td>1.19 s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'model', title:'模型管理', breadcrumb:['系统管理','模型管理'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+document.querySelectorAll('.tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-list').style.display = (t.dataset.pane === 'list' ? '' : 'none');
+    document.getElementById('pane-monitor').style.display = (t.dataset.pane === 'monitor' ? '' : 'none');
+  });
+});
+</script>
+</body>
+</html>

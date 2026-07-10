@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>未入班 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.unjoined-alert{background:linear-gradient(90deg,#fef9c3,#fef3c7);border-left:4px solid #f59e0b;padding:14px 18px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.unjoined-alert .ico{font-size:28px}
+.unjoined-alert .info{flex:1}
+.unjoined-alert .info .t{font-size:14px;font-weight:700;color:#92400e}
+.unjoined-alert .info .s{font-size:12px;color:#78350f;margin-top:3px}
+
+.batch-toolbar{background:#fff;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:none;align-items:center;gap:12px;border:1px solid #bfdbfe;background:#eff6ff}
+.batch-toolbar.open{display:flex}
+.batch-toolbar .count{font-size:13px;color:#1d4ed8;font-weight:600}
+
+.assign-modal-list{max-height:280px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:6px}
+.assign-class-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px}
+.assign-class-item:hover{background:#f8fafc}
+.assign-class-item.selected{background:#eff6ff;border-left:3px solid var(--accent);padding-left:9px}
+.assign-class-item .info{flex:1}
+.assign-class-item .info .nm{font-weight:600;color:var(--primary)}
+.assign-class-item .info .meta{font-size:11px;color:var(--text-mute);margin-top:2px}
+.assign-class-item .cap{font-size:11px;color:#475569}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="unjoined-alert">
+      <span class="ico">⚠️</span>
+      <div class="info">
+        <div class="t">本学期发现 18 名未入班学生</div>
+        <div class="s">这些学生已注册账户但尚未加入任何班级。请尽快分配到对应班级，否则他们无法使用智能体辅导功能。</div>
+      </div>
+      <button class="btn btn-warning">📊 查看本学期所有未入班</button>
+    </div>
+
+    <div class="stats-row stats-4">
+      <div class="stat-card accent">
+        <div class="lbl">📊 当前未入班</div>
+        <div class="val">18</div>
+        <div class="trend">较上周 ↑ 3 人</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">已发提醒短信</div>
+        <div class="val">12</div>
+        <div class="trend trend-up">回应率 67%</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">大一新生</div>
+        <div class="val">8</div>
+        <div class="trend">占比 44%</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">已分配处理中</div>
+        <div class="val">6</div>
+        <div class="trend trend-up">本周已处理 4</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item"><label>姓名/学号</label><input class="form-control" placeholder="模糊搜索"></div>
+      <div class="filter-item"><label>学院</label>
+        <select class="form-control"><option>全部</option><option>计算机学院</option><option>软件学院</option><option>电信学院</option></select>
+      </div>
+      <div class="filter-item"><label>专业</label>
+        <select class="form-control"><option>全部</option><option>软件工程</option><option>计算机科学</option></select>
+      </div>
+      <div class="filter-item"><label>年级</label>
+        <select class="form-control"><option>全部</option><option>大一</option><option>大二</option><option>大三</option><option>大四</option></select>
+      </div>
+      <div class="filter-item"><label>提醒状态</label>
+        <select class="form-control"><option>全部</option><option>未发送</option><option>已发送</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-outline">重置</button>
+        <button class="btn btn-primary">查询</button>
+      </div>
+    </div>
+
+    <div class="batch-toolbar" id="batch-bar">
+      <span class="count">✓ 已选中 <b id="batch-count">0</b> 名学生</span>
+      <button class="btn btn-sm btn-primary" onclick="openModal('m-assign')">📋 批量分配到班级</button>
+      <button class="btn btn-sm btn-outline" onclick="toast('已发送提醒短信给 12 人','success')">📨 发送提醒</button>
+      <button class="btn btn-sm btn-outline" onclick="toast('已导出 unjoined-students.xlsx','info')">📤 导出</button>
+      <button class="btn btn-sm btn-ghost" onclick="closeBatch()" style="margin-left:auto">取消</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">未入班学生列表</div>
+          <div class="card-sub">勾选学生后批量操作；点击姓名查看个人信息</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th width="40"><input type="checkbox" id="check-all"></th>
+              <th>学号</th>
+              <th>姓名</th>
+              <th>学院 / 专业 / 年级</th>
+              <th>注册时间</th>
+              <th>账户状态</th>
+              <th>提醒状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-12 flex-between" style="font-size:12px;color:var(--text-sub)">
+        <span>共 18 名未入班学生</span>
+        <div class="flex gap-4">
+          <span class="btn btn-sm btn-primary">1</span>
+          <span class="btn btn-sm btn-outline">2</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 批量分配弹窗 -->
+<div class="modal-overlay" id="m-assign">
+  <div class="modal">
+    <div class="modal-header"><h3>分配到班级</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div style="background:#eff6ff;padding:10px 14px;border-radius:6px;font-size:12px;color:#1e40af;margin-bottom:14px">
+        💡 已选 <b id="assign-count">0</b> 名学生，请选择目标班级（仅显示我的有效班级）
+      </div>
+      <div class="filter-bar" style="padding:8px 12px;margin-bottom:10px">
+        <div class="filter-item" style="flex:1"><input class="form-control" placeholder="搜索班级名称"></div>
+        <div class="filter-item"><select class="form-control"><option>2025-2026 第二学期</option></select></div>
+      </div>
+      <div class="assign-modal-list">
+        <div class="assign-class-item selected"><input type="radio" name="cls" checked><div class="info"><div class="nm">C 语言程序设计 · 1 班</div><div class="meta">王老师 · 班级码 A1B2 · 已开课</div></div><span class="cap">42 / 50</span></div>
+        <div class="assign-class-item"><input type="radio" name="cls"><div class="info"><div class="nm">数据结构 · A 班</div><div class="meta">李老师 · 班级码 D5E7 · 已开课</div></div><span class="cap">38 / 40</span></div>
+        <div class="assign-class-item"><input type="radio" name="cls"><div class="info"><div class="nm">Python 程序设计 · 2 班</div><div class="meta">赵老师 · 未开课</div></div><span class="cap">0 / 60</span></div>
+        <div class="assign-class-item"><input type="radio" name="cls"><div class="info"><div class="nm">软件工程 · 实训班</div><div class="meta">张老师 · 班级码 P9Q4 · 已开课</div></div><span class="cap">52 / 60</span></div>
+      </div>
+
+      <div style="margin-top:14px;background:#fef9c3;padding:10px 12px;border-radius:6px;font-size:11px;color:#78350f;border-left:3px solid #f59e0b">
+        ⚠️ 分配后系统将自动给学生发送通知，学生可在「实训课程」页面看到新加入的班级
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-assign');toast('已分配 3 名学生到「C 语言程序设计 · 1 班」','success')">✓ 确认分配</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'unjoined', title:'未入班', breadcrumb:['教学管理','未入班'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+const STUDENTS = [
+  { id:'2025010001', name:'李一', college:'计算机学院', major:'软件工程', grade:'大一', regAt:'2026-02-22', status:'normal', notify:'sent' },
+  { id:'2025010002', name:'王二', college:'计算机学院', major:'计算机科学', grade:'大一', regAt:'2026-02-22', status:'normal', notify:'sent' },
+  { id:'2025010003', name:'张三', college:'软件学院', major:'数据科学', grade:'大一', regAt:'2026-02-25', status:'normal', notify:'pending' },
+  { id:'2025010004', name:'赵四', college:'计算机学院', major:'人工智能', grade:'大一', regAt:'2026-02-26', status:'normal', notify:'sent' },
+  { id:'2024020005', name:'钱五', college:'软件学院', major:'软件工程', grade:'大二', regAt:'2024-09-01', status:'normal', notify:'sent' },
+  { id:'2024020006', name:'孙六', college:'计算机学院', major:'软件工程', grade:'大二', regAt:'2024-09-01', status:'normal', notify:'pending' },
+  { id:'2024020007', name:'周七', college:'电信学院', major:'通信工程', grade:'大二', regAt:'2024-09-01', status:'frozen', notify:'failed' },
+  { id:'2024020008', name:'吴八', college:'计算机学院', major:'计算机科学', grade:'大二', regAt:'2024-09-01', status:'normal', notify:'sent' },
+];
+
+const NOTIFY_MAP = {
+  sent:    '<span class="badge badge-green">✓ 已发送</span>',
+  pending: '<span class="badge badge-gray">未发送</span>',
+  failed:  '<span class="badge badge-red">✗ 发送失败</span>'
+};
+const STATUS_MAP = {
+  normal: '<span class="badge badge-green">正常</span>',
+  frozen: '<span class="badge badge-red">冻结</span>',
+};
+
+document.getElementById('tbody').innerHTML = STUDENTS.map(s => `
+  <tr>
+    <td><input type="checkbox" class="row-check"></td>
+    <td>${s.id}</td>
+    <td><a class="btn-link" onclick="toast('打开 ${s.name} 个人详情','info')">${s.name}</a></td>
+    <td>${s.college} / ${s.major} / ${s.grade}</td>
+    <td>${s.regAt}</td>
+    <td>${STATUS_MAP[s.status]}</td>
+    <td>${NOTIFY_MAP[s.notify]}</td>
+    <td>
+      <button class="btn btn-sm btn-link" onclick="document.querySelectorAll('.row-check').forEach(c=>c.checked=false);this.closest('tr').querySelector('.row-check').checked=true;updateBatchCount();openModal('m-assign')">分配班级</button>
+      <button class="btn btn-sm btn-link" onclick="toast('已发送提醒短信','success')">发送提醒</button>
+    </td>
+  </tr>
+`).join('');
+
+// 批量
+function updateBatchCount(){
+  const n = document.querySelectorAll('.row-check:checked').length;
+  document.getElementById('batch-count').textContent = n;
+  document.getElementById('assign-count').textContent = n;
+  document.getElementById('batch-bar').classList.toggle('open', n > 0);
+}
+function closeBatch(){
+  document.querySelectorAll('.row-check').forEach(c => c.checked = false);
+  document.getElementById('check-all').checked = false;
+  updateBatchCount();
+}
+document.querySelectorAll('.row-check').forEach(c => c.addEventListener('change', updateBatchCount));
+document.getElementById('check-all').addEventListener('change', e => {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = e.target.checked);
+  updateBatchCount();
+});
+
+// 班级选择
+document.querySelectorAll('.assign-class-item').forEach(it => {
+  it.addEventListener('click', () => {
+    document.querySelectorAll('.assign-class-item').forEach(x => x.classList.remove('selected'));
+    it.classList.add('selected');
+    it.querySelector('input').checked = true;
+  });
+});
+</script>
+</body>
+</html>

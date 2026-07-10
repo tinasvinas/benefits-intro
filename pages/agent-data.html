@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+/* 数据库列表 */
+.db-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.db-card{background:#fff;border-radius:12px;padding:18px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s}
+.db-card:hover{border-color:#bfdbfe;box-shadow:0 4px 16px rgba(37,99,235,.08);transform:translateY(-1px)}
+.db-card .db-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.db-card .db-name{font-size:14px;font-weight:600;color:var(--primary)}
+.db-card .db-desc{font-size:11px;color:var(--text-mute);margin-top:4px;min-height:30px}
+.db-card .db-meta{display:flex;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;font-size:11px;color:#64748b}
+
+/* 数据表列表 */
+.table-row{display:grid;grid-template-columns:40px 1fr 100px 100px 140px 120px;gap:12px;padding:12px 16px;border:1px solid #f1f5f9;border-radius:8px;margin-bottom:6px;align-items:center;cursor:pointer;transition:all .15s}
+.table-row:hover{border-color:#bfdbfe;background:#f8fafc}
+.table-icon{width:34px;height:34px;border-radius:8px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+/* 步骤条 */
+.steps-bar{display:flex;align-items:center;gap:0;margin-bottom:24px;padding:16px 20px;background:#f8fafc;border-radius:10px}
+.step-item{display:flex;align-items:center;gap:8px;flex:1}
+.step-item .step-num{width:28px;height:28px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step-item .step-label{font-size:12px;color:#94a3b8;font-weight:500}
+.step-item.active .step-num{background:var(--accent);color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.step-item.active .step-label{color:var(--primary);font-weight:600}
+.step-item.done .step-num{background:#10b981;color:#fff}
+.step-item.done .step-label{color:#10b981}
+.step-line{flex:0 0 40px;height:2px;background:#e2e8f0}
+.step-item.done+.step-line{background:#10b981}
+
+/* 字段设置表格 */
+.field-table{width:100%;border-collapse:collapse;font-size:12px}
+.field-table th{background:#f8fafc;padding:10px 12px;text-align:left;font-weight:600;color:var(--primary);border-bottom:2px solid #e2e8f0}
+.field-table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.field-table tr:hover{background:#fafbfc}
+.field-type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.type-text{background:#eff6ff;color:#2563eb}
+.type-integer{background:#f0fdf4;color:#16a34a}
+.type-float{background:#ecfdf5;color:#059669}
+.type-datetime{background:#fef3c7;color:#d97706}
+.type-boolean{background:#fae8ff;color:#a855f7}
+
+/* 预览表格 */
+.preview-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.preview-table th{background:#f1f5f9;padding:8px 12px;font-weight:600;color:var(--primary);text-align:left}
+.preview-table td{padding:8px 12px;border-top:1px solid #f1f5f9}
+.preview-table tr:nth-child(even){background:#fafbfc}
+
+/* 处理结果 */
+.result-card{padding:20px;border-radius:10px;text-align:center}
+.result-success{background:#f0fdf4;border:1px solid #bbf7d0}
+.result-partial{background:#fefce8;border:1px solid #fef08a}
+.result-icon{font-size:48px;margin-bottom:12px}
+.result-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.result-desc{font-size:12px;color:#64748b}
+
+/* 视图切换 */
+.view-panel{display:none}
+.view-panel.active{display:block}
+
+/* 上传区域 */
+.upload-zone{border:2px dashed #cbd5e1;border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover{border-color:#3b82f6;background:#eff6ff}
+.upload-zone .ico{font-size:36px;margin-bottom:10px}
+.upload-zone .title{font-size:14px;font-weight:600;color:var(--primary)}
+.upload-zone .hint{font-size:11px;color:var(--text-mute);margin-top:6px}
+
+/* 导入记录 */
+.import-record{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;margin-top:8px}
+.import-record .status-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+.import-record .info{flex:1;font-size:12px}
+.import-record .info .title{font-weight:600;color:var(--primary)}
+.import-record .info .meta{color:var(--text-mute);margin-top:2px}
+
+/* 数据集目标选择器（测试数据 / 线上数据） */
+.dataset-select{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.dataset-opt{border:1.5px solid #e2e8f0;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:10px;background:#fff}
+.dataset-opt:hover{border-color:#bfdbfe}
+.dataset-opt .ds-radio{width:18px;height:18px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;margin-top:2px;position:relative;transition:all .15s}
+.dataset-opt .ds-body .ds-title{font-size:13px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:6px}
+.dataset-opt .ds-body .ds-desc{font-size:11px;color:var(--text-mute);margin-top:3px;line-height:1.5}
+.dataset-opt.sel[data-target="test"]{border-color:#3b82f6;background:#eff6ff}
+.dataset-opt.sel[data-target="test"] .ds-radio{border-color:#3b82f6;background:#3b82f6;box-shadow:inset 0 0 0 3px #fff}
+.dataset-opt.sel[data-target="online"]{border-color:#f59e0b;background:#fffbeb}
+.dataset-opt.sel[data-target="online"] .ds-radio{border-color:#f59e0b;background:#f59e0b;box-shadow:inset 0 0 0 3px #fff}
+.ds-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.ds-tag-test{background:#dbeafe;color:#2563eb}
+.ds-tag-online{background:#fef3c7;color:#d97706}
+
+/* 导入模式选择 */
+.mode-select{display:flex;gap:10px}
+.mode-opt{flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:12px;transition:all .15s}
+.mode-opt:hover{border-color:#bfdbfe}
+.mode-opt.sel{border-color:#3b82f6;background:#eff6ff}
+.mode-opt .mode-title{font-weight:600;color:var(--primary)}
+.mode-opt .mode-risk{font-size:10px;margin-top:2px}
+.mode-opt .mode-risk.low{color:#16a34a}
+.mode-opt .mode-risk.high{color:#dc2626}
+
+/* 线上数据警示条 */
+.online-warn{background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:6px;font-size:12px;color:#92400e;margin-top:12px;display:flex;gap:8px;align-items:flex-start}
+
+/* 详情页数据集切换 tab */
+.ds-tabs{display:inline-flex;background:#f1f5f9;border-radius:8px;padding:3px;gap:2px}
+.ds-tab{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border:none;background:transparent;transition:all .15s}
+.ds-tab.active{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ds-tab.active[data-target="online"]{color:#d97706}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- 视图1: 数据库列表 -->
+    <div class="view-panel active" id="view-db-list">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">数据库管理</div>
+            <div class="card-sub">管理智能体使用的数据库和数据表</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-create-db')">+ 新建数据库</button>
+        </div>
+        <div class="db-grid" id="db-grid"></div>
+      </div>
+    </div>
+
+    <!-- 视图2: 数据表列表 -->
+    <div class="view-panel" id="view-table-list">
+      <div style="margin-bottom:14px">
+        <a href="javascript:void(0)" onclick="switchView('view-db-list')" style="font-size:12px;color:var(--accent);text-decoration:none">&larr; 返回数据库列表</a>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="current-db-title">教学数据库</div>
+            <div class="card-sub" id="current-db-desc">存储课程相关的学生学习数据</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" onclick="startImportTable()">📥 导入数据表</button>
+            <button class="btn btn-primary" onclick="openModal('modal-create-table')">+ 新建数据表</button>
+          </div>
+        </div>
+        <div id="table-list"></div>
+      </div>
+    </div>
+
+    <!-- 视图3: 数据表详情(含批量导入/导出) -->
+    <div class="view-panel" id="view-table-detail">
+      <div style="margin-bottom:14px">
+        <a href="javascript:void(0)" onclick="switchView('view-table-list')" style="font-size:12px;color:var(--accent);text-decoration:none">&larr; 返回数据表列表</a>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="detail-table-title">学生成绩表</div>
+            <div class="card-sub" id="detail-table-sub">共 128 条记录 · 6 个字段</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" onclick="startBatchImport()">📥 批量导入</button>
+            <button class="btn btn-outline" onclick="startExport()">📤 导出数据</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:4px 0 14px">
+          <span style="font-size:12px;color:#64748b">数据集：</span>
+          <div class="ds-tabs">
+            <button class="ds-tab active" data-target="test" onclick="switchDetailDataset('test')">🧪 测试数据</button>
+            <button class="ds-tab" data-target="online" onclick="switchDetailDataset('online')">🌐 线上数据</button>
+          </div>
+          <span id="detail-ds-hint" style="font-size:11px;color:var(--text-mute)"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="preview-table" id="detail-data-table">
+            <thead><tr><th>student_id</th><th>name</th><th>score</th><th>grade</th><th>submit_time</th><th>passed</th></tr></thead>
+            <tbody id="detail-data-body"></tbody>
+          </table>
+        </div>
+        <div id="import-records" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- 视图4: 导入数据表流程(CSV) -->
+    <div class="view-panel" id="view-import-table">
+      <div style="margin-bottom:14px">
+        <a href="javascript:void(0)" onclick="switchView('view-table-list')" style="font-size:12px;color:var(--accent);text-decoration:none">&larr; 返回数据表列表</a>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">导入数据表</div><div class="card-sub">通过上传CSV文件创建数据表并导入数据</div></div></div>
+        <div class="steps-bar" id="import-steps"></div>
+        <div id="import-step-content"></div>
+      </div>
+    </div>
+
+    <!-- 视图5: 批量导入流程 -->
+    <div class="view-panel" id="view-batch-import">
+      <div style="margin-bottom:14px">
+        <a href="javascript:void(0)" onclick="switchView('view-table-detail')" style="font-size:12px;color:var(--accent);text-decoration:none">&larr; 返回数据表</a>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">批量导入表数据</div><div class="card-sub">下载模板 → 上传文件 → 预览 → 处理入库</div></div></div>
+        <div class="steps-bar" id="batch-steps"></div>
+        <div id="batch-step-content"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 新建数据库弹窗 -->
+<div class="modal-overlay" id="modal-create-db">
+  <div class="modal" style="width:480px">
+    <div class="modal-head"><h3>新建数据库</h3><button class="modal-close" data-close-modal>&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label><span class="req">*</span> 数据库名称</label><input class="form-control" id="input-db-name" placeholder="不超过100个字符" maxlength="100"></div>
+      <div class="form-group"><label>数据库描述</label><textarea class="form-control" id="input-db-desc" placeholder="选填，描述该数据库的用途"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="createDatabase()">确认创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新建数据表弹窗 -->
+<div class="modal-overlay" id="modal-create-table">
+  <div class="modal" style="width:480px">
+    <div class="modal-head"><h3>新建数据表</h3><button class="modal-close" data-close-modal>&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label><span class="req">*</span> 数据表名称</label><input class="form-control" id="input-table-name" placeholder="如：学生成绩表"></div>
+      <div class="form-group"><label>表描述</label><textarea class="form-control" id="input-table-desc" placeholder="选填"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="createTable()">确认创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- 线上覆盖导入强确认弹窗 -->
+<div class="modal-overlay" id="modal-strong-confirm">
+  <div class="modal" style="width:460px">
+    <div class="modal-head"><h3 style="color:#dc2626">⚠️ 高风险操作确认</h3><button class="modal-close" data-close-modal>&times;</button></div>
+    <div class="modal-body">
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;font-size:12px;color:#7f1d1d;line-height:1.7">
+        您即将以<b>覆盖模式</b>向<b>线上数据</b>导入，该操作将<b>清空线上数据集的全部现有数据</b>后再写入，且影响正式生产环境。此操作不可撤销，并将记录审计日志。
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--primary);cursor:pointer">
+        <input type="checkbox" id="strong-confirm-check" onchange="document.getElementById('btn-strong-confirm').disabled=!this.checked">
+        我已了解风险，确认清空并覆盖线上数据
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal>取消</button>
+      <button class="btn btn-primary" id="btn-strong-confirm" style="background:#dc2626;border-color:#dc2626" disabled onclick="doStrongConfirm()">确认覆盖导入</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'agent-dev-db', title:'数据管理', breadcrumb:['智能体','智能体开发','数据库'], breadcrumbLinks:['index.html','',''] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// ========== 演示数据 ==========
+const DATABASES = [
+  { id:1, name:'教学数据库', desc:'存储课程相关的学生学习数据', tables:3, records:486, updated:'2026-05-20' },
+  { id:2, name:'实训项目库', desc:'实训课程的项目数据和提交记录', tables:5, records:1280, updated:'2026-05-18' },
+  { id:3, name:'知识图谱数据', desc:'课程知识点关联关系', tables:2, records:320, updated:'2026-05-10' },
+];
+
+const TABLES_DATA = {
+  1: [
+    { name:'学生成绩表', fields:6, records:128, updated:'2026-05-20' },
+    { name:'课程进度表', fields:8, records:256, updated:'2026-05-18' },
+    { name:'答疑记录表', fields:5, records:102, updated:'2026-05-15' },
+  ],
+  2: [
+    { name:'项目提交记录', fields:7, records:680, updated:'2026-05-18' },
+    { name:'代码评审结果', fields:9, records:420, updated:'2026-05-16' },
+  ]
+};
+
+const SAMPLE_DETAIL = {
+  test: [
+    ['2024001','张三','92','A','2026-05-12','true'],
+    ['2024002','李四','78','B','2026-05-12','true'],
+    ['2024003','王五','55','D','2026-05-13','false'],
+  ],
+  online: [
+    ['2024001','张三','90','A','2026-05-19','true'],
+    ['2024002','李四','81','B','2026-05-19','true'],
+    ['2024003','王五','60','C','2026-05-20','true'],
+    ['2024004','赵六','88','B','2026-05-20','true'],
+    ['2024005','钱七','95','A','2026-05-21','true'],
+  ],
+};
+
+const DATASET_META = {
+  test:   { label:'测试数据', icon:'🧪', tag:'ds-tag-test',   desc:'用于开发、调试、验证，数据与线上隔离，互不影响' },
+  online: { label:'线上数据', icon:'🌐', tag:'ds-tag-online', desc:'正式生产环境使用，导入需谨慎，操作将记录审计日志' },
+};
+
+let currentDbId = null;
+let detailDataset = 'test';   // 详情页当前查看的数据集
+
+// 渲染「导入目标」选择控件（默认测试数据）
+function renderDatasetSelector(idPrefix){
+  return `
+    <div class="form-group">
+      <label><span class="req">*</span> 导入目标数据集</label>
+      <div class="dataset-select" id="${idPrefix}-ds-select">
+        ${['test','online'].map(t=>{
+          const m = DATASET_META[t];
+          return `<div class="dataset-opt ${t==='test'?'sel':''}" data-target="${t}" onclick="selectDataset('${idPrefix}','${t}')">
+            <div class="ds-radio"></div>
+            <div class="ds-body">
+              <div class="ds-title">${m.icon} ${m.label} <span class="ds-tag ${m.tag}">${t==='test'?'默认':'高风险'}</span></div>
+              <div class="ds-desc">${m.desc}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div id="${idPrefix}-online-warn"></div>
+    </div>`;
+}
+
+function selectDataset(idPrefix, target){
+  importTarget[idPrefix] = target;
+  document.querySelectorAll(`#${idPrefix}-ds-select .dataset-opt`).forEach(el=>{
+    el.classList.toggle('sel', el.dataset.target===target);
+  });
+  const warn = document.getElementById(`${idPrefix}-online-warn`);
+  if(target==='online'){
+    warn.innerHTML = `<div class="online-warn"><span>⚠️</span><span>您正在向<b>线上数据</b>导入，该操作将影响正式生产环境并记录审计日志，请确认数据无误。</span></div>`;
+  } else {
+    warn.innerHTML = '';
+  }
+}
+
+// 各导入流程当前选中的目标数据集
+const importTarget = { import:'test', batch:'test' };
+
+// ========== 视图切换 ==========
+function switchView(viewId){
+  document.querySelectorAll('.view-panel').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+}
+
+// ========== 数据库列表 ==========
+function renderDbGrid(){
+  const grid = document.getElementById('db-grid');
+  grid.innerHTML = DATABASES.map(db=>`
+    <div class="db-card" onclick="enterDatabase(${db.id})">
+      <div class="db-icon">🗄️</div>
+      <div class="db-name">${db.name}</div>
+      <div class="db-desc">${db.desc}</div>
+      <div class="db-meta">
+        <span>📋 ${db.tables} 张表</span>
+        <span>📊 ${db.records} 条记录</span>
+        <span>🕒 ${db.updated}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function createDatabase(){
+  const name = document.getElementById('input-db-name').value.trim();
+  if(!name){ toast('数据库名称不可为空','error'); return; }
+  if(DATABASES.find(d=>d.name===name)){ toast("数据库名称 '"+name+"' 已存在",'error'); return; }
+  DATABASES.push({id:Date.now(),name,desc:document.getElementById('input-db-desc').value,tables:0,records:0,updated:'2026-06-10'});
+  closeModal('modal-create-db');
+  renderDbGrid();
+  toast('数据库创建成功','success');
+  // 自动进入该数据库
+  enterDatabase(DATABASES[DATABASES.length-1].id);
+}
+
+function enterDatabase(id){
+  currentDbId = id;
+  const db = DATABASES.find(d=>d.id===id);
+  document.getElementById('current-db-title').textContent = db.name;
+  document.getElementById('current-db-desc').textContent = db.desc;
+  renderTableList();
+  switchView('view-table-list');
+}
+
+// ========== 数据表列表 ==========
+function renderTableList(){
+  const list = document.getElementById('table-list');
+  const tables = TABLES_DATA[currentDbId] || [];
+  if(!tables.length){
+    list.innerHTML = '<div class="empty"><div style="font-size:36px">📭</div><div style="margin-top:8px;color:var(--text-mute)">暂无数据表，点击上方按钮创建或导入</div></div>';
+    return;
+  }
+  list.innerHTML = tables.map(t=>`
+    <div class="table-row" onclick="enterTableDetail('${t.name}')">
+      <div class="table-icon">📋</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--primary)">${t.name}</div></div>
+      <div style="font-size:11px;color:#64748b">${t.fields} 个字段</div>
+      <div style="font-size:11px;color:#64748b">${t.records} 条</div>
+      <div style="font-size:11px;color:var(--text-mute)">${t.updated}</div>
+      <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+        <button class="btn btn-sm btn-link" onclick="enterTableDetail('${t.name}')">查看</button>
+        <button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="confirmAction('确定删除数据表「${t.name}」？',()=>toast('已删除','success'))">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function createTable(){
+  const name = document.getElementById('input-table-name').value.trim();
+  if(!name){ toast('数据表名称不可为空','error'); return; }
+  const tables = TABLES_DATA[currentDbId] || [];
+  if(tables.find(t=>t.name===name)){ toast("表名 '"+name+"' 已存在",'error'); return; }
+  if(!TABLES_DATA[currentDbId]) TABLES_DATA[currentDbId]=[];
+  TABLES_DATA[currentDbId].push({name,fields:0,records:0,updated:'2026-06-10'});
+  closeModal('modal-create-table');
+  renderTableList();
+  toast('数据表创建成功','success');
+}
+
+function enterTableDetail(name){
+  document.getElementById('detail-table-title').textContent = name;
+  detailDataset = 'test';
+  document.querySelectorAll('#view-table-detail .ds-tab').forEach(t=>t.classList.toggle('active', t.dataset.target==='test'));
+  renderDetailData();
+  document.getElementById('import-records').innerHTML = '';
+  switchView('view-table-detail');
+}
+
+function switchDetailDataset(target){
+  detailDataset = target;
+  document.querySelectorAll('#view-table-detail .ds-tab').forEach(t=>t.classList.toggle('active', t.dataset.target===target));
+  renderDetailData();
+}
+
+function renderDetailData(){
+  const rows = SAMPLE_DETAIL[detailDataset];
+  const m = DATASET_META[detailDataset];
+  document.getElementById('detail-data-body').innerHTML = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  document.getElementById('detail-table-sub').textContent = `${m.label} · 共 ${rows.length} 条记录 · 6 个字段`;
+  document.getElementById('detail-ds-hint').textContent = m.label==='测试数据' ? '当前查看测试数据集' : '当前查看线上数据集（生产环境）';
+}
+
+// ========== 导入数据表(CSV)流程 ==========
+let importStep = 1;
+const IMPORT_STEPS = ['上传文件','设置字段','预览数据','处理导入'];
+
+function startImportTable(){ importStep=1; importTarget.import='test'; renderImportFlow(); switchView('view-import-table'); }
+
+function renderImportFlow(){
+  // 步骤条
+  document.getElementById('import-steps').innerHTML = IMPORT_STEPS.map((s,i)=>{
+    const cls = importStep>i+1?'done':importStep===i+1?'active':'';
+    const line = i<IMPORT_STEPS.length-1?'<span class="step-line"></span>':'';
+    return `<div class="step-item ${cls}"><span class="step-num">${importStep>i+1?'✓':i+1}</span><span class="step-label">${s}</span></div>${line}`;
+  }).join('');
+  // 内容
+  const c = document.getElementById('import-step-content');
+  if(importStep===1) c.innerHTML = renderImportStep1();
+  else if(importStep===2) c.innerHTML = renderImportStep2();
+  else if(importStep===3) c.innerHTML = renderImportStep3();
+  else c.innerHTML = renderImportStep4();
+}
+
+function renderImportStep1(){
+  return `
+    ${renderDatasetSelector('import')}
+    <div class="upload-zone" onclick="simulateUpload()">
+      <div class="ico">📁</div>
+      <div class="title">点击或拖拽上传 CSV 文件</div>
+      <div class="hint">支持 .csv（UTF-8编码）· 文件大小不超过10MB · 最多10,000行数据</div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label>数据表名称</label>
+      <input class="form-control" id="csv-table-name" placeholder="默认使用文件名" value="">
+      <div class="form-hint">可修改，不可与当前数据库内已有表重复</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" onclick="switchView('view-table-list')">取消</button>
+      <button class="btn btn-primary" id="btn-import-next1" disabled onclick="importNextStep()">下一步</button>
+    </div>`;
+}
+
+function simulateUpload(){
+  document.getElementById('csv-table-name').value = '实验成绩';
+  document.getElementById('btn-import-next1').disabled = false;
+  toast('文件 "实验成绩.csv" 上传成功（模拟）','success');
+}
+
+function renderImportStep2(){
+  const fields = [
+    {name:'student_id',type:'text',required:false,desc:''},
+    {name:'name',type:'text',required:true,desc:'学生姓名'},
+    {name:'score',type:'integer',required:true,desc:''},
+    {name:'avg_time',type:'float',required:false,desc:'平均耗时(秒)'},
+    {name:'submit_date',type:'datetime',required:false,desc:''},
+    {name:'passed',type:'boolean',required:false,desc:''},
+  ];
+  return `
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px">系统已根据CSV内容自动推断字段类型，请确认或调整：</p>
+    <table class="field-table">
+      <thead><tr><th>字段名称</th><th>推断类型</th><th>是否必填</th><th>描述</th><th>操作</th></tr></thead>
+      <tbody>${fields.map(f=>`
+        <tr>
+          <td><input class="form-control" value="${f.name}" style="font-size:12px;padding:4px 8px"></td>
+          <td><select class="form-control" style="font-size:11px;padding:4px 6px">
+            <option ${f.type==='text'?'selected':''}>文本</option>
+            <option ${f.type==='integer'?'selected':''}>整数</option>
+            <option ${f.type==='float'?'selected':''}>浮点数</option>
+            <option ${f.type==='datetime'?'selected':''}>日期时间</option>
+            <option ${f.type==='boolean'?'selected':''}>布尔</option>
+          </select></td>
+          <td><label class="toggle" style="transform:scale(.8)"><input type="checkbox" ${f.required?'checked':''}><span class="slider"></span></label></td>
+          <td><input class="form-control" value="${f.desc}" placeholder="选填" style="font-size:11px;padding:4px 8px"></td>
+          <td><button class="btn btn-sm btn-link" style="color:var(--danger)">删除</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;margin-top:16px">
+      <button class="btn btn-outline" onclick="importPrevStep()">上一步</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="switchView('view-table-list')">取消</button>
+        <button class="btn btn-primary" onclick="importNextStep()">下一步</button>
+      </div>
+    </div>`;
+}
+
+function renderImportStep3(){
+  const headers = ['student_id','name','score','avg_time','submit_date','passed'];
+  const rows = [
+    ['2024001','张三','92','15.3','2026-05-12','true'],
+    ['2024002','李四','78','22.1','2026-05-12','true'],
+    ['2024003','王五','55','45.6','2026-05-13','false'],
+    ['2024004','赵六','88','18.9','2026-05-13','true'],
+    ['2024005','钱七','95','12.4','2026-05-14','true'],
+  ];
+  return `
+    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;color:#1e40af">
+      当前预览只展示前10条记录（共 86 条）
+    </div>
+    <div style="overflow-x:auto">
+      <table class="preview-table">
+        <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px">
+      <button class="btn btn-outline" onclick="importPrevStep()">上一步</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="switchView('view-table-list')">取消</button>
+        <button class="btn btn-primary" onclick="confirmImport()">确认导入</button>
+      </div>
+    </div>`;
+}
+
+// 确认导入：线上数据需二次确认
+function confirmImport(){
+  if(importTarget.import==='online'){
+    confirmAction('即将向【线上数据】导入，该操作影响正式生产环境并记录审计日志，是否继续？', ()=>importNextStep());
+  } else {
+    importNextStep();
+  }
+}
+
+function renderImportStep4(){
+  const m = DATASET_META[importTarget.import];
+  return `
+    <div class="result-card result-success">
+      <div class="result-icon">✅</div>
+      <div class="result-title">导入成功</div>
+      <div class="result-desc">已导入至 <b>${m.icon} ${m.label}</b> · 共 86 条数据，0 条失败</div>
+      <div style="margin-top:16px">
+        <button class="btn btn-primary" onclick="switchView('view-table-list');renderTableList();toast('数据表已创建','success')">返回数据表列表</button>
+      </div>
+    </div>`;
+}
+
+function importNextStep(){ importStep++; renderImportFlow(); }
+function importPrevStep(){ importStep--; renderImportFlow(); }
+
+// ========== 批量导入流程 ==========
+let batchStep = 1;
+let batchMode = 'append';   // append / overwrite
+const BATCH_STEPS = ['上传文件','预览数据','处理结果'];
+
+function startBatchImport(){ batchStep=1; importTarget.batch='test'; batchMode='append'; renderBatchFlow(); switchView('view-batch-import'); }
+
+function renderBatchFlow(){
+  document.getElementById('batch-steps').innerHTML = BATCH_STEPS.map((s,i)=>{
+    const cls = batchStep>i+1?'done':batchStep===i+1?'active':'';
+    const line = i<BATCH_STEPS.length-1?'<span class="step-line"></span>':'';
+    return `<div class="step-item ${cls}"><span class="step-num">${batchStep>i+1?'✓':i+1}</span><span class="step-label">${s}</span></div>${line}`;
+  }).join('');
+  const c = document.getElementById('batch-step-content');
+  if(batchStep===1) c.innerHTML = renderBatchStep1();
+  else if(batchStep===2) c.innerHTML = renderBatchStep2();
+  else c.innerHTML = renderBatchStep3();
+}
+
+function renderBatchStep1(){
+  return `
+    ${renderDatasetSelector('batch')}
+    <div class="form-group">
+      <label>导入模式</label>
+      <div class="mode-select" id="batch-mode-select">
+        <div class="mode-opt sel" data-mode="append" onclick="selectBatchMode('append')">
+          <div class="mode-title">追加</div>
+          <div class="mode-risk low">在已有数据基础上新增记录 · 低风险</div>
+        </div>
+        <div class="mode-opt" data-mode="overwrite" onclick="selectBatchMode('overwrite')">
+          <div class="mode-title">覆盖</div>
+          <div class="mode-risk high">清空目标数据集后再导入 · 高风险</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <button class="btn btn-outline" onclick="toast('模板已下载：教学数据库_学生成绩表_导入模板.xlsx','success')">📥 下载导入模板</button>
+      <span style="font-size:11px;color:var(--text-mute);margin-left:8px">请先下载模板，按模板格式填写数据后上传</span>
+    </div>
+    <div class="upload-zone" onclick="simulateBatchUpload()">
+      <div class="ico">📁</div>
+      <div class="title">点击或拖拽上传 Excel 文件</div>
+      <div class="hint">支持 .xlsx / .xls · 不超过10MB · 最多10,000行 · 表头需与模板一致</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost" onclick="switchView('view-table-detail')">取消</button>
+      <button class="btn btn-primary" id="btn-batch-next1" disabled onclick="batchNextStep()">下一步</button>
+    </div>`;
+}
+
+function selectBatchMode(mode){
+  batchMode = mode;
+  document.querySelectorAll('#batch-mode-select .mode-opt').forEach(el=>el.classList.toggle('sel', el.dataset.mode===mode));
+}
+
+function simulateBatchUpload(){
+  document.getElementById('btn-batch-next1').disabled = false;
+  toast('文件上传成功，表头校验通过','success');
+}
+
+function renderBatchStep2(){
+  const headers = ['student_id','name','score','grade','submit_time','passed'];
+  const rows = [
+    ['2024006','孙八','82','B','2026-05-20','true'],
+    ['2024007','周九','61','C','2026-05-20','true'],
+    ['2024008','吴十','','D','2026-05-21','false'],
+    ['2024009','郑十一','93','A','2026-05-21','true'],
+    ['2024010','王十二','76','B','2026-05-22','true'],
+  ];
+  return `
+    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;color:#1e40af">
+      导入目标：<b>${DATASET_META[importTarget.batch].icon} ${DATASET_META[importTarget.batch].label}</b> · 模式：<b>${batchMode==='append'?'追加':'覆盖'}</b> · 当前预览只展示前10条记录（共 25 条待导入）
+    </div>
+    <div style="overflow-x:auto">
+      <table class="preview-table">
+        <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c||'<span style="color:#ef4444;font-style:italic">空</span>'}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px">
+      <button class="btn btn-outline" onclick="batchPrevStep()">上一步</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="switchView('view-table-detail')">取消</button>
+        <button class="btn btn-primary" onclick="confirmBatchImport()">确认导入</button>
+      </div>
+    </div>`;
+}
+
+// 批量导入确认：线上二次确认；覆盖+线上需强确认（勾选确认框）
+function confirmBatchImport(){
+  const target = importTarget.batch;
+  if(target==='online' && batchMode==='overwrite'){
+    openStrongConfirm();
+  } else if(target==='online'){
+    confirmAction('即将向【线上数据】导入，该操作影响正式生产环境并记录审计日志，是否继续？', ()=>batchNextStep());
+  } else {
+    batchNextStep();
+  }
+}
+
+function openStrongConfirm(){
+  document.getElementById('strong-confirm-check').checked = false;
+  document.getElementById('btn-strong-confirm').disabled = true;
+  openModal('modal-strong-confirm');
+}
+function doStrongConfirm(){
+  closeModal('modal-strong-confirm');
+  batchNextStep();
+}
+
+function renderBatchStep3(){
+  const m = DATASET_META[importTarget.batch];
+  return `
+    <div class="result-card result-partial">
+      <div class="result-icon">⚠️</div>
+      <div class="result-title">部分导入成功</div>
+      <div class="result-desc">已导入至 <b>${m.icon} ${m.label}</b>（${batchMode==='append'?'追加':'覆盖'}模式）· 共 25 条数据：成功 23 条，失败 2 条</div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-outline" onclick="toast('已下载：教学数据库_学生成绩表_导入失败数据_20260610.xlsx','success')">📥 下载失败数据</button>
+        <button class="btn btn-primary" onclick="switchView('view-table-detail');showImportRecord()">完成</button>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px">
+      <div style="font-size:12px;font-weight:600;color:#991b1b;margin-bottom:8px">失败原因：</div>
+      <div style="font-size:11px;color:#7f1d1d;line-height:1.8">
+        第3行：必填字段【score】为空<br>
+        第18行：【submit_time】数据格式错误
+      </div>
+    </div>`;
+}
+
+function batchNextStep(){ batchStep++; renderBatchFlow(); }
+function batchPrevStep(){ batchStep--; renderBatchFlow(); }
+
+function showImportRecord(){
+  const m = DATASET_META[importTarget.batch];
+  document.getElementById('import-records').innerHTML = `
+    <div style="font-size:12px;font-weight:600;color:var(--primary);margin-bottom:8px">导入记录</div>
+    <div class="import-record">
+      <div class="status-icon" style="background:#fef3c7">⚠️</div>
+      <div class="info">
+        <div class="title">批量导入 · ${m.icon} ${m.label} · 2026-06-10 14:32</div>
+        <div class="meta">${batchMode==='append'?'追加':'覆盖'}模式 · 成功 23 条 · 失败 2 条</div>
+      </div>
+      <button class="btn btn-sm btn-link" onclick="toast('已下载失败数据文件','success')">下载失败数据</button>
+    </div>`;
+}
+
+// ========== 导出 ==========
+function startExport(){
+  toast('导出任务已提交，正在生成文件...','info');
+  setTimeout(()=>{ toast('导出成功：教学数据库_学生成绩表_导出_20260610.xlsx','success'); },1500);
+}
+
+// ========== 初始化 ==========
+renderDbGrid();
+</script>
+</body>
+</html>

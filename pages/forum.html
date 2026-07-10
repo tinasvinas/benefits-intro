@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学习论坛 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.forum-grid{display:grid;grid-template-columns:1fr 280px;gap:18px}
+
+.forum-tabs{display:flex;gap:0;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:14px}
+.forum-tabs .ftab{flex:1;padding:9px 14px;text-align:center;font-size:13px;color:#64748b;cursor:pointer;border-radius:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.forum-tabs .ftab:hover{background:#f8fafc}
+.forum-tabs .ftab.active{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;font-weight:600}
+
+.post-list{display:flex;flex-direction:column;gap:10px}
+.post-card{background:#fff;border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:all .15s}
+.post-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.post-avatar{width:32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.post-author{font-size:12px;font-weight:600;color:var(--primary)}
+.post-meta{font-size:11px;color:var(--text-mute);display:flex;align-items:center;gap:6px}
+.post-meta .sep{color:#cbd5e1}
+.post-actions{margin-left:auto;display:flex;gap:4px}
+
+.post-body{margin-bottom:10px}
+.post-title{font-size:15px;font-weight:600;color:var(--primary);margin-bottom:6px}
+.post-content{font-size:13px;color:#475569;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.post-ai-snip{background:#eff6ff;border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#475569;margin:10px 0;display:flex;gap:8px;align-items:flex-start}
+.post-ai-snip .ico{font-size:13px}
+.post-ai-snip .src{font-size:10px;color:var(--accent);font-weight:600;margin-bottom:2px}
+
+.post-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+
+.post-foot{display:flex;align-items:center;gap:14px;padding-top:10px;border-top:1px dashed #f1f5f9;font-size:12px;color:var(--text-mute)}
+.post-foot .stat{display:flex;align-items:center;gap:4px;cursor:pointer;padding:3px 6px;border-radius:4px}
+.post-foot .stat:hover{background:#f8fafc;color:var(--accent)}
+.post-foot .stat.liked{color:#ef4444}
+
+/* 侧栏 */
+.side-card{background:#fff;border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:14px}
+.side-card .title{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.topic-item{display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;font-size:12px;color:#475569;border-bottom:1px dashed #f1f5f9}
+.topic-item:last-child{border:0}
+.topic-item:hover{color:var(--accent)}
+.topic-item .rank{width:18px;height:18px;border-radius:4px;background:#f1f5f9;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.topic-item .rank.top{color:#fff}
+.topic-item:nth-child(1) .rank.top{background:#ef4444}
+.topic-item:nth-child(2) .rank.top{background:#f59e0b}
+.topic-item:nth-child(3) .rank.top{background:#facc15}
+.topic-item .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topic-item .heat{font-size:10px;color:#ef4444}
+
+.user-item{display:flex;align-items:center;gap:10px;padding:8px 0}
+.user-item .av{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.user-item .info{flex:1;min-width:0}
+.user-item .info .nm{font-size:12px;font-weight:600;color:var(--primary)}
+.user-item .info .meta{font-size:10px;color:var(--text-mute)}
+.user-item .v{font-size:13px;font-weight:700;color:var(--accent)}
+
+.featured-banner{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:center}
+.featured-banner .ico{font-size:24px}
+.featured-banner .info{flex:1}
+.featured-banner .info .t{font-size:13px;font-weight:700;color:#92400e}
+.featured-banner .info .s{font-size:11px;color:#78350f;margin-top:2px}
+
+.publish-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;border:none;width:100%;justify-content:center;margin-bottom:14px;box-shadow:0 4px 12px rgba(37,99,235,.25)}
+.publish-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.3)}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="forum-grid">
+      <div>
+        <div class="featured-banner">
+          <span class="ico">🏆</span>
+          <div class="info">
+            <div class="t">本周精华贴：从一道指针题看 C 语言的内存模型</div>
+            <div class="s">@王老师 · 2,348 阅读 · 56 点赞 · 已收录到「核心知识精选」</div>
+          </div>
+          <button class="btn btn-sm btn-warning">查看精华</button>
+        </div>
+
+        <div class="forum-tabs">
+          <span class="ftab active">🔥 推荐</span>
+          <span class="ftab">🆕 最新</span>
+          <span class="ftab">📌 我的发布 <span style="background:#dbeafe;color:#1d4ed8;padding:0 6px;border-radius:8px;font-size:10px;margin-left:3px">8</span></span>
+          <span class="ftab">🆘 我求助 <span style="background:#fee2e2;color:#dc2626;padding:0 6px;border-radius:8px;font-size:10px;margin-left:3px">2</span></span>
+          <span class="ftab">⭐ 收藏</span>
+        </div>
+
+        <div class="filter-bar" style="background:#fff;padding:10px 14px;margin-bottom:12px">
+          <div class="filter-item"><label>课程</label>
+            <select class="form-control"><option>全部</option><option>C 语言程序设计</option><option>数据结构</option><option>Python 程序设计</option></select>
+          </div>
+          <div class="filter-item"><label>类型</label>
+            <select class="form-control"><option>全部</option><option>提问</option><option>笔记分享</option><option>求助</option><option>讨论</option></select>
+          </div>
+          <div class="filter-item"><label>排序</label>
+            <select class="form-control"><option>综合</option><option>最新</option><option>最热</option><option>未回复</option></select>
+          </div>
+        </div>
+
+        <div class="post-list">
+          <!-- 帖子 1：求助 -->
+          <div class="post-card">
+            <div class="post-head">
+              <div class="post-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">张</div>
+              <div>
+                <div class="post-author">张同学</div>
+                <div class="post-meta">
+                  <span>计算机学院 · 大二</span><span class="sep">·</span><span>14:22</span>
+                </div>
+              </div>
+              <div class="post-actions">
+                <span class="badge badge-red">🆘 求助中</span>
+              </div>
+            </div>
+            <div class="post-body">
+              <div class="post-title">为什么 char* p = &x; 会报 incompatible pointer types?</div>
+              <div class="post-content">老师好！我在做指针练习时遇到了类型不兼容警告，AI 已经给我讲了 3 步，但还是不太理解为什么 int* 和 char* 不能互转，在线等老师解答 🙏</div>
+            </div>
+            <div class="post-ai-snip">
+              <span class="ico">🤖</span>
+              <div>
+                <div class="src">代码纠错（码上） 已回答</div>
+                "在 C 语言中，指针不只记录'地址'，还记录'该地址处数据的类型'..."
+              </div>
+            </div>
+            <div class="post-tags">
+              <span class="badge badge-blue">C 语言</span>
+              <span class="badge badge-purple">指针</span>
+              <span class="badge badge-blue">王老师班</span>
+            </div>
+            <div class="post-foot">
+              <span class="stat liked">❤️ 12</span>
+              <span class="stat">💬 5</span>
+              <span class="stat">👁️ 86</span>
+              <span class="stat">⭐ 收藏</span>
+              <span class="stat" style="margin-left:auto">📤 分享</span>
+            </div>
+          </div>
+
+          <!-- 帖子 2：笔记分享 -->
+          <div class="post-card">
+            <div class="post-head">
+              <div class="post-avatar" style="background:linear-gradient(135deg,#2563eb,#1e40af)">王</div>
+              <div>
+                <div class="post-author">王老师 <span class="badge badge-orange">老师</span></div>
+                <div class="post-meta">
+                  <span>计算机学院</span><span class="sep">·</span><span>10:30</span>
+                </div>
+              </div>
+              <div class="post-actions">
+                <span class="badge badge-yellow">⭐ 精华</span>
+              </div>
+            </div>
+            <div class="post-body">
+              <div class="post-title">从一道指针题看 C 语言的内存模型</div>
+              <div class="post-content">最近批改作业看到很多同学在指针类型转换上踩坑，今天系统讲一下 C 语言的内存模型：栈、堆、全局区、常量区，以及各种指针类型在内存中的"身份"问题...</div>
+            </div>
+            <div class="post-tags">
+              <span class="badge badge-blue">C 语言</span>
+              <span class="badge badge-purple">内存模型</span>
+              <span class="badge badge-green">教师笔记</span>
+            </div>
+            <div class="post-foot">
+              <span class="stat liked">❤️ 56</span>
+              <span class="stat">💬 23</span>
+              <span class="stat">👁️ 2,348</span>
+              <span class="stat">⭐ 收藏 (38)</span>
+              <span class="stat" style="margin-left:auto">📤 分享</span>
+            </div>
+          </div>
+
+          <!-- 帖子 3：讨论 -->
+          <div class="post-card">
+            <div class="post-head">
+              <div class="post-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">李</div>
+              <div>
+                <div class="post-author">李同学</div>
+                <div class="post-meta">
+                  <span>软件工程 · 大二</span><span class="sep">·</span><span>09:15</span>
+                </div>
+              </div>
+            </div>
+            <div class="post-body">
+              <div class="post-title">数据结构图解智能体真的香！</div>
+              <div class="post-content">今天用 @王老师 发布的"数据结构图解"问了一个红黑树的问题，居然给我画出了动态插入过程，完全理解了！比看视频效率高 5 倍。强烈推荐！</div>
+            </div>
+            <div class="post-ai-snip">
+              <span class="ico">🤖</span>
+              <div>
+                <div class="src">关联智能体：数据结构图解</div>
+                这位同学使用本智能体后给出了 5 星好评
+              </div>
+            </div>
+            <div class="post-tags">
+              <span class="badge badge-blue">数据结构</span>
+              <span class="badge badge-purple">智能体推荐</span>
+            </div>
+            <div class="post-foot">
+              <span class="stat">❤️ 28</span>
+              <span class="stat">💬 8</span>
+              <span class="stat">👁️ 326</span>
+              <span class="stat">⭐ 收藏</span>
+            </div>
+          </div>
+
+          <!-- 帖子 4：提问 -->
+          <div class="post-card">
+            <div class="post-head">
+              <div class="post-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">钱</div>
+              <div>
+                <div class="post-author">钱同学</div>
+                <div class="post-meta">
+                  <span>计算机学院 · 大三</span><span class="sep">·</span><span>昨天 22:30</span>
+                </div>
+              </div>
+            </div>
+            <div class="post-body">
+              <div class="post-title">链表反转用递归怎么写比迭代清晰？</div>
+              <div class="post-content">迭代写法我会，但用递归怎么实现既清晰又高效？AI 给的解释有点抽象，求大神带带</div>
+            </div>
+            <div class="post-tags">
+              <span class="badge badge-blue">数据结构</span>
+              <span class="badge badge-purple">链表</span>
+              <span class="badge badge-purple">递归</span>
+            </div>
+            <div class="post-foot">
+              <span class="stat">❤️ 8</span>
+              <span class="stat">💬 12</span>
+              <span class="stat">👁️ 156</span>
+              <span class="stat">⭐ 收藏</span>
+            </div>
+          </div>
+
+          <!-- 帖子 5 -->
+          <div class="post-card">
+            <div class="post-head">
+              <div class="post-avatar" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">孙</div>
+              <div>
+                <div class="post-author">孙同学</div>
+                <div class="post-meta">
+                  <span>软件工程 · 大二</span><span class="sep">·</span><span>昨天 20:14</span>
+                </div>
+              </div>
+            </div>
+            <div class="post-body">
+              <div class="post-title">Python pandas 处理 CSV 的 3 个高效技巧</div>
+              <div class="post-content">最近在做数据分析作业，整理了 3 个 pandas 高效读取/处理 CSV 的技巧：1) 用 chunksize 分块读取大文件 2) usecols 只读需要的列 3) dtype 提前指定类型...</div>
+            </div>
+            <div class="post-tags">
+              <span class="badge badge-blue">Python</span>
+              <span class="badge badge-purple">pandas</span>
+              <span class="badge badge-green">学习笔记</span>
+            </div>
+            <div class="post-foot">
+              <span class="stat">❤️ 45</span>
+              <span class="stat">💬 9</span>
+              <span class="stat">👁️ 580</span>
+              <span class="stat">⭐ 收藏 (32)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 侧栏 -->
+      <div>
+        <button class="publish-btn" onclick="openModal('m-publish')">✏️ 发布新帖子</button>
+
+        <div class="side-card">
+          <div class="title">🔥 热门话题</div>
+          <div class="topic-item"><div class="rank top">1</div><div class="name">指针类型转换</div><div class="heat">🔥 1.2K</div></div>
+          <div class="topic-item"><div class="rank top">2</div><div class="name">数据结构图解</div><div class="heat">🔥 856</div></div>
+          <div class="topic-item"><div class="rank top">3</div><div class="name">malloc 内存泄漏</div><div class="heat">🔥 642</div></div>
+          <div class="topic-item"><div class="rank">4</div><div class="name">Python pandas 技巧</div><div class="heat">580</div></div>
+          <div class="topic-item"><div class="rank">5</div><div class="name">链表反转递归</div><div class="heat">432</div></div>
+          <div class="topic-item"><div class="rank">6</div><div class="name">UML 用例图绘制</div><div class="heat">320</div></div>
+          <div class="topic-item"><div class="rank">7</div><div class="name">操作系统死锁</div><div class="heat">280</div></div>
+          <div class="topic-item"><div class="rank">8</div><div class="name">CPU 流水线冒险</div><div class="heat">195</div></div>
+        </div>
+
+        <div class="side-card">
+          <div class="title">⭐ 本月活跃用户</div>
+          <div class="user-item">
+            <div class="av" style="background:linear-gradient(135deg,#2563eb,#1e40af)">王</div>
+            <div class="info"><div class="nm">王老师 <span class="badge badge-orange" style="font-size:9px">教师</span></div><div class="meta">28 篇 · 1.2K 点赞</div></div>
+            <div class="v">98</div>
+          </div>
+          <div class="user-item">
+            <div class="av" style="background:linear-gradient(135deg,#10b981,#059669)">张</div>
+            <div class="info"><div class="nm">张同学</div><div class="meta">22 篇 · 580 点赞</div></div>
+            <div class="v">85</div>
+          </div>
+          <div class="user-item">
+            <div class="av" style="background:linear-gradient(135deg,#f59e0b,#d97706)">李</div>
+            <div class="info"><div class="nm">李同学</div><div class="meta">18 篇 · 420 点赞</div></div>
+            <div class="v">72</div>
+          </div>
+          <div class="user-item">
+            <div class="av" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">钱</div>
+            <div class="info"><div class="nm">钱同学</div><div class="meta">15 篇 · 380 点赞</div></div>
+            <div class="v">68</div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <div class="title">📋 论坛公约</div>
+          <div style="font-size:11px;color:var(--text-sub);line-height:1.7">
+            · 提问前请先用智能体尝试解答<br>
+            · 发布时请添加合适标签<br>
+            · 求助类帖子推送给授课老师<br>
+            · 严禁广告、人身攻击<br>
+            · 优秀贴入选「精华」可获积分
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 发布帖子 -->
+<div class="modal-overlay" id="m-publish">
+  <div class="modal lg">
+    <div class="modal-header"><h3>发布新帖子</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label><span class="req">*</span>类型</label>
+          <select class="form-control"><option>提问</option><option>笔记分享</option><option>求助（推送给老师）</option><option>讨论</option></select>
+        </div>
+        <div class="form-group"><label>关联课程</label>
+          <select class="form-control"><option>不关联</option><option>C 语言程序设计</option><option>数据结构</option><option>Python 程序设计</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label><span class="req">*</span>标题</label>
+        <input class="form-control" placeholder="一句话讲清楚问题或主题（≤80 字）" maxlength="80">
+      </div>
+      <div class="form-group"><label><span class="req">*</span>正文</label>
+        <textarea class="form-control" style="min-height:160px" placeholder="支持 Markdown 与代码块。如有报错信息，请贴完整的错误提示和代码"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn btn-sm btn-outline">📎 上传图片</button>
+          <button class="btn btn-sm btn-outline">📄 引用对话</button>
+          <button class="btn btn-sm btn-outline">🤖 关联智能体</button>
+        </div>
+      </div>
+      <div class="form-group"><label>标签</label>
+        <input class="form-control" placeholder="用空格分隔，最多 5 个，如：C 语言 指针 类型转换">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-ghost">💾 存草稿</button>
+      <button class="btn btn-primary" onclick="closeModal('m-publish');toast('帖子已发布','success')">🚀 发布</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'forum', title:'学习论坛', breadcrumb:['智能体','学习论坛'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+document.querySelectorAll('.forum-tabs .ftab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.forum-tabs .ftab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    toast(`已切换到「${t.textContent.trim()}」`, 'info');
+  });
+});
+</script>
+</body>
+</html>

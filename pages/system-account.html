@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>账户管理 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.import-step{display:flex;align-items:center;gap:0;margin-bottom:18px}
+.step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mute);position:relative}
+.step .num{width:26px;height:26px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.step.active .num{background:var(--accent);color:#fff}
+.step.done .num{background:var(--success);color:#fff}
+.step.active span,.step.done span{color:var(--primary);font-weight:600}
+.step-line{flex:1;height:2px;background:#e2e8f0;margin:0 12px;min-width:30px}
+.step.done + .step-line{background:var(--success)}
+
+.batch-toolbar{display:none;align-items:center;gap:10px;padding:10px 14px;background:#fef3c7;border-radius:8px;margin-bottom:12px;font-size:12px;color:#92400e}
+.batch-toolbar.open{display:flex}
+
+/* ===== 账户弹窗 Step 导航（参照学校管理） ===== */
+.acc-modal-body{display:flex;gap:0;padding:0 !important;min-height:520px}
+.acc-step-nav{flex:0 0 200px;background:#f8fafc;border-right:1px solid var(--border);padding:18px 0}
+.acc-step-nav .step-item{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;color:#475569;font-size:13px;border-left:3px solid transparent;transition:all .15s}
+.acc-step-nav .step-item:hover{background:#f1f5f9}
+.acc-step-nav .step-item.active{background:#eff6ff;color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.acc-step-nav .step-item .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#e2e8f0;color:#64748b;font-size:11px;font-weight:700;flex-shrink:0}
+.acc-step-nav .step-item.active .step-num{background:var(--accent);color:#fff}
+.acc-step-nav .step-item.completed .step-num{background:var(--success);color:#fff}
+.acc-step-nav .step-item.completed .step-num::before{content:'✓'}
+.acc-step-nav .step-item.completed .step-num span{display:none}
+.acc-step-content{flex:1;padding:22px 26px;overflow-y:auto;max-height:70vh}
+.acc-pane{display:none}
+.acc-pane.active{display:block}
+
+/* 当前权益概览 */
+.cur-benefit-card{background:linear-gradient(135deg,#1e3a5f,#1e40af);color:#fff;padding:16px 20px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:16px}
+.cur-benefit-card .ico{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cur-benefit-card .info{flex:1}
+.cur-benefit-card .info .nm{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.cur-benefit-card .info .nm .tag{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.cur-benefit-card .info .meta{font-size:11px;opacity:.85;margin-top:4px}
+.cur-benefit-card .stat{text-align:right;font-size:11px;opacity:.85}
+.cur-benefit-card .stat b{display:block;font-size:14px;color:#fff;margin-top:2px;opacity:1}
+.cur-benefit-card.empty{background:#f1f5f9;color:#64748b}
+.cur-benefit-card.empty .ico{background:rgba(0,0,0,.05)}
+.cur-benefit-card.empty .info .nm,.cur-benefit-card.empty .stat b{color:#1e293b}
+
+/* 历史表 */
+.record-table{width:100%;font-size:12px;border-collapse:collapse}
+.record-table th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
+.record-table td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.record-table tr.hist-row:hover{background:#fafbfc}
+.expand-toggle{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;background:#f1f5f9;color:#64748b;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;user-select:none;transition:all .15s;border:1px solid #e2e8f0}
+.expand-toggle:hover{background:#dbeafe;color:var(--accent);border-color:#bfdbfe}
+.expand-toggle.open{background:var(--accent);color:#fff;border-color:var(--accent)}
+.detail-row.collapsed{display:none}
+.detail-row > td{padding:0 !important;background:#f8fafc}
+.detail-row:hover{background:#f8fafc !important}
+.pkg-detail-wrap{padding:14px 18px}
+.pkg-detail-wrap .pdh{font-size:12px;font-weight:600;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pkg-detail-wrap .pdh .meta{font-weight:400;color:var(--text-mute);font-size:11px;margin-left:6px}
+
+.pkg-table{width:100%;font-size:12px;border-collapse:collapse;background:#fff;border-radius:6px;overflow:hidden;border:1px solid #e2e8f0}
+.pkg-table th{background:#f1f5f9;padding:8px 10px;text-align:left;font-size:11px;color:#475569;font-weight:600;border-bottom:1px solid #e2e8f0}
+.pkg-table td{padding:9px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.pkg-table tr:last-child td{border-bottom:0}
+.pkg-table .seq{font-weight:700;color:var(--primary);width:60px}
+.pkg-table .stat-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.stat-tag.active{background:#dbeafe;color:#1d4ed8}
+.stat-tag.queued{background:#e0e7ff;color:#3730a3}
+.stat-tag.expired{background:#e2e8f0;color:#64748b}
+.pkg-table .actions a{margin-right:10px;color:var(--accent);cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap}
+.pkg-table .actions a:hover{text-decoration:underline}
+.pkg-table .actions a.danger{color:var(--danger)}
+.pkg-table .actions a.disabled{color:#cbd5e1;cursor:not-allowed;pointer-events:none}
+.pkg-empty{padding:30px;text-align:center;color:var(--text-mute);font-size:12px;background:#fff;border:1px dashed #e2e8f0;border-radius:6px}
+
+/* 档位卡片（迷你） */
+.tier-card-mini{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.tier-card-mini:hover{border-color:#93c5fd;background:#f8fbff}
+.tier-card-mini.selected{border-color:var(--accent);background:#eff6ff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.tier-card-mini.disabled{opacity:.4;cursor:not-allowed;background:#f8fafc}
+.tier-card-mini .tc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:#fff}
+.tc-icon.free{background:linear-gradient(135deg,#94a3b8,#64748b)}
+.tc-icon.basic{background:linear-gradient(135deg,#6366f1,#4f46e5)}
+.tc-icon.teacher{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.tc-icon.vip-a{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.tc-icon.vip-b{background:linear-gradient(135deg,#8b5cf6,#7c3aed)}
+.tc-icon.vip-c{background:linear-gradient(135deg,#ec4899,#db2777)}
+.tier-card-mini .tc-info{flex:1;min-width:0}
+.tier-card-mini .tc-name{font-size:13px;font-weight:700;color:var(--primary)}
+.tier-card-mini .tc-sub{font-size:11px;color:var(--text-mute);margin-top:2px}
+.tier-card-mini .tc-check{width:20px;height:20px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:11px}
+.tier-card-mini.selected .tc-check{background:var(--accent);border-color:var(--accent)}
+.tier-card-mini.selected .tc-check::before{content:'✓'}
+
+/* 月包队列预览 */
+.pkg-queue{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pkg-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border-left:3px solid #cbd5e1;background:#f8fafc;font-size:12px}
+.pkg-card.active{border-left-color:var(--accent);background:#eff6ff}
+.pkg-card.queued{border-left-color:#a78bfa;background:#f5f3ff}
+.pkg-card.expired{border-left-color:#94a3b8;background:#f1f5f9;opacity:.7}
+.pkg-card .seq{font-weight:700;color:var(--primary);width:60px;flex-shrink:0}
+.pkg-card .range{flex:1;color:#475569}
+.pkg-card .status-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.pkg-card.active .status-tag{background:#dbeafe;color:#1d4ed8}
+.pkg-card.queued .status-tag{background:#ede9fe;color:#6d28d9}
+.pkg-card.expired .status-tag{background:#e2e8f0;color:#64748b}
+
+/* 数量步进器 */
+.qty-stepper{display:inline-flex;align-items:center;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;background:#fff}
+.qty-stepper button{width:34px;height:34px;border:0;background:#f8fafc;font-size:16px;cursor:pointer;color:#475569}
+.qty-stepper button:hover{background:#e2e8f0}
+.qty-stepper input{width:60px;height:34px;border:0;text-align:center;font-size:13px;font-weight:600;color:var(--primary);outline:none}
+
+/* 学生不能开教师版的提示 */
+.tier-tip{font-size:11px;color:var(--text-mute);background:#fef3c7;padding:8px 12px;border-radius:6px;margin-top:10px;border-left:3px solid #f59e0b;color:#92400e}
+
+/* 权益管理子 Tab（参照学校管理 records-tabbar） */
+.benefit-subtabs{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);margin-bottom:12px;padding-bottom:0}
+.benefit-subtabs .bs-tabs{display:flex;gap:4px}
+.benefit-subtabs .bs-tab{padding:8px 16px;font-size:13px;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+.benefit-subtabs .bs-tab.active{color:var(--accent);border-color:var(--accent);font-weight:600}
+.benefit-subtabs .bs-ops{display:flex;gap:8px}
+.benefit-sub-pane{display:none}
+.benefit-sub-pane.active{display:block}
+
+/* 增量包进度条 */
+.usage-cell{min-width:160px}
+.usage-bar{display:block;width:120px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:4px}
+.usage-bar > span{display:block;height:100%;background:linear-gradient(90deg,#10b981,#059669);border-radius:3px}
+.usage-bar > span.warn{background:linear-gradient(90deg,#f59e0b,#d97706)}
+.usage-bar > span.danger{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.usage-num{font-size:11px;color:var(--text-mute)}
+.usage-num b{color:var(--primary);font-weight:600}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="filter-bar">
+      <div class="filter-item"><label>账户</label><input class="form-control" placeholder="模糊搜索登录名"></div>
+      <div class="filter-item"><label>账户类型</label>
+        <select class="form-control"><option>全部</option><option>教师</option><option>学生</option><option>运营管理员</option></select>
+      </div>
+      <div class="filter-item"><label>姓名</label><input class="form-control" placeholder="模糊搜索"></div>
+      <div class="filter-item"><label>权益</label>
+        <select class="form-control"><option>全部</option><option>教师版</option><option>个人A</option><option>个人B</option></select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-outline">重置</button>
+        <button class="btn btn-primary">查询</button>
+      </div>
+    </div>
+
+    <div class="batch-toolbar" id="batch-bar">
+      <span>✓ 已选中 <b id="batch-count">0</b> 条</span>
+      <button class="btn btn-sm btn-danger" onclick="if(confirm('确定批量删除选中的账户？'))toast('已删除','success')">确定删除</button>
+      <button class="btn btn-sm btn-ghost" onclick="closeBatch()">取消</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">账户列表</div>
+          <div class="card-sub">共 2,196 个账户 · 教师 38 · 学生 2,156 · 运营 2</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="openBatch()">批量删除</button>
+          <button class="btn btn-outline" onclick="openModal('m-import')">📥 批量导入</button>
+          <button class="btn btn-primary" onclick="openAccountModal('student','','基础信息',true)">+ 新增账户</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th width="40"><input type="checkbox" id="check-all"></th>
+              <th>登录名</th>
+              <th>学工号</th>
+              <th>昵称</th>
+              <th>账户类型</th>
+              <th>姓名</th>
+              <th>学院</th>
+              <th>专业</th>
+              <th>个人权益</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><input type="checkbox" class="row-check"></td><td>buptT1001</td><td>T1001</td><td>王老师</td><td><span class="badge badge-blue">教师</span></td><td>王明</td><td>计算机学院</td><td>软件工程</td><td><span class="badge badge-yellow">教师版</span></td><td><button class="btn btn-sm btn-link" onclick="openAccountModal('teacher','acc-t1001','基础信息')">修改</button> <button class="btn btn-sm btn-link" onclick="openAccountModal('teacher','acc-t1001','权益管理')">权益</button> <button class="btn btn-sm btn-link">重置密码</button></td></tr>
+            <tr><td><input type="checkbox" class="row-check"></td><td>buptT1002</td><td>T1002</td><td>李老师</td><td><span class="badge badge-blue">教师</span> <span class="badge badge-purple">助教</span></td><td>李华</td><td>计算机学院</td><td>计算机科学</td><td><span class="badge badge-gray">无</span></td><td><button class="btn btn-sm btn-link" onclick="openAccountModal('teacher','acc-t1002','基础信息')">修改</button> <button class="btn btn-sm btn-link" onclick="openAccountModal('teacher','acc-t1002','权益管理')">权益</button></td></tr>
+            <tr><td><input type="checkbox" class="row-check"></td><td>bupt2024010001</td><td>2024010001</td><td>张同学</td><td><span class="badge badge-green">学生</span></td><td>张伟</td><td>计算机学院</td><td>软件工程</td><td><span class="badge badge-blue">A 月卡</span></td><td><button class="btn btn-sm btn-link" onclick="openAccountModal('student','acc-s001','基础信息')">修改</button> <button class="btn btn-sm btn-link" onclick="openAccountModal('student','acc-s001','权益管理')">权益</button></td></tr>
+            <tr><td><input type="checkbox" class="row-check"></td><td>bupt2024010002</td><td>2024010002</td><td>李同学</td><td><span class="badge badge-green">学生</span></td><td>李娜</td><td>计算机学院</td><td>软件工程</td><td><span class="badge badge-gray">无</span></td><td><button class="btn btn-sm btn-link" onclick="openAccountModal('student','acc-s002','基础信息')">修改</button> <button class="btn btn-sm btn-link" onclick="openAccountModal('student','acc-s002','权益管理')">权益</button></td></tr>
+            <tr><td><input type="checkbox" class="row-check"></td><td>buptops001</td><td>ops001</td><td>运营A</td><td><span class="badge badge-orange">运营管理员</span></td><td>运营A</td><td>—</td><td>—</td><td>—</td><td><button class="btn btn-sm btn-link" onclick="openAccountModal('ops','acc-ops001','基础信息')">修改</button> <button class="btn btn-sm btn-link">查看</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 账户弹窗（基础信息 + 权益管理 Step 导航） -->
+<div class="modal-overlay" id="m-account">
+  <div class="modal xxl">
+    <div class="modal-header">
+      <h3 id="acc-modal-title">修改账户</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body acc-modal-body">
+
+      <!-- 左侧 Step 导航 -->
+      <div class="acc-step-nav">
+        <div class="step-item active" data-step="基础信息" onclick="switchAccTab('基础信息')">
+          <span class="step-num"><span>1</span></span>
+          <span>基础信息</span>
+        </div>
+        <div class="step-item" data-step="权益管理" onclick="switchAccTab('权益管理')">
+          <span class="step-num"><span>2</span></span>
+          <span>权益管理</span>
+        </div>
+      </div>
+
+      <!-- 右侧内容区 -->
+      <div class="acc-step-content">
+
+      <!-- ============ Tab 1：基础信息 ============ -->
+      <div class="acc-pane active" data-pane="基础信息">
+        <div class="card-title mb-12">🪪 账户信息</div>
+        <div class="form-row">
+          <div class="form-group"><label>账户类型</label>
+            <select class="form-control" id="acc-type">
+              <option value="teacher">教师</option>
+              <option value="student" selected>学生</option>
+              <option value="ops">运营管理员</option>
+            </select>
+          </div>
+          <div class="form-group"><label><span class="req">*</span>学工号</label>
+            <input class="form-control" placeholder="字母或数字，长度40">
+            <div class="form-hint">登录名将自动生成：bupt + 学工号</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>昵称</label><input class="form-control" placeholder="不填默认为学工号"></div>
+          <div class="form-group"><label>初始密码</label><input class="form-control" placeholder="不填默认：bupt + 学工号"></div>
+        </div>
+
+        <div class="card-title mt-16 mb-12">📞 联系人信息</div>
+        <div class="form-row">
+          <div class="form-group"><label><span class="req">*</span>姓名</label><input class="form-control" placeholder="长度40"></div>
+          <div class="form-group"><label>性别</label><div style="padding:8px 0"><label style="margin-right:14px"><input type="radio" name="g2"> 男</label><label><input type="radio" name="g2"> 女</label></div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>联系电话</label><input class="form-control" placeholder="11位手机号"></div>
+          <div class="form-group"><label>联系邮箱</label><input class="form-control" placeholder="邮箱格式校验"></div>
+        </div>
+
+        <div class="card-title mt-16 mb-12">🎓 教育信息</div>
+        <div class="form-row">
+          <div class="form-group"><label>学校</label><input class="form-control" value="北京邮电大学" readonly></div>
+          <div class="form-group"><label><span class="req">*</span>学院</label><input class="form-control"></div>
+        </div>
+        <div class="form-row" id="student-fields">
+          <div class="form-group"><label>专业</label><input class="form-control"></div>
+          <div class="form-group"><label>年级</label><input class="form-control"></div>
+        </div>
+      </div>
+
+      <!-- ============ Tab 2：权益管理 ============ -->
+      <div class="acc-pane" data-pane="权益管理">
+        <!-- 当前权益概览 -->
+        <div id="acc-cur-benefit"></div>
+
+        <!-- 子 Tab：月包记录 / 增量包（参照学校管理 records-tabbar） -->
+        <div class="benefit-subtabs">
+          <div class="bs-tabs">
+            <div class="bs-tab active" data-bs="months" onclick="switchBenefitSub('months')">📜 月包记录</div>
+            <div class="bs-tab" data-bs="packs" onclick="switchBenefitSub('packs')">📦 增量包</div>
+          </div>
+          <div class="bs-ops">
+            <button class="btn btn-sm btn-outline" id="acc-add-pack-btn" style="display:none" onclick="openAddAccPack()">+ 新增增量包</button>
+            <button class="btn btn-sm btn-primary" id="acc-add-benefit-btn" onclick="openModal('m-acc-benefit')">+ 新增权益</button>
+          </div>
+        </div>
+
+        <!-- 月包记录子区 -->
+        <div class="benefit-sub-pane active" data-bs="months">
+          <div style="font-size:12px;color:var(--text-mute);margin-bottom:10px">每个月包有效期 1 个月，连续开通时上一包失效后下一包接力。免费版仅设到期时间。</div>
+
+          <table class="record-table" id="acc-hist-table">
+            <thead>
+              <tr>
+                <th style="width:140px">档位</th>
+                <th>开通数量</th>
+                <th>开通时间</th>
+                <th>到期时间</th>
+                <th>已使用 / 未使用</th>
+                <th>开通人</th>
+                <th>开通渠道</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody id="acc-hist-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- 增量包子区 -->
+        <div class="benefit-sub-pane" data-bs="packs">
+          <div style="font-size:12px;color:var(--text-mute);margin-bottom:10px">每个增量包额度为 <b style="color:var(--primary)">1,000 万 Token</b>，独立计费、不影响档位余额，<b>永久有效</b>，按开通时间倒序消耗。</div>
+
+          <table class="record-table" id="acc-pack-table">
+            <thead>
+              <tr>
+                <th style="width:200px">类型</th>
+                <th style="width:140px">额度</th>
+                <th class="usage-cell">已用 / 总额</th>
+                <th>开通时间</th>
+                <th>有效期</th>
+                <th>开通人</th>
+                <th>开通渠道</th>
+                <th>备注</th>
+                <th style="width:80px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="acc-pack-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      </div><!-- /acc-step-content -->
+    </div><!-- /acc-modal-body -->
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-ghost" id="acc-btn-prev" style="display:none" onclick="switchAccTab('基础信息')">← 上一步</button>
+      <button class="btn btn-primary" id="acc-btn-next" onclick="switchAccTab('权益管理')">下一步 →</button>
+      <button class="btn btn-primary" id="acc-save-btn" style="display:none" onclick="saveAccount()">✓ 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 账户 · 新增权益弹窗 ===== -->
+<div class="modal-overlay" id="m-acc-benefit">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3>新增权益 · <span id="ab-account-name" style="color:var(--text-mute);font-weight:400;font-size:14px"></span></h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+
+      <div class="card-title mb-12">🎯 选择目标档位</div>
+      <div id="ab-tier-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"></div>
+      <div class="tier-tip" id="ab-teacher-tip" style="display:none">⚠️ 教师版仅"教师"账户可开通，学生账户请选择基础版 / A / B / C 月卡。</div>
+
+      <!-- 月包配置块 -->
+      <div id="ab-pkg-config" style="display:none;margin-top:18px">
+        <div class="card-title mb-12">📅 开通配置</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="req">*</span>开通日期</label>
+            <input class="form-control" type="date" id="ab-start-date" value="2026-05-27">
+            <div class="form-hint">第一个月包从此日期开始生效</div>
+          </div>
+          <div class="form-group">
+            <label><span class="req">*</span>开通数量（月数）</label>
+            <div class="qty-stepper">
+              <button type="button" onclick="abAdjustQty(-1)">−</button>
+              <input id="ab-qty" type="number" value="1" min="1" max="60" oninput="abRenderQueue()">
+              <button type="button" onclick="abAdjustQty(1)">+</button>
+            </div>
+            <div class="form-hint">连续开通 N 个月：每月上一包失效，下一包生效</div>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--text-mute);margin-top:6px">月包队列预览（共 <b id="ab-qty-echo" style="color:var(--accent)">1</b> 个）</div>
+        <div class="pkg-queue" id="ab-queue"></div>
+      </div>
+
+      <!-- 免费版配置块 -->
+      <div id="ab-free-config" style="display:none;margin-top:18px">
+        <div class="card-title mb-12">🆓 免费版配置</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="req">*</span>到期时间</label>
+            <input class="form-control" type="date" id="ab-free-end" value="2026-12-31">
+            <div class="form-hint">到期后该账户将无法登录系统</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 备注 -->
+      <div id="ab-remark-block" style="display:none;margin-top:14px">
+        <div class="form-group">
+          <label>备注</label>
+          <input class="form-control" id="ab-remark" placeholder="选填，例如合同号 / 申请单号">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="saveAccBenefit()">✓ 确认开通</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 账户 · 修改单个月包弹窗 ===== -->
+<div class="modal-overlay" id="m-acc-edit-pkg">
+  <div class="modal md">
+    <div class="modal-header">
+      <h3 id="ep-title">修改月包</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div id="ep-meta" style="background:#f8fafc;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--text-mute);margin-bottom:14px;line-height:1.7"></div>
+
+      <div class="form-group">
+        <label>档位 <span style="color:var(--danger)">*</span></label>
+        <select class="form-control" id="ep-tier"></select>
+        <div class="form-hint" style="color:#b45309">⚠️ 修改档位将作用于<b>整条开通记录的所有月包</b>。</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" id="ep-start-wrap">
+          <label>开始时间 <span style="color:var(--danger)">*</span></label>
+          <input class="form-control" id="ep-start" type="date">
+          <div class="form-hint" id="ep-start-hint"></div>
+        </div>
+        <div class="form-group">
+          <label>结束时间 <span style="color:var(--danger)">*</span></label>
+          <input class="form-control" id="ep-end" type="date">
+        </div>
+      </div>
+
+      <div id="ep-warn" style="background:#fef3c7;border-left:3px solid #f59e0b;padding:10px 12px;font-size:12px;color:#92400e;border-radius:0 6px 6px 0;line-height:1.6"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="saveAccEditPkg()">✓ 保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 账户 · 新增增量包弹窗 ===== -->
+<div class="modal-overlay" id="m-acc-pack">
+  <div class="modal md">
+    <div class="modal-header">
+      <h3>📦 新增增量包 · <span id="ap-account-name" style="color:var(--text-mute);font-weight:400;font-size:14px"></span></h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:12px;color:#1e40af;margin-bottom:14px;line-height:1.6">
+        <b>💡 增量包说明：</b>每个增量包额度为 <b>1,000 万 Token</b>，独立计费、不与档位月包共享。<b>永久有效</b>，账户档位变更或月包到期不影响增量包。按开通时间倒序消耗。
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span>增量包类型</label>
+        <input class="form-control" value="🎁 个人 Token 增量包" readonly>
+        <div class="form-hint">作用范围：<span style="color:var(--primary);font-weight:600">仅当前账户</span></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><span class="req">*</span>额度</label>
+          <input class="form-control" value="10,000,000 Token" readonly style="font-weight:600;color:var(--primary)">
+          <div class="form-hint">固定额度，不可修改</div>
+        </div>
+        <div class="form-group">
+          <label><span class="req">*</span>开通时间</label>
+          <input class="form-control" type="date" id="ap-start-date" value="2026-05-27">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>开通渠道</label>
+          <select class="form-control" id="ap-channel">
+            <option value="线下签约" selected>线下签约</option>
+            <option value="用户自购">用户自购</option>
+            <option value="活动赠送">活动赠送</option>
+            <option value="系统初始化">系统初始化</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>有效期</label>
+          <input class="form-control" value="永久有效" readonly>
+          <div class="form-hint">增量包不设到期时间</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>备注</label>
+        <textarea class="form-control" id="ap-remark" placeholder="如：合同号、采购单号" maxlength="200" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="saveAccPack()">✓ 确认开通</button>
+    </div>
+  </div>
+</div>
+
+<!-- 批量导入 -->
+<div class="modal-overlay" id="m-import">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3>批量导入账户</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-step">
+        <div class="step done"><div class="num">1</div><span>下载模板</span></div>
+        <div class="step-line"></div>
+        <div class="step active"><div class="num">2</div><span>上传文件</span></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="num">3</div><span>校验入库</span></div>
+        <div class="step-line"></div>
+        <div class="step"><div class="num">4</div><span>查看结果</span></div>
+      </div>
+
+      <div style="background:#f8fafc;padding:14px;border-radius:8px;margin-bottom:14px">
+        <div class="fw-600 mb-8">📥 下载模板</div>
+        <div class="form-hint mb-12">分为两个 Sheet 页：教师、学生。支持开通个人 VIP 字段。</div>
+        <div class="flex gap-8">
+          <button class="btn btn-sm btn-outline" onclick="toast('已下载：批量新增账户模板.xlsx','info')">批量新增账户模板.xlsx</button>
+          <button class="btn btn-sm btn-outline" onclick="toast('已下载：批量修改账户模板-权益版.xlsx','info')">批量修改账户模板-权益版.xlsx</button>
+        </div>
+      </div>
+
+      <div style="border:2px dashed #cbd5e1;padding:30px;border-radius:8px;text-align:center;background:#fafbfc">
+        <div style="font-size:32px;color:#94a3b8">📤</div>
+        <div class="fw-600 mt-12">点击或拖拽文件到此处上传</div>
+        <div class="form-hint mt-8">支持 .xlsx / .xls 格式，文件大小 ≤ 10MB，单次 ≤ 10,000 行</div>
+        <button class="btn btn-primary mt-12">选择文件</button>
+      </div>
+
+      <div class="card-title mt-16 mb-12">⚠️ 校验规则</div>
+      <div style="font-size:12px;color:#475569;line-height:1.8">
+        · 学工号必填、不可重复<br>
+        · 必填字段：教师需"学院"、学生需"学院"<br>
+        · 密码规则：长度 8-20 位，必须包含数字加字母<br>
+        · 权益类型：只能输入数据库配置的中文枚举值（教师版、A、B…）<br>
+        · 学生账号不能开通"教师版"权益<br>
+        · 有权益类型时，有效期不能为空
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="closeModal('m-import');toast('已开始导入校验，可在导入记录查看进度','success')">开始导入</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'account', title:'账户管理', breadcrumb:['系统管理','账户管理'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+function openBatch(){ document.getElementById('batch-bar').classList.add('open'); }
+function closeBatch(){
+  document.getElementById('batch-bar').classList.remove('open');
+  document.querySelectorAll('.row-check').forEach(c => c.checked = false);
+  document.getElementById('check-all').checked = false;
+  updateBatchCount();
+}
+function updateBatchCount(){
+  const n = document.querySelectorAll('.row-check:checked').length;
+  document.getElementById('batch-count').textContent = n;
+}
+document.querySelectorAll('.row-check').forEach(c => c.addEventListener('change', updateBatchCount));
+document.getElementById('check-all').addEventListener('change', e => {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = e.target.checked);
+  updateBatchCount();
+});
+
+// 账户类型联动
+document.getElementById('acc-type').addEventListener('change', e => {
+  document.getElementById('student-fields').style.display = (e.target.value === 'student' ? '' : 'none');
+  // 教师版档位卡片显示/禁用
+  refreshTierCards();
+});
+
+// ============== 工具：日期 ==============
+function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function fmt(dt){ const y=dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,'0'), d=String(dt.getDate()).padStart(2,'0'); return `${y}-${m}-${d}`; }
+function addMonths(dt, n){ const r = new Date(dt); r.setMonth(r.getMonth()+n); return r; }
+function addDays(dt, n){ const r = new Date(dt); r.setDate(r.getDate()+n); return r; }
+const TODAY = parseDate('2026-05-27'); // demo 固定今天
+
+// ============== 档位定义 ==============
+const TIERS = {
+  'free':    { key:'free',    name:'免费版',     icon:'🆓', cls:'free',    badge:'badge-gray',   sub:'仅有效期，到期后无法登录' },
+  'basic':   { key:'basic',   name:'基础版',     icon:'📘', cls:'basic',   badge:'badge-gray',   sub:'按月开通，可叠加' },
+  'teacher': { key:'teacher', name:'教师版',     icon:'🍎', cls:'teacher', badge:'badge-yellow', sub:'仅教师可开通' },
+  'vipA':    { key:'vipA',    name:'A 月卡',     icon:'🅰️', cls:'vip-a',   badge:'badge-blue',   sub:'个人 VIP - A' },
+  'vipB':    { key:'vipB',    name:'B 月卡',     icon:'🅱️', cls:'vip-b',   badge:'badge-purple', sub:'个人 VIP - B' },
+  'vipC':    { key:'vipC',    name:'C 月卡',     icon:'©️', cls:'vip-c',   badge:'badge-red',    sub:'个人 VIP - C' },
+};
+const TIER_ORDER_ALL    = ['free','basic','teacher','vipA','vipB','vipC'];
+const TIER_ORDER_PAID   = ['basic','teacher','vipA','vipB','vipC']; // 修改档位下拉用（不含免费）
+
+// ============== 账户上下文 ==============
+let _accCtx = null; // { accountId, accountType, name }
+
+function _accountLabel(ctx){ return ctx ? `${ctx.name || ctx.accountId}（${ctx.accountType==='teacher'?'教师':ctx.accountType==='student'?'学生':'运营'}）` : ''; }
+
+// ============== 演示数据：每个账号的开通历史 ==============
+const ACC_HIST = {
+  'acc-t1001': [
+    { id:'r1', tier:'teacher', qty:6, start:'2025-09-01', operator:'白小乐', channel:'线下签约', remark:'合同 #C-2025-T01',
+      items:[
+        { seq:1, tier:'teacher', start:'2025-09-01', end:'2025-09-30', status:'expired' },
+        { seq:2, tier:'teacher', start:'2025-10-01', end:'2025-10-31', status:'expired' },
+        { seq:3, tier:'teacher', start:'2025-11-01', end:'2025-11-30', status:'expired' },
+        { seq:4, tier:'teacher', start:'2025-12-01', end:'2025-12-31', status:'expired' },
+        { seq:5, tier:'teacher', start:'2026-01-01', end:'2026-01-31', status:'expired' },
+        { seq:6, tier:'teacher', start:'2026-02-01', end:'2026-02-28', status:'expired' },
+      ]
+    },
+    { id:'r2', tier:'teacher', qty:6, start:'2026-03-01', operator:'白小乐', channel:'线下签约', remark:'续费 6 个月',
+      items:[
+        { seq:1, tier:'teacher', start:'2026-03-01', end:'2026-03-31', status:'expired' },
+        { seq:2, tier:'teacher', start:'2026-04-01', end:'2026-04-30', status:'expired' },
+        { seq:3, tier:'teacher', start:'2026-05-01', end:'2026-05-31', status:'active'  },
+        { seq:4, tier:'teacher', start:'2026-06-01', end:'2026-06-30', status:'queued'  },
+        { seq:5, tier:'teacher', start:'2026-07-01', end:'2026-07-31', status:'queued'  },
+        { seq:6, tier:'teacher', start:'2026-08-01', end:'2026-08-31', status:'queued'  },
+      ]
+    },
+  ],
+  'acc-t1002': [],
+  'acc-s001': [
+    { id:'r1', tier:'vipA', qty:3, start:'2026-04-01', operator:'张同学', channel:'用户自购', remark:'—',
+      items:[
+        { seq:1, tier:'vipA', start:'2026-04-01', end:'2026-04-30', status:'expired' },
+        { seq:2, tier:'vipA', start:'2026-05-01', end:'2026-05-31', status:'active'  },
+        { seq:3, tier:'vipA', start:'2026-06-01', end:'2026-06-30', status:'queued'  },
+      ]
+    },
+    { id:'r2', tier:'free', qty:0, start:'2025-09-01', operator:'系统', channel:'系统初始化', remark:'入学首发',
+      items:[ { seq:1, tier:'free', start:'2025-09-01', end:'2026-08-31', status:'active' } ]
+    },
+  ],
+  'acc-s002': [
+    { id:'r1', tier:'free', qty:0, start:'2025-09-01', operator:'系统', channel:'系统初始化', remark:'入学首发',
+      items:[ { seq:1, tier:'free', start:'2025-09-01', end:'2026-08-31', status:'active' } ]
+    },
+  ],
+  'acc-ops001': [],
+};
+
+// ============== 演示数据：每个账号的增量包 ==============
+// 每包额度固定 10,000,000 Token，永久有效
+const ACC_PACKS = {
+  'acc-t1001': [
+    { id:'p1', quota:10000000, used:6840000, openDate:'2026-03-15', operator:'白小乐', channel:'线下签约', remark:'合同 #C-2025-T01 配套' },
+    { id:'p2', quota:10000000, used:240000,  openDate:'2026-05-08', operator:'白小乐', channel:'活动赠送', remark:'教师节活动赠送' },
+  ],
+  'acc-t1002': [],
+  'acc-s001':  [
+    { id:'p1', quota:10000000, used:1820000, openDate:'2026-04-22', operator:'张同学', channel:'用户自购', remark:'—' },
+  ],
+  'acc-s002':  [],
+  'acc-ops001':[],
+};
+
+function _fmtToken(n){ return Number(n).toLocaleString('en-US'); }
+
+// ============== Modal: 打开账户弹窗 ==============
+function openAccountModal(accountType, accountId, defaultTab, isCreate){
+  _accCtx = { accountType, accountId: accountId || ('new-'+Date.now()), name: _displayName(accountId, accountType) };
+
+  document.getElementById('acc-modal-title').textContent = isCreate ? '新增账户' : '修改账户 · ' + _accountLabel(_accCtx);
+  document.getElementById('acc-save-btn').textContent = isCreate ? '✓ 创建' : '✓ 保存';
+
+  // 初始化基础信息表单的 type
+  document.getElementById('acc-type').value = accountType === 'ops' ? 'ops' : accountType;
+  document.getElementById('student-fields').style.display = (accountType === 'student' ? '' : 'none');
+
+  switchAccTab(defaultTab || '基础信息');
+  refreshTierCards();
+  renderAccHist();
+
+  openModal('m-account');
+}
+
+function _displayName(id, type){
+  const map = {
+    'acc-t1001':'王老师','acc-t1002':'李老师',
+    'acc-s001':'张同学','acc-s002':'李同学','acc-ops001':'运营A'
+  };
+  return map[id] || (type==='teacher'?'新教师':type==='student'?'新学生':'新运营');
+}
+
+function switchAccTab(name){
+  // Step 导航高亮
+  document.querySelectorAll('#m-account .acc-step-nav .step-item').forEach(t => {
+    const stepName = t.dataset.step;
+    t.classList.toggle('active', stepName === name);
+    // 标记已完成的步骤
+    if(name === '权益管理' && stepName === '基础信息') t.classList.add('completed');
+    else t.classList.remove('completed');
+  });
+  document.querySelectorAll('#m-account .acc-pane').forEach(p => p.classList.toggle('active', p.dataset.pane === name));
+  // 底部按钮切换
+  document.getElementById('acc-btn-prev').style.display = name === '基础信息' ? 'none' : '';
+  document.getElementById('acc-btn-next').style.display = name === '基础信息' ? '' : 'none';
+  document.getElementById('acc-save-btn').style.display = name === '基础信息' ? 'none' : '';
+}
+
+function saveAccount(){
+  closeModal('m-account');
+  toast('账户已保存', 'success');
+}
+
+// ============== 当前权益概览（计算 active 月包）==============
+function _findActivePkg(accountId){
+  const list = ACC_HIST[accountId] || [];
+  for(const rec of list){
+    for(const it of rec.items){
+      if(it.status === 'active') return { rec, it };
+    }
+  }
+  return null;
+}
+
+function renderCurBenefit(){
+  const wrap = document.getElementById('acc-cur-benefit');
+  const cur = _findActivePkg(_accCtx.accountId);
+  const packs = ACC_PACKS[_accCtx.accountId] || [];
+  const totalQuota = packs.reduce((s,p)=>s+p.quota, 0);
+  const totalUsed  = packs.reduce((s,p)=>s+p.used, 0);
+  const remaining  = totalQuota - totalUsed;
+
+  let benefitHtml;
+  if(!cur){
+    benefitHtml = `
+      <div class="cur-benefit-card empty" style="flex:1">
+        <div class="ico">🚫</div>
+        <div class="info">
+          <div class="nm">当前无生效权益</div>
+          <div class="meta" style="color:#64748b">该账户暂未开通任何权益月包</div>
+        </div>
+      </div>`;
+  } else {
+    const t = TIERS[cur.it.tier] || TIERS.basic;
+    const days = Math.max(0, Math.round((parseDate(cur.it.end) - TODAY)/86400000));
+    benefitHtml = `
+      <div class="cur-benefit-card" style="flex:1">
+        <div class="ico">${t.icon}</div>
+        <div class="info">
+          <div class="nm">${t.name} <span class="tag">第 ${cur.it.seq}/${cur.rec.items.length} 个月包</span></div>
+          <div class="meta">本月包：${cur.it.start} ~ ${cur.it.end} · 整条订单到期：${cur.rec.items[cur.rec.items.length-1].end}</div>
+        </div>
+        <div class="stat">剩余天数<b>${days} 天</b></div>
+      </div>`;
+  }
+
+  let packHtml = '';
+  if(packs.length){
+    const pct = totalQuota ? Math.round(totalUsed / totalQuota * 100) : 0;
+    packHtml = `
+      <div class="cur-benefit-card" style="flex:1;background:linear-gradient(135deg,#065f46,#10b981)">
+        <div class="ico">📦</div>
+        <div class="info">
+          <div class="nm">增量包 Token <span class="tag">${packs.length} 包</span></div>
+          <div class="meta">已用 ${_fmtToken(totalUsed)} / 总额 ${_fmtToken(totalQuota)}（${pct}%） · 永久有效</div>
+        </div>
+        <div class="stat">剩余<b>${_fmtToken(remaining)}</b></div>
+      </div>`;
+  }
+  wrap.innerHTML = `<div style="display:flex;gap:12px;margin-bottom:14px">${benefitHtml}${packHtml}</div>`;
+}
+
+// ============== 历史表 ==============
+const STATUS_LABEL = { active:'当前生效', queued:'未使用', expired:'已失效' };
+
+function _badge(tier){
+  const t = TIERS[tier]; if(!t) return tier;
+  return `<span class="badge ${t.badge}">${t.icon} ${t.name}</span>`;
+}
+
+function renderAccHist(){
+  renderCurBenefit();
+  renderAccPacks();
+  const tbody = document.getElementById('acc-hist-tbody');
+  const list = ACC_HIST[_accCtx.accountId] || [];
+  if(list.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-mute);padding:30px">暂无开通记录，点击右上角「+ 新增权益」开通</td></tr>`;
+    return;
+  }
+  let html = '';
+  list.forEach(rec => {
+    const tier = TIERS[rec.tier];
+    const isFree = rec.tier === 'free';
+    const usedCnt = rec.items.filter(x => x.status === 'expired').length;
+    const queuedCnt = rec.items.filter(x => x.status === 'queued').length;
+    const activeCnt = rec.items.filter(x => x.status === 'active').length;
+    const lastEnd = rec.items[rec.items.length-1].end;
+    const usage = isFree
+      ? (activeCnt ? '<b style="color:var(--success)">使用中</b>' : '<b style="color:var(--danger)">已到期</b>')
+      : `<b style="color:var(--text-mute)">已用 ${usedCnt}</b> / <b style="color:var(--success)">未用 ${queuedCnt}</b>` + (activeCnt ? `<span style="color:var(--accent);margin-left:4px">（生效中 ${activeCnt}）</span>` : '');
+    const channelBadge = rec.channel === '系统初始化'
+      ? '<span class="badge badge-gray">系统初始化</span>'
+      : rec.channel === '用户自购'
+      ? '<span class="badge badge-green">用户自购</span>'
+      : '<span class="badge badge-blue">线下签约</span>';
+
+    html += `
+      <tr class="hist-row" data-rec="${rec.id}">
+        <td>
+          <span class="expand-toggle" onclick="toggleAccHistRow(this,'${rec.id}')">▶</span>
+          <span class="badge ${tier.badge}">${tier.icon} ${tier.name}</span>
+        </td>
+        <td>${isFree ? '—' : rec.qty + ' 个月包'}</td>
+        <td>${rec.start}</td>
+        <td>${lastEnd}</td>
+        <td>${usage}</td>
+        <td>${rec.operator}</td>
+        <td>${channelBadge}</td>
+        <td>${rec.remark || '—'}</td>
+      </tr>
+      <tr class="detail-row collapsed" data-detail="${rec.id}"><td colspan="8"></td></tr>
+    `;
+  });
+  tbody.innerHTML = html;
+}
+
+function toggleAccHistRow(toggleEl, recId){
+  const detailRow = document.querySelector(`tr.detail-row[data-detail="${recId}"]`);
+  if(!detailRow) return;
+  const isOpen = !detailRow.classList.contains('collapsed');
+  if(isOpen){
+    detailRow.classList.add('collapsed');
+    toggleEl.classList.remove('open');
+    toggleEl.textContent = '▶';
+  } else {
+    const td = detailRow.querySelector('td');
+    td.innerHTML = renderAccHistDetail(recId);
+    td.dataset.rendered = '1';
+    detailRow.classList.remove('collapsed');
+    toggleEl.classList.add('open');
+    toggleEl.textContent = '▼';
+  }
+}
+
+function _findRec(recId){
+  const list = ACC_HIST[_accCtx.accountId] || [];
+  return list.find(r => r.id === recId);
+}
+
+function renderAccHistDetail(recId){
+  const rec = _findRec(recId);
+  if(!rec) return '';
+  const isFree = rec.tier === 'free';
+  if(!rec.items.length){
+    return `<div class="pkg-detail-wrap"><div class="pkg-empty">暂无月包明细</div></div>`;
+  }
+  const rows = rec.items.map(it => {
+    const canEditTier  = (it.status === 'active' || it.status === 'queued') && !isFree;
+    const canEditStart = (it.status === 'queued') || isFree;
+    const canEditEnd   = (it.status === 'active' || it.status === 'queued') || isFree;
+    const canEdit      = canEditTier || canEditStart || canEditEnd;
+    const canDelete    = (it.status === 'queued');
+
+    const editTitle = it.status === 'expired' ? '已失效，不可修改'
+                    : it.status === 'active'  ? '可修改：档位、结束时间'
+                    : isFree ? '可修改：到期时间'
+                    :                           '可修改：档位、开始时间、结束时间';
+    const editLink = canEdit
+      ? `<a onclick="openAccEditPkgModal('${recId}',${it.seq})" title="${editTitle}">✏️ 修改</a>`
+      : `<a class="disabled" title="${editTitle}">✏️ 修改</a>`;
+    const delLink = canDelete
+      ? `<a class="danger" onclick="deleteAccPkg('${recId}',${it.seq})">🗑 删除</a>`
+      : `<a class="disabled" title="${it.status==='active'?'当前生效，不可删除':'已失效，不可删除'}">🗑 删除</a>`;
+
+    return `
+      <tr data-seq="${it.seq}" data-status="${it.status}">
+        <td class="seq">${isFree?'—':'第 '+it.seq+' 个'}</td>
+        <td>${_badge(it.tier)}</td>
+        <td>${it.start}</td>
+        <td>${it.end}</td>
+        <td><span class="stat-tag ${it.status}">${STATUS_LABEL[it.status]}</span></td>
+        <td class="actions">${editLink}${delLink}</td>
+      </tr>`;
+  }).join('');
+  return `
+    <div class="pkg-detail-wrap">
+      <div class="pdh">开通明细 <span class="meta">共 ${rec.items.length} 个月包 · 修改档位将作用于整条开通记录</span></div>
+      <table class="pkg-table">
+        <thead><tr>
+          <th style="width:80px">序号</th>
+          <th style="width:140px">档位</th>
+          <th style="width:160px">开始时间</th>
+          <th style="width:160px">结束时间</th>
+          <th style="width:90px">状态</th>
+          <th style="width:160px">操作</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ============== 新增权益（月包）弹窗 ==============
+function refreshTierCards(){
+  const list = document.getElementById('ab-tier-list');
+  if(!list) return;
+  const accountType = (_accCtx && _accCtx.accountType) || document.getElementById('acc-type').value;
+  list.innerHTML = TIER_ORDER_ALL.map(k => {
+    const t = TIERS[k];
+    const teacherOnly = (k === 'teacher');
+    const disabled = teacherOnly && accountType !== 'teacher';
+    return `
+      <div class="tier-card-mini ${disabled?'disabled':''}" data-tier="${k}" onclick="${disabled?'':`abPickTier('${k}')`}">
+        <div class="tc-icon ${t.cls}">${t.icon}</div>
+        <div class="tc-info">
+          <div class="tc-name">${t.name}${teacherOnly?'<span style="font-size:10px;color:#92400e;margin-left:4px">仅教师</span>':''}</div>
+          <div class="tc-sub">${t.sub}</div>
+        </div>
+        <div class="tc-check"></div>
+      </div>`;
+  }).join('');
+}
+
+let _abTier = null;
+function abPickTier(key){
+  _abTier = key;
+  document.querySelectorAll('#ab-tier-list .tier-card-mini').forEach(c => c.classList.toggle('selected', c.dataset.tier === key));
+  document.getElementById('ab-teacher-tip').style.display = 'none';
+  document.getElementById('ab-remark-block').style.display = '';
+  if(key === 'free'){
+    document.getElementById('ab-pkg-config').style.display = 'none';
+    document.getElementById('ab-free-config').style.display = '';
+  } else {
+    document.getElementById('ab-pkg-config').style.display = '';
+    document.getElementById('ab-free-config').style.display = 'none';
+    abRenderQueue();
+  }
+}
+
+function abAdjustQty(delta){
+  const i = document.getElementById('ab-qty');
+  let v = parseInt(i.value, 10) || 1;
+  v = Math.max(1, Math.min(60, v + delta));
+  i.value = v;
+  abRenderQueue();
+}
+
+function abRenderQueue(){
+  const qty = parseInt(document.getElementById('ab-qty').value, 10) || 1;
+  document.getElementById('ab-qty-echo').textContent = qty;
+  const startStr = document.getElementById('ab-start-date').value || '2026-05-27';
+  const start = parseDate(startStr);
+  const wrap = document.getElementById('ab-queue');
+  let html = '';
+  for(let i=0;i<qty;i++){
+    const s = addMonths(start, i);
+    const e = addDays(addMonths(start, i+1), -1);
+    let status = 'queued';
+    if(TODAY >= s && TODAY <= e) status = 'active';
+    else if(TODAY > e) status = 'expired';
+    else if(i === 0) status = 'active'; // 第一个包默认 active 提示
+    html += `
+      <div class="pkg-card ${status}">
+        <div class="seq">第 ${i+1} 个</div>
+        <div class="range">${fmt(s)} ~ ${fmt(e)}</div>
+        <span class="status-tag">${STATUS_LABEL[status]}</span>
+      </div>`;
+  }
+  wrap.innerHTML = html;
+}
+document.addEventListener('change', e => {
+  if(e.target && e.target.id === 'ab-start-date') abRenderQueue();
+});
+
+// 打开新增权益弹窗时初始化
+document.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if(btn && btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'m-acc-benefit'")){
+    document.getElementById('ab-account-name').textContent = _accountLabel(_accCtx);
+    refreshTierCards();
+    _abTier = null;
+    document.getElementById('ab-pkg-config').style.display = 'none';
+    document.getElementById('ab-free-config').style.display = 'none';
+    document.getElementById('ab-remark-block').style.display = 'none';
+    document.getElementById('ab-qty').value = 1;
+    document.getElementById('ab-start-date').value = '2026-05-27';
+    document.getElementById('ab-free-end').value = '2026-12-31';
+    document.getElementById('ab-remark').value = '';
+    // 教师版可选状态提示
+    if(_accCtx && _accCtx.accountType !== 'teacher'){
+      document.getElementById('ab-teacher-tip').style.display = '';
+    }
+  }
+});
+
+function saveAccBenefit(){
+  if(!_abTier){ toast('请先选择目标档位', 'warning'); return; }
+  const t = TIERS[_abTier];
+  if(_abTier === 'teacher' && _accCtx.accountType !== 'teacher'){ toast('教师版仅教师账户可开通','warning'); return; }
+  const remark = document.getElementById('ab-remark').value.trim() || '—';
+  const newRec = { id:'r'+Date.now(), tier:_abTier, operator:'当前操作员', channel:'线下签约', remark };
+
+  if(_abTier === 'free'){
+    const end = document.getElementById('ab-free-end').value;
+    if(!end){ toast('请选择到期时间','warning'); return; }
+    newRec.qty = 0;
+    newRec.start = fmt(TODAY);
+    newRec.items = [{ seq:1, tier:'free', start:newRec.start, end, status: parseDate(end) >= TODAY ? 'active':'expired' }];
+  } else {
+    const qty = parseInt(document.getElementById('ab-qty').value, 10) || 1;
+    const startStr = document.getElementById('ab-start-date').value;
+    if(!startStr){ toast('请选择开通日期','warning'); return; }
+    const start = parseDate(startStr);
+    newRec.qty = qty;
+    newRec.start = startStr;
+    newRec.items = [];
+    for(let i=0;i<qty;i++){
+      const s = addMonths(start, i);
+      const e = addDays(addMonths(start, i+1), -1);
+      let status = 'queued';
+      if(TODAY >= s && TODAY <= e) status = 'active';
+      else if(TODAY > e) status = 'expired';
+      newRec.items.push({ seq:i+1, tier:_abTier, start:fmt(s), end:fmt(e), status });
+    }
+    // 若全部 queued 且首包尚未到期，把第一个标 active 演示
+    if(!newRec.items.some(x=>x.status==='active') && newRec.items.length){
+      newRec.items[0].status = 'active';
+    }
+  }
+
+  ACC_HIST[_accCtx.accountId] = ACC_HIST[_accCtx.accountId] || [];
+  ACC_HIST[_accCtx.accountId].unshift(newRec);
+
+  closeModal('m-acc-benefit');
+  renderAccHist();
+  toast(`已开通 ${t.name}${_abTier==='free'?'':' · '+newRec.qty+' 个月包'}`, 'success');
+}
+
+// ============== 修改 / 删除月包 ==============
+let _epCtx = null;
+
+function openAccEditPkgModal(recId, seq){
+  const rec = _findRec(recId); if(!rec) return;
+  const item = rec.items.find(x => x.seq === parseInt(seq,10)); if(!item) return;
+  if(item.status === 'expired'){ toast('已失效的月包不可修改','warning'); return; }
+  const isFree = rec.tier === 'free';
+
+  _epCtx = { recId, seq:item.seq, originalStatus:item.status, isFree };
+
+  // 标题
+  document.getElementById('ep-title').textContent = isFree ? '修改免费版有效期' : `修改第 ${item.seq} 个月包`;
+
+  // 档位下拉
+  const tierSel = document.getElementById('ep-tier');
+  tierSel.innerHTML = TIER_ORDER_PAID.map(k => {
+    const t = TIERS[k];
+    const dis = (k === 'teacher' && _accCtx.accountType !== 'teacher') ? 'disabled' : '';
+    return `<option value="${k}" ${dis} ${k===item.tier?'selected':''}>${t.icon} ${t.name}${dis?'（仅教师）':''}</option>`;
+  }).join('');
+  if(isFree){ tierSel.disabled = true; tierSel.innerHTML = `<option selected>🆓 免费版</option>`; }
+  else tierSel.disabled = false;
+
+  // 元信息
+  const t = TIERS[rec.tier];
+  document.getElementById('ep-meta').innerHTML = `
+    <div>账户：<b style="color:var(--primary)">${_accountLabel(_accCtx)}</b></div>
+    <div>所属订单：<b>${t.name}</b> · 共 ${rec.items.length} 个${isFree?'记录':'月包'} · 开通人 ${rec.operator}</div>
+    <div>当前状态：<b style="color:${item.status==='active'?'#1d4ed8':'#3730a3'}">${STATUS_LABEL[item.status]}</b> · 序号 ${isFree?'—':'第 '+item.seq+' 个'}</div>
+  `;
+
+  // 起止时间字段
+  const isActive = item.status === 'active' && !isFree;
+  const isQueued = item.status === 'queued';
+  document.getElementById('ep-start').value = item.start;
+  document.getElementById('ep-end').value = item.end;
+  if(isActive){
+    document.getElementById('ep-start').disabled = true;
+    document.getElementById('ep-start-hint').innerHTML = '<span style="color:#92400e">⚠️ 当前生效中的月包不可修改开始时间</span>';
+  } else {
+    document.getElementById('ep-start').disabled = false;
+    document.getElementById('ep-start-hint').innerHTML = '';
+  }
+  document.getElementById('ep-end').disabled = false;
+
+  // 警告条
+  const warn = document.getElementById('ep-warn');
+  if(isFree){
+    warn.innerHTML = '<b>⚠️ 提示：</b>修改免费版到期时间，到期后该账户无法登录系统。';
+  } else if(isActive){
+    warn.innerHTML = '<b>⚠️ 提示：</b>修改"当前生效"月包的结束时间，将同步影响下一个月包的启用时间。修改档位会作用于整条开通记录的所有月包。';
+  } else {
+    warn.innerHTML = '<b>⚠️ 提示：</b>修改"未使用"月包的起止时间不影响已生效/已失效的月包。修改档位会作用于整条开通记录的所有月包。';
+  }
+
+  openModal('m-acc-edit-pkg');
+}
+
+function saveAccEditPkg(){
+  if(!_epCtx) return;
+  const { recId, seq, originalStatus, isFree } = _epCtx;
+  const rec = _findRec(recId); if(!rec) return;
+  const item = rec.items.find(x => x.seq === parseInt(seq,10)); if(!item) return;
+
+  const newStart = document.getElementById('ep-start').value;
+  const newEnd = document.getElementById('ep-end').value;
+  if(!newStart || !newEnd){ toast('开始时间与结束时间不能为空','warning'); return; }
+  if(newStart >= newEnd){ toast('开始时间必须早于结束时间','warning'); return; }
+  if(originalStatus === 'active' && !isFree && newStart !== item.start){ toast('当前生效月包不允许修改开始时间','warning'); return; }
+
+  let tierChanged = false;
+  if(!isFree){
+    const newTier = document.getElementById('ep-tier').value;
+    if(newTier && newTier !== item.tier){
+      tierChanged = true;
+      rec.items.forEach(it => { it.tier = newTier; });
+      rec.tier = newTier;
+    }
+  }
+  item.start = newStart;
+  item.end = newEnd;
+
+  closeModal('m-acc-edit-pkg');
+  renderAccHist();
+
+  if(tierChanged) toast(`月包已更新；档位已同步为 ${TIERS[rec.tier].name}（整条订单）`, 'success');
+  else toast(`月包已更新：${item.start} ~ ${item.end}`, 'success');
+  _epCtx = null;
+}
+
+function deleteAccPkg(recId, seq){
+  const rec = _findRec(recId); if(!rec) return;
+  const item = rec.items.find(x => x.seq === parseInt(seq,10)); if(!item) return;
+  if(item.status !== 'queued'){ toast(item.status==='active'?'当前生效不可删除':'已失效不可删除','warning'); return; }
+  if(!confirm(`确认删除第 ${seq} 个未使用月包？\n${item.start} ~ ${item.end}`)) return;
+  rec.items = rec.items.filter(x => x.seq !== item.seq);
+  // 重新编号
+  rec.items.forEach((x,i)=>{ x.seq = i+1; });
+  rec.qty = rec.items.length;
+  renderAccHist();
+  toast(`已删除该月包`, 'success');
+}
+
+// ============== 增量包 ==============
+const ACC_PACK_QUOTA = 10000000; // 1000 万 Token
+
+function switchBenefitSub(name){
+  document.querySelectorAll('#m-account .bs-tab').forEach(t => t.classList.toggle('active', t.dataset.bs === name));
+  document.querySelectorAll('#m-account .benefit-sub-pane').forEach(p => p.classList.toggle('active', p.dataset.bs === name));
+  // 按 Tab 切换右侧操作按钮
+  document.getElementById('acc-add-benefit-btn').style.display = name === 'months' ? '' : 'none';
+  document.getElementById('acc-add-pack-btn').style.display = name === 'packs' ? '' : 'none';
+}
+
+function _channelBadge(ch){
+  if(ch === '系统初始化') return '<span class="badge badge-gray">系统初始化</span>';
+  if(ch === '用户自购')   return '<span class="badge badge-green">用户自购</span>';
+  if(ch === '活动赠送')   return '<span class="badge badge-yellow">活动赠送</span>';
+  return '<span class="badge badge-blue">线下签约</span>';
+}
+
+function renderAccPacks(){
+  const tbody = document.getElementById('acc-pack-tbody');
+  if(!tbody || !_accCtx) return;
+  const list = ACC_PACKS[_accCtx.accountId] || [];
+  if(list.length === 0){
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-mute);padding:30px">暂无增量包，点击右上角「+ 新增增量包」开通</td></tr>`;
+    return;
+  }
+  // 总额度 / 总已用 概览（注入到首行上方说明区可选；此处直接渲染表格行）
+  let html = '';
+  list.forEach(p => {
+    const pct = Math.min(100, Math.round(p.used / p.quota * 100));
+    const cls = pct >= 90 ? 'danger' : pct >= 70 ? 'warn' : '';
+    html += `
+      <tr data-pack="${p.id}">
+        <td><span class="row-strong" style="color:var(--primary);font-weight:600">🎁 个人 Token 增量包</span></td>
+        <td><b style="color:var(--primary)">${_fmtToken(p.quota)}</b><div style="font-size:10px;color:var(--text-mute);margin-top:1px">Token</div></td>
+        <td class="usage-cell" style="white-space:normal">
+          <span class="usage-num"><b>${_fmtToken(p.used)}</b> / ${_fmtToken(p.quota)} (${pct}%)</span>
+          <span class="usage-bar"><span class="${cls}" style="width:${pct}%"></span></span>
+        </td>
+        <td>${p.openDate}</td>
+        <td><span style="color:var(--success);font-weight:500">永久有效</span></td>
+        <td>${p.operator}</td>
+        <td>${_channelBadge(p.channel)}</td>
+        <td>${p.remark || '—'}</td>
+        <td><a class="btn btn-sm btn-link" style="color:var(--danger);cursor:pointer" onclick="deleteAccPack('${p.id}')">删除</a></td>
+      </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function openAddAccPack(){
+  if(!_accCtx){ toast('请先选择账户','warning'); return; }
+  document.getElementById('ap-account-name').textContent = _accountLabel(_accCtx);
+  document.getElementById('ap-start-date').value = '2026-05-27';
+  document.getElementById('ap-channel').value = '线下签约';
+  document.getElementById('ap-remark').value = '';
+  openModal('m-acc-pack');
+}
+
+function saveAccPack(){
+  const date = document.getElementById('ap-start-date').value;
+  if(!date){ toast('请选择开通时间','warning'); return; }
+  const channel = document.getElementById('ap-channel').value;
+  const remark  = document.getElementById('ap-remark').value.trim() || '—';
+  const newPack = {
+    id: 'p'+Date.now(),
+    quota: ACC_PACK_QUOTA,
+    used: 0,
+    openDate: date,
+    operator: '当前操作员',
+    channel,
+    remark
+  };
+  ACC_PACKS[_accCtx.accountId] = ACC_PACKS[_accCtx.accountId] || [];
+  ACC_PACKS[_accCtx.accountId].unshift(newPack);
+  closeModal('m-acc-pack');
+  renderAccPacks();
+  switchBenefitSub('packs');
+  toast(`已开通增量包：1,000 万 Token`, 'success');
+}
+
+function deleteAccPack(packId){
+  const list = ACC_PACKS[_accCtx.accountId] || [];
+  const idx = list.findIndex(p => p.id === packId);
+  if(idx < 0) return;
+  const p = list[idx];
+  if(!confirm(`确认删除该增量包？\n额度 ${_fmtToken(p.quota)} Token，已用 ${_fmtToken(p.used)} Token\n已用部分仍计入消耗记录。`)) return;
+  list.splice(idx, 1);
+  renderAccPacks();
+  toast(`已删除增量包`, 'success');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>全局驾驶舱 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+/* 大屏专属：覆盖默认布局，铺满全屏 */
+body{background:#020617}
+#sidebar{display:none}
+#main{height:100vh}
+#topbar{display:none}
+#content{padding:0;background:#020617;color:#e2e8f0;overflow:auto;height:100vh}
+
+.dash-wrap{padding:18px 22px;min-height:100vh;background:
+  radial-gradient(circle at 10% 20%, rgba(59,130,246,.18), transparent 35%),
+  radial-gradient(circle at 90% 80%, rgba(139,92,246,.15), transparent 40%),
+  linear-gradient(180deg,#020617 0%,#0f172a 100%);
+}
+
+.dash-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(96,165,250,.18)}
+.dash-head .title{font-size:24px;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:10px;letter-spacing:1px}
+.dash-head .meta{display:flex;align-items:center;gap:14px;font-size:12px;color:#94a3b8}
+.dash-head .scope-toggle{display:flex;background:rgba(30,41,59,.6);border:1px solid rgba(96,165,250,.25);border-radius:6px;padding:2px}
+.dash-head .scope-toggle span{padding:5px 12px;font-size:11px;color:#94a3b8;cursor:pointer;border-radius:4px}
+.dash-head .scope-toggle span.active{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-weight:600}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:livepulse 1.5s infinite}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.9)}}
+
+/* 三栏布局 */
+.dash-grid{display:grid;grid-template-columns:300px 1fr 300px;gap:14px}
+
+/* 通用卡 */
+.dash-card{background:linear-gradient(135deg,rgba(30,41,59,.7),rgba(15,23,42,.5));border:1px solid rgba(96,165,250,.18);border-radius:10px;padding:14px;backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.dash-card::before{content:'';position:absolute;left:0;top:0;width:60%;height:1px;background:linear-gradient(90deg,#60a5fa,transparent)}
+.dc-title{font-size:12px;color:#cbd5e1;margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.5px}
+.dc-title::before{content:'';width:3px;height:12px;background:linear-gradient(180deg,#60a5fa,#a78bfa);border-radius:1px}
+
+/* 中心 KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi-card{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(124,58,237,.12));border:1px solid rgba(96,165,250,.3);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi-card::after{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(96,165,250,.15),transparent 70%)}
+.kpi-card .k-l{font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:5px}
+.kpi-card .k-v{font-size:28px;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-top:4px;font-family:'SF Mono',monospace}
+.kpi-card .k-trend{font-size:11px;color:#10b981;margin-top:4px}
+
+/* 排行榜 */
+.rank-item{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:12px;color:#cbd5e1;border-bottom:1px dashed rgba(96,165,250,.1)}
+.rank-item:last-child{border:0}
+.rank-item .num{width:18px;height:18px;border-radius:3px;background:rgba(96,165,250,.15);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.rank-item:nth-child(1) .num{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.rank-item:nth-child(2) .num{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.rank-item:nth-child(3) .num{background:linear-gradient(135deg,#facc15,#eab308);color:#000}
+.rank-item .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-item .v{color:#60a5fa;font-weight:700;font-family:'SF Mono',monospace}
+
+/* 中国地图 SVG 占位 */
+.map-card{height:340px;position:relative}
+.map-svg{width:100%;height:100%}
+.map-region{fill:rgba(59,130,246,.15);stroke:rgba(96,165,250,.4);stroke-width:1;cursor:pointer;transition:all .2s}
+.map-region:hover{fill:rgba(96,165,250,.4)}
+.map-region.hot{fill:rgba(239,68,68,.5)}
+.map-region.warm{fill:rgba(245,158,11,.4)}
+.map-region.mild{fill:rgba(59,130,246,.35)}
+.map-marker{fill:#fbbf24;stroke:#fff;stroke-width:1}
+.map-pulse{fill:none;stroke:#fbbf24;stroke-width:2;opacity:.6;animation:pulse-ring 2s infinite}
+@keyframes pulse-ring{0%{r:3;opacity:1}100%{r:14;opacity:0}}
+.map-legend{position:absolute;left:14px;bottom:14px;display:flex;gap:10px;font-size:10px;color:#94a3b8}
+.map-legend .lg{display:flex;align-items:center;gap:4px}
+.map-legend .lg span{width:10px;height:10px;border-radius:2px}
+
+/* 趋势图 */
+.trend-svg{width:100%;height:160px}
+.trend-axis{stroke:rgba(96,165,250,.15)}
+.trend-line{fill:none;stroke:url(#tg);stroke-width:2}
+.trend-area{fill:url(#tg-fill);opacity:.3}
+.trend-label{font-size:9px;fill:#64748b}
+
+/* 实时活跃 */
+.activity-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:11px;color:#94a3b8;border-bottom:1px dashed rgba(96,165,250,.1);animation:slideUp .4s}
+.activity-item:last-child{border:0}
+.activity-item .av{width:24px;height:24px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.activity-item .body{flex:1}
+.activity-item b{color:#cbd5e1}
+.activity-item .ts{font-size:9px;color:#64748b;margin-top:2px}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* 词云 */
+.wc-wrap{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;padding:8px;min-height:160px}
+.wc-wrap span{padding:2px 8px;border-radius:10px;color:#94a3b8;font-size:11px;cursor:pointer;transition:all .15s}
+.wc-wrap span:hover{color:#fff;background:rgba(96,165,250,.2)}
+.wc-wrap span.s5{font-size:22px;color:#60a5fa;font-weight:700}
+.wc-wrap span.s4{font-size:18px;color:#a78bfa;font-weight:600}
+.wc-wrap span.s3{font-size:15px;color:#22d3ee}
+.wc-wrap span.s2{font-size:13px;color:#fbbf24}
+
+/* 学校排行（条形） */
+.bar-rank{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px}
+.bar-rank .nm{width:80px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.bar-rank .bar-bg{flex:1;height:14px;background:rgba(96,165,250,.1);border-radius:3px;overflow:hidden;position:relative}
+.bar-rank .bar-fill{height:100%;background:linear-gradient(90deg,#60a5fa,#1d4ed8);border-radius:3px;position:relative}
+.bar-rank .v{color:#60a5fa;font-weight:700;font-family:'SF Mono',monospace;width:60px;text-align:right}
+
+/* 进度环 */
+.ring-svg{width:100px;height:100px}
+.ring-bg{fill:none;stroke:rgba(96,165,250,.15);stroke-width:8}
+.ring-fill{fill:none;stroke:url(#rg);stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center}
+.ring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.ring-grid .item .v{font-size:18px;font-weight:700;color:#60a5fa;margin-top:-60px;position:relative}
+.ring-grid .item .l{font-size:10px;color:#94a3b8;margin-top:8px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <div class="dash-wrap">
+      <div class="dash-head">
+        <div class="title">⚡ 初发 Trufar · 全国驾驶舱</div>
+        <div class="meta">
+          <div class="scope-toggle">
+            <span>校内（BUPT）</span>
+            <span class="active">全国</span>
+          </div>
+          <span><span class="live-dot"></span> 实时数据</span>
+          <span id="dash-time">2026-05-21 14:22:18</span>
+        </div>
+      </div>
+
+      <!-- 顶部 KPI -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="k-l">📚 接入学校</div>
+          <div class="k-v" id="kpi-school">128</div>
+          <div class="k-trend">↑ 本月 +12 所</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-l">👥 活跃用户</div>
+          <div class="k-v" id="kpi-user">186,420</div>
+          <div class="k-trend">↑ 18.6% 周环比</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-l">🤖 智能体调用</div>
+          <div class="k-v" id="kpi-call">2.86M</div>
+          <div class="k-trend">↑ 24.3% 周环比</div>
+        </div>
+        <div class="kpi-card">
+          <div class="k-l">⚡ Token 消耗</div>
+          <div class="k-v" id="kpi-token">3.42B</div>
+          <div class="k-trend">↑ 21.5% 周环比</div>
+        </div>
+      </div>
+
+      <!-- 三栏 -->
+      <div class="dash-grid">
+        <!-- 左：学校 / 智能体排行 -->
+        <div>
+          <div class="dash-card">
+            <div class="dc-title">🏆 学校活跃 TOP10</div>
+            <div class="bar-rank"><span class="nm">北京邮电大学</span><div class="bar-bg"><div class="bar-fill" style="width:96%"></div></div><span class="v">98.2K</span></div>
+            <div class="bar-rank"><span class="nm">清华大学</span><div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div><span class="v">86.4K</span></div>
+            <div class="bar-rank"><span class="nm">北京大学</span><div class="bar-bg"><div class="bar-fill" style="width:78%"></div></div><span class="v">72.6K</span></div>
+            <div class="bar-rank"><span class="nm">上海交通大学</span><div class="bar-bg"><div class="bar-fill" style="width:70%"></div></div><span class="v">64.8K</span></div>
+            <div class="bar-rank"><span class="nm">浙江大学</span><div class="bar-bg"><div class="bar-fill" style="width:64%"></div></div><span class="v">58.2K</span></div>
+            <div class="bar-rank"><span class="nm">复旦大学</span><div class="bar-bg"><div class="bar-fill" style="width:56%"></div></div><span class="v">52.4K</span></div>
+            <div class="bar-rank"><span class="nm">中国人民大学</span><div class="bar-bg"><div class="bar-fill" style="width:48%"></div></div><span class="v">44.6K</span></div>
+            <div class="bar-rank"><span class="nm">武汉大学</span><div class="bar-bg"><div class="bar-fill" style="width:42%"></div></div><span class="v">38.8K</span></div>
+            <div class="bar-rank"><span class="nm">华中科技大学</span><div class="bar-bg"><div class="bar-fill" style="width:38%"></div></div><span class="v">35.2K</span></div>
+            <div class="bar-rank"><span class="nm">中山大学</span><div class="bar-bg"><div class="bar-fill" style="width:32%"></div></div><span class="v">28.6K</span></div>
+          </div>
+
+          <div class="dash-card mt-16" style="margin-top:14px">
+            <div class="dc-title">🤖 热门智能体 TOP8</div>
+            <div class="rank-item"><div class="num">1</div><div class="name">代码纠错（码上）</div><div class="v">58.6K</div></div>
+            <div class="rank-item"><div class="num">2</div><div class="name">知识问答（码上）</div><div class="v">42.3K</div></div>
+            <div class="rank-item"><div class="num">3</div><div class="name">代码解读（码上）</div><div class="v">38.2K</div></div>
+            <div class="rank-item"><div class="num">4</div><div class="name">编程问答（码上）</div><div class="v">26.8K</div></div>
+            <div class="rank-item"><div class="num">5</div><div class="name">英语作文批改</div><div class="v">18.5K</div></div>
+            <div class="rank-item"><div class="num">6</div><div class="name">数据结构图解</div><div class="v">12.3K</div></div>
+            <div class="rank-item"><div class="num">7</div><div class="name">考研政治助手</div><div class="v">9.8K</div></div>
+            <div class="rank-item"><div class="num">8</div><div class="name">指针辅导专家</div><div class="v">7.6K</div></div>
+          </div>
+        </div>
+
+        <!-- 中：地图 + 趋势 -->
+        <div>
+          <div class="dash-card map-card">
+            <div class="dc-title">🗺️ 全国学校分布热力</div>
+            <svg class="map-svg" viewBox="0 0 720 420">
+              <!-- 中国轮廓简化版 -->
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(96,165,250,.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="720" height="420" fill="url(#grid)"/>
+
+              <!-- 简化省份块 -->
+              <path d="M 100 80 L 240 60 L 320 100 L 280 160 L 180 180 L 80 140 Z" class="map-region warm"/>
+              <path d="M 240 60 L 360 50 L 420 100 L 400 160 L 320 100 Z" class="map-region hot"/>
+              <path d="M 360 50 L 480 70 L 540 130 L 460 180 L 420 100 Z" class="map-region warm"/>
+              <path d="M 480 70 L 580 100 L 620 180 L 540 130 Z" class="map-region mild"/>
+              <path d="M 280 160 L 400 160 L 380 240 L 240 220 L 180 180 Z" class="map-region hot"/>
+              <path d="M 400 160 L 540 130 L 580 220 L 480 260 L 380 240 Z" class="map-region hot"/>
+              <path d="M 540 130 L 620 180 L 640 260 L 580 220 Z" class="map-region warm"/>
+              <path d="M 240 220 L 380 240 L 360 320 L 220 300 L 180 260 Z" class="map-region warm"/>
+              <path d="M 380 240 L 480 260 L 460 340 L 360 320 Z" class="map-region hot"/>
+              <path d="M 480 260 L 580 220 L 620 320 L 540 360 L 460 340 Z" class="map-region warm"/>
+              <path d="M 220 300 L 360 320 L 340 360 L 200 340 Z" class="map-region mild"/>
+              <path d="M 360 320 L 460 340 L 460 380 L 340 360 Z" class="map-region mild"/>
+
+              <!-- 热点城市 -->
+              <g><circle cx="380" cy="120" r="4" class="map-marker"/><circle cx="380" cy="120" class="map-pulse" r="3"/><text x="388" y="118" font-size="10" fill="#fbbf24">北京 98K</text></g>
+              <g><circle cx="510" cy="200" r="4" class="map-marker"/><circle cx="510" cy="200" class="map-pulse" r="3"/><text x="518" y="198" font-size="10" fill="#fbbf24">上海 86K</text></g>
+              <g><circle cx="450" cy="220" r="3" class="map-marker"/><text x="458" y="218" font-size="10" fill="#fbbf24">杭州 58K</text></g>
+              <g><circle cx="340" cy="240" r="3" class="map-marker"/><text x="298" y="238" font-size="10" fill="#fbbf24">武汉 38K</text></g>
+              <g><circle cx="420" cy="320" r="3" class="map-marker"/><text x="428" y="318" font-size="10" fill="#fbbf24">广州 28K</text></g>
+              <g><circle cx="200" cy="160" r="3" class="map-marker"/><text x="158" y="158" font-size="10" fill="#fbbf24">西安 24K</text></g>
+            </svg>
+            <div class="map-legend">
+              <span class="lg"><span style="background:rgba(239,68,68,.5)"></span>50K+</span>
+              <span class="lg"><span style="background:rgba(245,158,11,.4)"></span>20-50K</span>
+              <span class="lg"><span style="background:rgba(59,130,246,.35)"></span>5-20K</span>
+              <span class="lg"><span style="background:rgba(96,165,250,.15)"></span>&lt;5K</span>
+            </div>
+          </div>
+
+          <div class="dash-card" style="margin-top:14px">
+            <div class="dc-title">📈 7 日活跃趋势</div>
+            <svg class="trend-svg" viewBox="0 0 600 160">
+              <defs>
+                <linearGradient id="tg" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#60a5fa"/>
+                  <stop offset="100%" stop-color="#a78bfa"/>
+                </linearGradient>
+                <linearGradient id="tg-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#60a5fa"/>
+                  <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="40" y1="130" x2="580" y2="130" class="trend-axis"/>
+              <line x1="40" y1="20"  x2="40"  y2="130" class="trend-axis"/>
+              <text x="36" y="25" text-anchor="end" class="trend-label">200K</text>
+              <text x="36" y="80" text-anchor="end" class="trend-label">100K</text>
+              <text x="36" y="130" text-anchor="end" class="trend-label">0</text>
+              <path d="M 40 90 L 130 70 L 220 60 L 310 50 L 400 55 L 490 35 L 580 30" class="trend-line"/>
+              <path d="M 40 90 L 130 70 L 220 60 L 310 50 L 400 55 L 490 35 L 580 30 L 580 130 L 40 130 Z" class="trend-area"/>
+              <text x="40"  y="148" class="trend-label">5/15</text>
+              <text x="220" y="148" class="trend-label">5/17</text>
+              <text x="400" y="148" class="trend-label">5/19</text>
+              <text x="580" y="148" class="trend-label" text-anchor="end">5/21</text>
+              <!-- 数据点 -->
+              <g fill="#fbbf24"><circle cx="40" cy="90" r="3"/><circle cx="130" cy="70" r="3"/><circle cx="220" cy="60" r="3"/><circle cx="310" cy="50" r="3"/><circle cx="400" cy="55" r="3"/><circle cx="490" cy="35" r="3"/><circle cx="580" cy="30" r="3"/></g>
+            </svg>
+          </div>
+
+          <div class="dash-card" style="margin-top:14px">
+            <div class="dc-title">🎯 智能体类型分布</div>
+            <div class="ring-grid">
+              <div class="item">
+                <svg class="ring-svg" viewBox="0 0 100 100">
+                  <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient></defs>
+                  <circle cx="50" cy="50" r="40" class="ring-bg"/>
+                  <circle cx="50" cy="50" r="40" class="ring-fill" stroke-dasharray="251" stroke-dashoffset="50"/>
+                </svg>
+                <div class="v">80%</div>
+                <div class="l">辅导型</div>
+              </div>
+              <div class="item">
+                <svg class="ring-svg" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" class="ring-bg"/>
+                  <circle cx="50" cy="50" r="40" class="ring-fill" stroke-dasharray="251" stroke-dashoffset="125"/>
+                </svg>
+                <div class="v">50%</div>
+                <div class="l">问答型</div>
+              </div>
+              <div class="item">
+                <svg class="ring-svg" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" class="ring-bg"/>
+                  <circle cx="50" cy="50" r="40" class="ring-fill" stroke-dasharray="251" stroke-dashoffset="180"/>
+                </svg>
+                <div class="v">28%</div>
+                <div class="l">工具型</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：词云 + 实时活跃 -->
+        <div>
+          <div class="dash-card">
+            <div class="dc-title">☁️ 热门话题词云</div>
+            <div class="wc-wrap">
+              <span class="s5">指针</span>
+              <span class="s5">数据结构</span>
+              <span class="s4">递归</span>
+              <span class="s4">链表</span>
+              <span class="s3">malloc</span>
+              <span class="s4">Python</span>
+              <span class="s3">pandas</span>
+              <span class="s3">UML</span>
+              <span class="s2">SQL</span>
+              <span class="s3">操作系统</span>
+              <span class="s2">栈</span>
+              <span class="s2">队列</span>
+              <span class="s4">动态规划</span>
+              <span class="s3">二叉树</span>
+              <span class="s2">排序</span>
+              <span class="s2">哈希</span>
+              <span>内存模型</span>
+              <span class="s2">编译原理</span>
+              <span>计算机网络</span>
+              <span>正则表达式</span>
+              <span class="s3">机器学习</span>
+              <span>线性代数</span>
+            </div>
+          </div>
+
+          <div class="dash-card" style="margin-top:14px">
+            <div class="dc-title">⚡ 实时活动流</div>
+            <div id="activity-stream">
+              <div class="activity-item">
+                <div class="av" style="background:#3b82f6">张</div>
+                <div class="body"><b>张同学</b>（BUPT）使用「代码纠错」<div class="ts">14:22:08 · C 语言指针</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#10b981">王</div>
+                <div class="body"><b>王老师</b>（清华）发布精华贴<div class="ts">14:21:55 · 内存模型</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#f59e0b">李</div>
+                <div class="body"><b>李同学</b>（北大）求助老师<div class="ts">14:21:42 · 链表反转</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#1d4ed8">钱</div>
+                <div class="body"><b>钱老师</b>（浙大）发布新智能体<div class="ts">14:21:30 · 算法竞赛辅导</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#0ea5e9">孙</div>
+                <div class="body"><b>孙同学</b>（复旦）分享笔记<div class="ts">14:21:18 · pandas 技巧</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#06b6d4">周</div>
+                <div class="body"><b>周老师</b>（武大）批改实验<div class="ts">14:21:02 · 软工实训</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="av" style="background:#84cc16">吴</div>
+                <div class="body"><b>吴同学</b>（上交）使用「英语作文批改」<div class="ts">14:20:48</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-card" style="margin-top:14px">
+            <div class="dc-title">🎓 学科覆盖 TOP6</div>
+            <div class="rank-item"><div class="num">1</div><div class="name">计算机科学</div><div class="v">42.6%</div></div>
+            <div class="rank-item"><div class="num">2</div><div class="name">数学</div><div class="v">18.4%</div></div>
+            <div class="rank-item"><div class="num">3</div><div class="name">外语</div><div class="v">12.8%</div></div>
+            <div class="rank-item"><div class="num">4</div><div class="name">物理</div><div class="v">8.6%</div></div>
+            <div class="rank-item"><div class="num">5</div><div class="name">生物</div><div class="v">6.2%</div></div>
+            <div class="rank-item"><div class="num">6</div><div class="name">其他</div><div class="v">11.4%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PAGE_CONFIG = { activeNav:'cockpit', title:'全局驾驶舱', breadcrumb:['权益与运营','全局驾驶舱'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// 时间实时刷新
+setInterval(() => {
+  const d = new Date();
+  document.getElementById('dash-time').textContent =
+    d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' +
+    d.toTimeString().slice(0,8);
+}, 1000);
+
+// KPI 数字微动
+function jitter(){
+  const k = ['kpi-user','kpi-call','kpi-token'];
+  k.forEach(id => {
+    const el = document.getElementById(id);
+    el.style.transition = 'all .4s';
+    el.style.transform = 'scale(1.05)';
+    setTimeout(() => { el.style.transform = 'scale(1)'; }, 400);
+  });
+}
+setInterval(jitter, 4000);
+
+// 范围切换
+document.querySelectorAll('.scope-toggle span').forEach(s => {
+  s.addEventListener('click', () => {
+    document.querySelectorAll('.scope-toggle span').forEach(x => x.classList.remove('active'));
+    s.classList.add('active');
+    toast(`已切换到「${s.textContent}」视图`, 'info');
+  });
+});
+</script>
+</body>
+</html>
