@@ -354,7 +354,7 @@ const BENEFITS_CONFIG = {
       {
         type: 'price',
         label: '价格与时长',
-        values: { free: '-', trial: '年包待定', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' }
+        values: { free: '-', trial: '6个月 ', vip: '6,000 元/年', vip1: '5万 元/年', svip: '20万 元/年' }
       },
       { type: 'group', label: '扣减额度' },
       {
@@ -417,7 +417,7 @@ const BENEFITS_CONFIG = {
   personal: {
     tiers: [
       { key: 'teacher', name: '教师版', tag: '教师专属', tagClass: 'svip', highlight: false },
-      { key: 'a', name: '体验版', tag: '入门', tagClass: 'basic', highlight: false },
+      { key: 'a', name: '基础版', tag: '入门', tagClass: 'basic', highlight: false },
       { key: 'b', name: 'VIP', tag: '进阶', tagClass: 'vip', highlight: false },
       { key: 'c', name: 'SVIP', tag: '高阶', tagClass: 'vip', highlight: false }
     ],
@@ -425,9 +425,9 @@ const BENEFITS_CONFIG = {
       {
         type: 'price',
         label: '价格与时长',
-        values: { teacher: 'xx 元/月', a: 'A 元/月', b: 'B 元/月', c: 'C 元/月' }
+        values: { teacher: '1000 元/月', a: '19.9 元/月', b: '100 元/月', c: '600 元/月' }
       },
-      { type: 'group', label: '扣减指标' },
+      { type: 'group', label: '扣减额度' },
       {
         type: 'data',
         label: '个人 Token',
@@ -471,7 +471,7 @@ const BENEFITS_CONFIG = {
         icon: '🏫',
         class: '',
         items: [
-          { label: '价格', value: '待定' },
+          { label: '价格', value: '500元' },
           { label: '学校累计 Token', value: '5000万', highlight: true }
         ]
       },
@@ -481,7 +481,7 @@ const BENEFITS_CONFIG = {
         icon: '👤',
         class: 'personal',
         items: [
-          { label: '价格', value: '待定' },
+          { label: '价格', value: '100元' },
           { label: 'Token/人', value: '1000 万', highlight: true }
         ]
       }
@@ -555,7 +555,9 @@ function renderPersonalTable() {
       html += '<tr class="price-row"><td class="row-head">' + row.label + '</td>';
       tiers.forEach(tier => {
         const val = row.values[tier.key];
-        if (val.includes('待定') || val.includes('元/月')) {
+        if (val === '-') {
+          html += `<td>${val}</td>`;
+        } else if (val.includes('待定')) {
           html += `<td><span class="tbd">${val}</span></td>`;
         } else {
           const parts = val.split(' ');
@@ -586,7 +588,15 @@ function renderAddonPackages() {
     html += `<div class="pk-name"><span class="pk-ico">${pkg.icon}</span>${pkg.name}</div>`;
     pkg.items.forEach(item => {
       const valueClass = item.highlight ? 'v big' : 'v';
-      const displayValue = item.value.includes('待定') ? `<span class="tbd">${item.value}</span>` : item.value;
+      let displayValue;
+      if (item.value.includes('待定')) {
+        displayValue = `<span class="tbd">${item.value}</span>`;
+      } else if (item.label === '价格') {
+        // 统一价格样式：数字用 amt，单位用 per
+        displayValue = `<span class="amt">${item.value}</span>`;
+      } else {
+        displayValue = item.value;
+      }
       html += `<div class="pk-row"><span class="l">${item.label}</span><span class="${valueClass}">${displayValue}</span></div>`;
     });
     html += '</div>';
