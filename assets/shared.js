@@ -149,41 +149,44 @@ function renderTopbar(target, opts={}){
   renderRoleSwitch(document.getElementById('role-switch-box'));
 }
 
-// ========== 侧边栏：统一菜单结构 ==========
-const NAV_GROUPS = [
-  { label:'智能体', items:[
-    { key:'market',     name:'智能体市场',  href:'index.html',                  icon:'home' },
-    { key:'training',   name:'实训课程',    href:'pages/training.html',         icon:'book' },
-    { key:'agent-dev',  name:'智能体开发',  icon:'cube', children:[
-      { key:'agent-dev-create', name:'创建智能体', href:'pages/agent-dev.html',   icon:'cube' },
-      { key:'agent-dev-my',     name:'我的智能体', href:'pages/agent-dev.html',   icon:'user' },
-      { key:'agent-dev-db',     name:'数据库',     href:'pages/agent-data.html',  icon:'database' },
-    ]},
-    { key:'agent-use',  name:'智能体使用',  href:'pages/agent-use.html',        icon:'chat' },
-    { key:'forum',      name:'学习论坛',    href:'pages/forum.html',            icon:'forum' },
+// ========== 侧边栏：一级导航与按需二级导航 ==========
+const PRIMARY_NAV = [
+  { key:'market', name:'智能体市场', href:'index.html', icon:'home' },
+  { key:'training', name:'实训课程', href:'pages/training.html', icon:'book' },
+  { key:'agent-dev', name:'智能体开发', icon:'cube', children:[
+    { key:'agent-dev-create', name:'创建智能体', href:'pages/agent-dev.html', icon:'cube' },
+    { key:'agent-dev-my', name:'我的智能体', href:'pages/agent-dev.html', icon:'user' },
+    { key:'agent-dev-db', name:'数据库', href:'pages/agent-data.html', icon:'database' },
   ]},
-  { label:'教学管理', items:[
-    { key:'workbench',  name:'工作台',     href:'pages/teaching-workbench.html',  icon:'dashboard' },
-    { key:'unjoined',   name:'未入班',     href:'pages/unjoined.html',            icon:'users' },
-    { key:'course',     name:'课程管理',   href:'pages/course.html',              icon:'list' },
-    { key:'classmgr',   name:'班级管理',   href:'pages/teaching-classmgr.html',  icon:'group' },
-    { key:'myclass',    name:'我的班级',   href:'pages/teaching-myclass.html',   icon:'chart' },
-    { key:'students',   name:'学生列表',   href:'pages/teaching-students.html',  icon:'people' },
-    { key:'archive',    name:'学习档案',   href:'pages/archive.html',             icon:'profile' },
-    { key:'semester',   name:'学期管理',   href:'pages/semester.html',            icon:'calendar' },
+  { key:'wb-training', name:'WorkBuddy 实训', href:'pages/workbuddy-training.html', icon:'monitor' },
+  { key:'agent-use', name:'智能体使用', href:'pages/agent-use.html', icon:'chat' },
+  { key:'forum', name:'学习论坛', href:'pages/forum.html', icon:'forum' },
+  { key:'teaching', name:'教学管理', icon:'dashboard', children:[
+    { key:'workbench', name:'工作台', href:'pages/teaching-workbench.html', icon:'dashboard' },
+    { key:'unjoined', name:'未入班', href:'pages/unjoined.html', icon:'users' },
+    { key:'course', name:'课程管理', href:'pages/course.html', icon:'list' },
+    { key:'course-resource', name:'课程资源管理', href:'pages/course-resource.html', icon:'layers' },
+    { key:'classmgr', name:'班级管理', href:'pages/teaching-classmgr.html', icon:'group' },
+    { key:'myclass', name:'我的班级', href:'pages/teaching-myclass.html', icon:'chart' },
+    { key:'students', name:'学生列表', href:'pages/teaching-students.html', icon:'people' },
+    { key:'archive', name:'学习档案', href:'pages/archive.html', icon:'profile' },
+    { key:'semester', name:'学期管理', href:'pages/semester.html', icon:'calendar' },
   ]},
-  { label:'系统管理', items:[
-    { key:'school',     name:'学校管理',   href:'pages/system-school.html',  icon:'building' },
-    { key:'account',    name:'账户管理',   href:'pages/system-account.html', icon:'user' },
-    { key:'org',        name:'组织管理',   href:'pages/system-org.html',     icon:'tree' },
-    { key:'model',      name:'模型管理',   href:'pages/system-model.html',   icon:'cpu' },
-    { key:'tool',       name:'工具管理',   href:'pages/tool.html',           icon:'wrench' },
+  { key:'system', name:'系统管理', icon:'cpu', children:[
+    { key:'school', name:'学校管理', href:'pages/system-school.html', icon:'building' },
+    { key:'account', name:'账户管理', href:'pages/system-account.html', icon:'user' },
+    { key:'org', name:'组织管理', href:'pages/system-org.html', icon:'tree' },
+    { key:'model', name:'模型管理', href:'pages/system-model.html', icon:'cpu' },
+    { key:'tool', name:'工具管理', href:'pages/tool.html', icon:'wrench' },
   ]},
-  { label:'权益与运营', items:[
-    { key:'benefits',   name:'我的权益',   href:'pages/benefits.html', icon:'crown' },
-    { key:'cockpit',    name:'全局驾驶舱', href:'pages/cockpit.html',  icon:'screen' },
+  { key:'operations', name:'权益与运营', icon:'crown', children:[
+    { key:'benefits', name:'我的权益', href:'pages/benefits.html', icon:'crown' },
+    { key:'cockpit', name:'全局驾驶舱', href:'pages/cockpit.html', icon:'screen' },
   ]},
 ];
+
+// 保留旧数据名，避免其他脚本引用时中断；侧栏不再按分组全量渲染。
+const NAV_GROUPS = PRIMARY_NAV;
 
 const ICONS = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>',
@@ -206,6 +209,8 @@ const ICONS = {
   wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
   crown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 17h20l-2-9-5 4-3-7-3 7-5-4z"/></svg>',
   screen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  monitor:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
   database:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
   chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>',
 };
@@ -220,68 +225,95 @@ function resolveHref(href){
   return href;
 }
 
+function resolveAssetHref(path){
+  const normalized = path.replace(/^\.\//, '').replace(/^assets\//, '');
+  const inPages = /\/pages\//i.test(location.pathname) || /\\pages\\/i.test(location.pathname);
+  return `${inPages ? '../' : ''}assets/${normalized}`;
+}
+
+function getPrimaryModule(activeKey){
+  const directItem = PRIMARY_NAV.find(item => item.key === activeKey);
+  if(directItem) return directItem.key;
+  const parentItem = PRIMARY_NAV.find(item => item.children?.some(child => child.key === activeKey));
+  return parentItem?.key || 'market';
+}
+
+function renderSecondaryNav(group, activeKey){
+  if(!group?.children) return '';
+  return `
+    <div class="secondary-header">
+      <div class="secondary-title">${group.name}</div>
+      <div class="secondary-subtitle">功能菜单</div>
+    </div>
+    <nav>
+      ${group.children.map(item => `
+        <a href="${resolveHref(item.href)}" data-nav="${item.key}" class="${item.key===activeKey?'active':''}">
+          ${ICONS[item.icon] || ''}<span>${item.name}</span>
+        </a>
+      `).join('')}
+    </nav>
+    <div class="sidebar-footer">CodeChat · v5.2</div>
+  `;
+}
+
 function renderSidebar(activeKey){
   const sb = document.getElementById('sidebar');
   if(!sb) return;
-  const navHtml = NAV_GROUPS.map(g => `
-    <div class="nav-group-label">${g.label}</div>
-    ${g.items.map(it => {
-      if(it.todo){
-        return `
-        <a href="javascript:void(0)" data-nav="${it.key}" data-todo="1" class="nav-todo">
-          ${ICONS[it.icon] || ''}<span>${it.name}</span><span class="todo-tag">规划中</span>
-        </a>`;
-      }
-      if(it.children){
-        const childActive = it.children.some(c => c.key === activeKey);
-        const open = childActive ? 'open' : '';
-        return `
-        <div class="nav-submenu ${open}" data-submenu="${it.key}">
-          <a href="javascript:void(0)" class="nav-submenu-toggle ${childActive?'active':''}" data-nav="${it.key}">
-            ${ICONS[it.icon] || ''}<span>${it.name}</span><span class="nav-chevron">${ICONS.chevron}</span>
-          </a>
-          <div class="nav-submenu-list">
-            ${it.children.map(c => `
-              <a href="${resolveHref(c.href)}" data-nav="${c.key}" class="${c.key===activeKey?'active':''}">
-                ${ICONS[c.icon] || ''}<span>${c.name}</span>
-              </a>
-            `).join('')}
-          </div>
-        </div>`;
-      }
-      return `
-      <a href="${resolveHref(it.href)}" data-nav="${it.key}" class="${it.key===activeKey?'active':''}">
-        ${ICONS[it.icon] || ''}<span>${it.name}</span>
-      </a>`;
-    }).join('')}
-  `).join('');
+
+  const activePrimaryKey = getPrimaryModule(activeKey);
+  let expandedKey = PRIMARY_NAV.find(item => item.key === activePrimaryKey && item.children)?.key || null;
+
+  const primaryHtml = PRIMARY_NAV.map(item => {
+    const active = activePrimaryKey === item.key;
+    const expandable = Boolean(item.children);
+    const attributes = expandable
+      ? `href="javascript:void(0)" role="button" aria-expanded="${expandedKey===item.key}" data-expand="${item.key}"`
+      : `href="${resolveHref(item.href)}"`;
+    return `
+      <a class="rail-item ${active?'active':''} ${expandable?'expandable':''}" ${attributes} data-primary="${item.key}" title="${item.name}">
+        ${ICONS[item.icon] || ''}<span>${item.name}</span>
+      </a>
+    `;
+  }).join('');
 
   sb.innerHTML = `
-    <div class="logo">
-      <span class="logo-mark">初</span>
-      <span class="logo-text">初发 Trufar<small>CodeChat · v5.2</small></span>
+    <div class="primary-rail">
+      <a class="rail-brand" href="${resolveHref('index.html')}" title="初发">
+        <img src="${resolveAssetHref('trufar-logo.png')}" alt="初发 Logo">
+        <span>初发</span>
+      </a>
+      <div class="rail-nav">${primaryHtml}</div>
+      <div class="rail-bottom">
+        <a class="rail-item" href="javascript:void(0)" data-shell-action="help" title="帮助文档">${ICONS.book}<span>帮助文档</span></a>
+        <a class="rail-item" href="javascript:void(0)" data-shell-action="about" title="关于我们">${ICONS.profile}<span>关于我们</span></a>
+      </div>
     </div>
-    <nav>${navHtml}</nav>
-    <div class="sidebar-footer">© 2026 大数据平台部</div>
+    <div class="secondary-sidebar"></div>
   `;
 
-  // 拦截规划中菜单的点击
-  sb.querySelectorAll('a[data-todo]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const name = a.querySelector('span').textContent;
-      toast(`「${name}」功能规划中，本期 Demo 暂未实现`, 'info');
+  const secondary = sb.querySelector('.secondary-sidebar');
+  const updateSecondary = () => {
+    const group = PRIMARY_NAV.find(item => item.key === expandedKey && item.children);
+    sb.classList.toggle('has-secondary', Boolean(group));
+    secondary.innerHTML = renderSecondaryNav(group, activeKey);
+    sb.querySelectorAll('[data-expand]').forEach(item => {
+      const isExpanded = item.dataset.expand === expandedKey;
+      item.setAttribute('aria-expanded', String(isExpanded));
+      item.classList.toggle('expanded', isExpanded);
+    });
+  };
+
+  sb.querySelectorAll('[data-expand]').forEach(item => {
+    item.addEventListener('click', (event) => {
+      event.preventDefault();
+      expandedKey = expandedKey === item.dataset.expand ? null : item.dataset.expand;
+      updateSecondary();
     });
   });
 
-  // 二级菜单展开/收起
-  sb.querySelectorAll('.nav-submenu-toggle').forEach(toggle => {
-    toggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      const submenu = toggle.closest('.nav-submenu');
-      if(submenu) submenu.classList.toggle('open');
-    });
-  });
+  sb.querySelector('[data-shell-action="help"]')?.addEventListener('click', () => toast('帮助文档 Demo', 'info'));
+  sb.querySelector('[data-shell-action="about"]')?.addEventListener('click', () => toast('关于我们 Demo', 'info'));
+  updateSecondary();
 }
 
 // ========== 消息通知 ==========

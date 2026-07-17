@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智能体市场 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+/* 顶部英雄区 */
+.market-hero{
+  background:linear-gradient(135deg,#1e40af 0%,#2563eb 50%,#3b82f6 100%);
+  color:#fff;padding:32px 28px;border-radius:14px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.market-hero::after{
+  content:'';position:absolute;right:-60px;top:-80px;
+  width:320px;height:320px;
+  background:radial-gradient(circle,rgba(255,255,255,.15),transparent 65%);
+}
+.market-hero .inner{position:relative;z-index:1}
+.market-hero h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.market-hero .subtitle{font-size:14px;opacity:.9;margin-bottom:18px}
+.market-hero .search-box{
+  position:relative;max-width:580px;
+}
+.market-hero .search-box input{
+  width:100%;padding:12px 50px 12px 16px;
+  border:none;border-radius:10px;font-size:13px;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.market-hero .search-box button{
+  position:absolute;right:6px;top:6px;
+  background:var(--accent);color:#fff;border:none;
+  padding:6px 16px;border-radius:7px;cursor:pointer;
+  font-size:12px;font-weight:600;
+}
+.market-hero .search-box button:hover{background:var(--accent-hover)}
+
+/* 筛选栏 */
+.filter-bar{
+  display:flex;gap:12px;align-items:center;margin-bottom:18px;
+  padding:14px;background:#fff;border-radius:10px;border:1px solid var(--border);
+}
+.filter-bar .label{font-size:12px;color:var(--text-mute);font-weight:600}
+.filter-bar .filter-group{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.filter-chip{
+  padding:5px 12px;border:1px solid #e2e8f0;
+  border-radius:16px;font-size:12px;color:#475569;
+  cursor:pointer;transition:all .15s;background:#fff;
+}
+.filter-chip:hover{border-color:#bfdbfe;background:#f8fafc}
+.filter-chip.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+
+/* 智能体网格 */
+.agent-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;margin-bottom:24px;
+}
+.agent-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:18px;cursor:pointer;
+  transition:all .2s;position:relative;
+}
+.agent-card:hover{
+  border-color:#bfdbfe;box-shadow:0 4px 16px rgba(37,99,235,.1);
+  transform:translateY(-2px);
+}
+.agent-card .icon{
+  width:52px;height:52px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;color:#fff;margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.agent-card .name{
+  font-size:15px;font-weight:600;color:var(--primary);
+  margin-bottom:6px;
+}
+.agent-card .desc{
+  font-size:12px;color:var(--text-sub);line-height:1.6;
+  margin-bottom:12px;min-height:38px;
+  display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;
+}
+.agent-card .tags{
+  display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;
+}
+.agent-card .meta{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;color:var(--text-mute);
+  padding-top:12px;border-top:1px solid #f1f5f9;
+}
+.agent-card .meta .stat{display:flex;align-items:center;gap:4px}
+.agent-card .hot-badge{
+  position:absolute;top:12px;right:12px;
+  background:#ef4444;color:#fff;font-size:10px;
+  padding:2px 8px;border-radius:10px;font-weight:600;
+}
+
+/* 分页 */
+.pagination{
+  display:flex;justify-content:center;gap:6px;margin-top:24px;
+}
+.pagination button{
+  padding:6px 12px;border:1px solid var(--border);
+  border-radius:6px;background:#fff;cursor:pointer;
+  font-size:12px;color:var(--text-sub);
+}
+.pagination button:hover{border-color:var(--accent);color:var(--accent)}
+.pagination button.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- 英雄区 -->
+    <div class="market-hero">
+      <div class="inner">
+        <h1>智能体市场</h1>
+        <div class="subtitle">探索优质智能体，提升学习与教学效率</div>
+        <div class="search-box">
+          <input type="text" placeholder="搜索智能体名称、功能、标签...">
+          <button>🔍 搜索</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+      <div class="label">分类：</div>
+      <div class="filter-group">
+        <span class="filter-chip active">全部</span>
+        <span class="filter-chip">代码辅导</span>
+        <span class="filter-chip">作业批改</span>
+        <span class="filter-chip">课程助手</span>
+        <span class="filter-chip">知识问答</span>
+        <span class="filter-chip">创意写作</span>
+      </div>
+      <div class="label">排序：</div>
+      <select class="filter-chip" style="padding:5px 10px">
+        <option>最热门</option>
+        <option>最新上架</option>
+        <option>评分最高</option>
+      </select>
+    </div>
+
+    <!-- 智能体网格 -->
+    <div class="agent-grid" id="agent-grid">
+      <!-- 智能体卡片会由JS动态生成 -->
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination">
+      <button disabled>« 上一页</button>
+      <button class="active">1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>下一页 »</button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PAGE_CONFIG = {
+  activeNav:'market',
+  title:'智能体市场',
+  breadcrumb:['智能体','智能体市场']
+};
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// 智能体数据
+const agents = [
+  {
+    name:'代码纠错（码上）',
+    desc:'5步辅导法，帮助学生理解C语言编程错误，培养独立debug能力',
+    icon:'⚙',
+    bg:'linear-gradient(135deg,#2563eb,#1e40af)',
+    tags:['系统智能体','代码辅导','5步法'],
+    users:1248,
+    rating:4.9,
+    hot:true
+  },
+  {
+    name:'Python作业批改助手',
+    desc:'自动批改Python作业，提供详细反馈和改进建议',
+    icon:'📝',
+    bg:'linear-gradient(135deg,#10b981,#059669)',
+    tags:['作业批改','Python'],
+    users:856,
+    rating:4.7
+  },
+  {
+    name:'数据结构可视化',
+    desc:'通过图形化演示帮助理解链表、树、图等复杂数据结构',
+    icon:'📊',
+    bg:'linear-gradient(135deg,#f59e0b,#d97706)',
+    tags:['知识问答','可视化'],
+    users:642,
+    rating:4.8
+  },
+  {
+    name:'算法思路启发器',
+    desc:'不直接给答案，通过苏格拉底式提问引导学生思考算法设计',
+    icon:'💡',
+    bg:'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+    tags:['课程助手','算法'],
+    users:534,
+    rating:4.6
+  },
+  {
+    name:'实验报告生成器',
+    desc:'根据实验数据和代码自动生成规范的实验报告框架',
+    icon:'📄',
+    bg:'linear-gradient(135deg,#06b6d4,#0891b2)',
+    tags:['创意写作','实验'],
+    users:423,
+    rating:4.5
+  },
+  {
+    name:'面试题目训练营',
+    desc:'精选编程面试题，提供多种解法和复杂度分析',
+    icon:'🎯',
+    bg:'linear-gradient(135deg,#ec4899,#db2777)',
+    tags:['知识问答','面试'],
+    users:789,
+    rating:4.8,
+    hot:true
+  },
+  {
+    name:'Git版本控制教练',
+    desc:'交互式学习Git命令，模拟真实协作场景',
+    icon:'🌿',
+    bg:'linear-gradient(135deg,#14b8a6,#0d9488)',
+    tags:['课程助手','Git'],
+    users:612,
+    rating:4.7
+  },
+  {
+    name:'数据库SQL导师',
+    desc:'从基础查询到复杂优化，手把手教学SQL技能',
+    icon:'🗄',
+    bg:'linear-gradient(135deg,#f97316,#ea580c)',
+    tags:['代码辅导','数据库'],
+    users:498,
+    rating:4.6
+  },
+  {
+    name:'Web前端审美顾问',
+    desc:'评审CSS代码和页面设计，提供美学和用户体验建议',
+    icon:'🎨',
+    bg:'linear-gradient(135deg,#a855f7,#9333ea)',
+    tags:['作业批改','前端'],
+    users:367,
+    rating:4.5
+  }
+];
+
+// 渲染智能体卡片
+function renderAgents(){
+  const grid = document.getElementById('agent-grid');
+  grid.innerHTML = agents.map(a => `
+    <div class="agent-card" onclick="toast('即将跳转到智能体详情','info')">
+      ${a.hot ? '<span class="hot-badge">🔥 热门</span>' : ''}
+      <div class="icon" style="background:${a.bg}">${a.icon}</div>
+      <div class="name">${a.name}</div>
+      <div class="desc">${a.desc}</div>
+      <div class="tags">
+        ${a.tags.map(t => `<span class="badge badge-blue">${t}</span>`).join('')}
+      </div>
+      <div class="meta">
+        <span class="stat">👥 ${a.users} 使用</span>
+        <span class="stat">⭐ ${a.rating}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 筛选功能
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function(){
+    if(this.closest('.filter-group')){
+      this.closest('.filter-group').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      toast(`已切换到：${this.textContent}`, 'info');
+    }
+  });
+});
+
+renderAgents();
+</script>
+</body>
+</html>

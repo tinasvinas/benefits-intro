@@ -31,16 +31,42 @@
 .chip .x{cursor:pointer;color:#94a3b8;font-weight:bold}
 .chip-input input{border:none;outline:none;flex:1;min-width:100px;font-size:12px;padding:4px}
 
-.toggle{position:relative;display:inline-block;width:38px;height:20px}
-.toggle input{display:none}
-.toggle .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:10px;cursor:pointer;transition:.2s}
-.toggle .slider::before{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked + .slider{background:var(--accent)}
-.toggle input:checked + .slider::before{transform:translateX(18px)}
-
 .assign-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .assign-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:6px}
 .assign-card.pinned{background:#fef3c7;border-color:#fde68a;color:#92400e;font-weight:500}
+
+/* 实训任务节点选择 */
+.training-node-section{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:14px;margin-bottom:14px}
+.node-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.node-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.node-item:hover{border-color:var(--accent)}
+.node-item input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:var(--accent)}
+.node-main{flex:1;min-width:0}
+.node-name{font-size:13px;font-weight:600;color:var(--primary)}
+.node-meta{font-size:11px;color:var(--text-mute);margin-top:2px}
+.node-deadline{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b}
+.node-deadline input[type=date]{width:auto;padding:4px 8px;font-size:12px}
+.node-desc{font-size:11px;color:#64748b;margin-top:3px}
+.node-tools{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.batch-deadline{display:grid;grid-template-columns:1fr 150px auto;gap:8px;align-items:end;background:#eff6ff;border-radius:8px;padding:10px;margin:10px 0}
+.task-summary{font-size:12px;line-height:1.7;min-width:90px}
+.homework-actions{display:flex;gap:8px;margin-bottom:12px}
+.readonly-browser{display:grid;grid-template-columns:180px 1fr;min-height:320px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.drive-tree{background:#f8fafc;padding:12px;border-right:1px solid var(--border)}
+.drive-tree div{padding:7px;border-radius:5px;cursor:pointer}
+.drive-tree .active{background:#dbeafe;color:#1d4ed8}
+.file-browser{padding:16px}
+.file-row{display:flex;align-items:center;gap:10px;padding:9px;border-bottom:1px solid #f1f5f9}
+.file-row .file-actions{margin-left:auto}
+.review-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+.submission-preview{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;min-height:260px}
+
+
+/* 紧凑轻量覆盖 */
+.tip-bar{background:#fff;border-color:#dce5ee;border-radius:5px;padding:7px 10px;font-size:11px;color:#58708a;margin-bottom:10px}
+.benefit-tip{padding:9px 12px;background:#fffaf0;border:1px solid #eee2c8;border-radius:5px;margin-bottom:10px;font-size:12px}
+.benefit-tip .ico{font-size:15px}.code-tag{background:#eef2f6;color:#4c6075;border:1px solid #dde3e9;padding:1px 6px;font-size:10px}
+.icon-btn{width:25px;height:25px;border-radius:5px}.chip-input{min-height:32px;border-radius:5px;padding:4px 6px}.training-node-section{background:#f8fafb;border:1px solid var(--border);border-radius:5px;padding:11px;margin-bottom:11px}.node-list{gap:6px}.node-item{gap:8px;border-radius:5px;padding:8px 9px}.node-name{font-size:12px}.batch-deadline{border:1px solid #dbe7f2;background:#f3f7fb;border-radius:5px;padding:8px}.readonly-browser,.submission-preview{border-radius:5px}
 </style>
 </head>
 <body>
@@ -93,6 +119,7 @@
           <div class="card-sub">说明：请先点击 <b style="color:var(--success)">✓ 开课</b> 按钮，学生才能加入班级。如需修改班级信息，请先点击 <b style="color:var(--warning)">✕ 停课</b>，通过 <b style="color:var(--accent)">✏ 修改</b> 按钮修改，完成后再开课。</div>
         </div>
         <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="openModal('m-students')">作业管理</button>
           <button class="btn btn-outline" onclick="toast('打开批量导入弹窗','info')">📥 批量导入</button>
           <button class="btn btn-primary" onclick="openModal('m-class')">+ 新增班级</button>
         </div>
@@ -114,6 +141,7 @@
               <th>助教</th>
               <th>授课学期</th>
               <th>学生人数</th>
+              <th>实训任务</th>
               <th>状态</th>
               <th>操作</th>
             </tr>
@@ -127,6 +155,7 @@
               <td>李同学, 张同学</td>
               <td>2025-2026 第二学期</td>
               <td>42 / 50</td>
+              <td><div class="task-summary"><b>4 个节点</b><br><span class="text-mute">提交进度 68%</span></div><div class="progress"><div class="progress-bar" style="width:68%"></div></div></td>
               <td><span class="badge badge-green">已开课</span></td>
               <td>
                 <div class="action-icons">
@@ -145,6 +174,7 @@
               <td>—</td>
               <td>2025-2026 第二学期</td>
               <td>38 / 40</td>
+              <td><div class="task-summary"><b>3 个节点</b><br><span class="text-mute">提交进度 54%</span></div><div class="progress"><div class="progress-bar" style="width:54%"></div></div></td>
               <td><span class="badge badge-green">已开课</span></td>
               <td>
                 <div class="action-icons">
@@ -163,6 +193,7 @@
               <td>—</td>
               <td>2025-2026 第二学期</td>
               <td>0 / 60</td>
+              <td><span class="text-mute">非实训班级</span></td>
               <td><span class="badge badge-gray">未开课</span></td>
               <td>
                 <div class="action-icons">
@@ -182,6 +213,7 @@
               <td>—</td>
               <td>2024-2025 第二学期</td>
               <td>52 / 60</td>
+              <td><div class="task-summary"><b>4 个节点</b><br><span class="text-mute">提交进度 100%</span></div><div class="progress"><div class="progress-bar" style="width:100%;background:var(--success)"></div></div></td>
               <td><span class="badge badge-orange">已停课</span></td>
               <td>
                 <div class="action-icons">
@@ -223,8 +255,8 @@
       <div class="form-row">
         <div class="form-group">
           <label><span class="req">*</span>课程名称</label>
-          <select class="form-control"><option>请选择课程</option><option>C语言程序设计</option><option>数据结构</option><option>Python程序设计</option></select>
-          <div class="form-hint">来自课程管理已生效的课程</div>
+          <select class="form-control" id="class-course"><option value="">请选择课程</option><option value="CS101" data-training="true" data-ready="true">C语言程序设计（实训）</option><option value="CS201" data-training="true" data-ready="true">数据结构（实训）</option><option value="SE401" data-training="true" data-ready="true">软件工程（实训）</option><option value="CS301" data-training="false" data-ready="false">Python程序设计（普通）</option></select>
+          <div class="form-hint" id="course-training-hint">仅已启用的课程可选；实训课程选择后自动加载任务节点</div>
         </div>
         <div class="form-group">
           <label><span class="req">*</span>班级名称</label>
@@ -235,13 +267,62 @@
         <div class="form-group">
           <label>实训班级</label>
           <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-            <label class="toggle"><input type="checkbox"><span class="slider"></span></label>
-            <span class="form-hint" style="margin:0">打开时，学生可在班级发布智能体</span>
+            <label class="toggle"><input type="checkbox" id="class-training-toggle"><span class="slider"></span></label>
+            <span class="form-hint" style="margin:0">打开时，学生可在班级发布智能体，并需选择下方实训任务节点</span>
           </div>
         </div>
         <div class="form-group">
           <label>班级码</label>
           <div class="form-control" style="background:#f8fafc;color:var(--text-mute)">开课后自动生成 4 位唯一码</div>
+        </div>
+      </div>
+
+      <!-- 实训任务节点选择（实训班级开启时显示） -->
+      <div class="training-node-section" id="training-node-section" style="display:none">
+        <div class="form-group">
+          <label>选择实训任务节点</label>
+          <div class="form-hint">仅展示该课程在「课程资源管理」中配置的任务节点；勾选本班需要完成的节点并设置截止时间</div>
+          <div class="node-tools">
+            <div class="flex gap-8">
+              <button type="button" class="btn btn-sm btn-outline" id="select-all-nodes">全选</button>
+              <button type="button" class="btn btn-sm btn-outline" id="clear-all-nodes">全不选</button>
+            </div>
+            <b id="node-selection-count">已选 2 / 总数 4</b>
+          </div>
+          <div class="batch-deadline">
+            <div class="form-group" style="margin:0"><label>批量设置截止时间</label><select class="form-control" id="deadline-mode"><option value="absolute">统一绝对日期</option><option value="interval">按周递增</option></select></div>
+            <div class="form-group" style="margin:0"><label>日期 / 间隔</label><input type="date" class="form-control" id="batch-date" value="2026-05-20"><input type="number" class="form-control" id="batch-weeks" value="1" min="1" style="display:none" title="每个任务间隔周数"></div>
+            <button type="button" class="btn btn-primary" id="apply-deadline">应用到已选</button>
+          </div>
+          <div class="node-list">
+            <label class="node-item"><input type="checkbox" checked>
+              <div class="node-main"><div class="node-name">任务1：智能体基础创建</div><div class="node-desc">完成 WorkBuddy 登录、基础配置与首个智能体创建</div><div class="node-meta">关联课件 2 · 资源 1 · 提交物 1</div></div>
+              <div class="node-deadline"><span>截止</span><input type="date" class="form-control" value="2026-03-20"></div>
+            </label>
+            <label class="node-item"><input type="checkbox" checked>
+              <div class="node-main"><div class="node-name">任务2：知识库构建与 RAG</div><div class="node-desc">导入课程数据，调优检索参数并完成问答验证</div><div class="node-meta">关联课件 1 · 资源 2 · 提交物 2</div></div>
+              <div class="node-deadline"><span>截止</span><input type="date" class="form-control" value="2026-04-10"></div>
+            </label>
+            <label class="node-item"><input type="checkbox">
+              <div class="node-main"><div class="node-name">任务3：多角色工作流编排</div><div class="node-desc">配置变量与多步骤流程，验证角色协作效果</div><div class="node-meta">关联课件 1 · 资源 1 · 提交物 1</div></div>
+              <div class="node-deadline"><span>截止</span><input type="date" class="form-control" value="2026-04-30"></div>
+            </label>
+            <label class="node-item"><input type="checkbox">
+              <div class="node-main"><div class="node-name">任务4：综合项目实训</div><div class="node-desc">综合使用 Skills、知识库与工作流完成课程项目</div><div class="node-meta">关联课件 1 · 资源 3 · 提交物 1（含对话截图）</div></div>
+              <div class="node-deadline"><span>截止</span><input type="date" class="form-control" value="2026-05-20"></div>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>自动关联课件与资源</label>
+          <div class="assign-list">
+            <span class="assign-card">📄 智能体开发实训课件.pdf</span>
+            <span class="assign-card">🎬 实训入门演示.mp4</span>
+            <span class="assign-card">📦 code-corrector.skill.zip</span>
+            <span class="assign-card">📊 数据集-sample.csv</span>
+            <span class="assign-card pinned">📐 实训项目模板.pptx</span>
+          </div>
+          <div class="form-hint">根据所选任务节点自动带出，教师可在此基础上增删</div>
         </div>
       </div>
       <div class="form-row">
@@ -298,7 +379,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" data-close-modal>取消</button>
-      <button class="btn btn-primary" onclick="closeModal('m-class');toast('班级保存成功','success')">确定</button>
+      <button class="btn btn-primary" onclick="saveClass()">确定</button>
     </div>
   </div>
 </div>
@@ -315,14 +396,18 @@
         <input class="form-control" placeholder="批量粘贴学号（一行一个或逗号分隔，长度限制 5000）">
         <button class="btn btn-primary" style="white-space:nowrap" onclick="toast('已添加 12 个学生','success')">+ 添加学生</button>
       </div>
+      <div class="homework-actions">
+        <button class="btn btn-outline" onclick="toast('已生成批量作业下载包 Demo','success')">批量下载作业</button>
+        <button class="btn btn-outline" onclick="toast('提交记录已导出为 Excel Demo','success')">导出提交记录</button>
+      </div>
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th width="40"><input type="checkbox"></th><th>学号</th><th>姓名</th><th>加入时间</th><th>操作</th></tr></thead>
+          <thead><tr><th width="40"><input type="checkbox"></th><th>学号</th><th>姓名</th><th>加入时间</th><th>任务提交</th><th>最新提交时间</th><th>操作</th></tr></thead>
           <tbody>
-            <tr><td><input type="checkbox"></td><td>2024010001</td><td>张同学</td><td>2026-02-22</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
-            <tr><td><input type="checkbox"></td><td>2024010002</td><td>李同学</td><td>2026-02-22</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
-            <tr><td><input type="checkbox"></td><td>2024010003</td><td>王同学</td><td>2026-02-23</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
-            <tr><td><input type="checkbox"></td><td>2024010004</td><td>赵同学</td><td>2026-02-25</td><td><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010001</td><td>张同学</td><td>2026-02-22</td><td><span class="badge badge-green">已提交 4/4</span></td><td>2026-05-18 20:36</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-drive')">查看 D 盘</button><button class="btn btn-sm btn-link" onclick="openModal('m-homework')">查看作业</button><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010002</td><td>李同学</td><td>2026-02-22</td><td><span class="badge badge-orange">逾期 3/4</span></td><td>2026-05-21 09:15</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-drive')">查看 D 盘</button><button class="btn btn-sm btn-link" onclick="openModal('m-homework')">查看作业</button><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010003</td><td>王同学</td><td>2026-02-23</td><td><span class="badge badge-blue">已提交 2/4</span></td><td>2026-04-09 18:20</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-drive')">查看 D 盘</button><button class="btn btn-sm btn-link" onclick="openModal('m-homework')">查看作业</button><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
+            <tr><td><input type="checkbox"></td><td>2024010004</td><td>赵同学</td><td>2026-02-25</td><td><span class="badge badge-gray">未提交</span></td><td>—</td><td><button class="btn btn-sm btn-link" onclick="openModal('m-drive')">查看 D 盘</button><button class="btn btn-sm btn-link disabled">查看作业</button><button class="btn btn-sm btn-ghost" style="color:var(--danger)">移除</button></td></tr>
           </tbody>
         </table>
       </div>
@@ -359,6 +444,35 @@
   </div>
 </div>
 
+<!-- 学生 D 盘只读浏览 -->
+<div class="modal-overlay" id="m-drive">
+  <div class="modal xl">
+    <div class="modal-header"><h3>学生 D 盘 · 张同学（只读）</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div class="tip-bar"><span class="ico">🔒</span><span>教师仅可预览和下载，不能修改学生文件。</span></div>
+      <div class="readonly-browser">
+        <div class="drive-tree"><b>D:\ 实训盘</b><div>📁 课件</div><div>📁 资源</div><div class="active">📁 作业文件夹</div><div>📁 对话截图</div></div>
+        <div class="file-browser"><div class="file-row">📦 2024010001_张同学_任务4.zip <span class="text-mute">18.6 MB</span><span class="file-actions"><button class="btn btn-sm btn-link" onclick="toast('文件预览已打开','info')">预览</button><button class="btn btn-sm btn-link" onclick="toast('文件已加入下载队列','success')">下载</button></span></div><div class="file-row">🖼️ 对话记录_20260518_203015.png <span class="text-mute">4.2 MB</span><span class="file-actions"><button class="btn btn-sm btn-link" onclick="toast('对话截图预览已打开','info')">预览</button><button class="btn btn-sm btn-link" onclick="toast('文件已加入下载队列','success')">下载</button></span></div><div class="file-row">📄 实训报告.pdf <span class="text-mute">2.8 MB</span><span class="file-actions"><button class="btn btn-sm btn-link" onclick="toast('PDF 预览已打开','info')">预览</button></span></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" data-close-modal>关闭</button></div>
+  </div>
+</div>
+
+<!-- 作业批改 -->
+<div class="modal-overlay" id="m-homework">
+  <div class="modal xl">
+    <div class="modal-header"><h3>查看作业 · 张同学 / 任务4：综合项目实训</h3><button class="modal-close" data-close-modal>×</button></div>
+    <div class="modal-body">
+      <div class="review-layout">
+        <div class="submission-preview"><div class="card-title mb-12">已提交文件</div><div class="file-row">📦 2024010001_张同学_任务4.zip <span class="badge badge-green">按时提交</span><button class="btn btn-sm btn-link" style="margin-left:auto" onclick="toast('项目文件预览已打开','info')">预览</button></div><div class="file-row">🖼️ 对话记录_20260518_203015.png <span class="badge badge-blue">对话记录</span><button class="btn btn-sm btn-link" style="margin-left:auto" onclick="toast('对话截图大图预览已打开','info')">预览</button></div><div class="file-row">📄 实训报告.pdf <button class="btn btn-sm btn-link" style="margin-left:auto" onclick="toast('报告预览已打开','info')">预览</button></div><div class="form-hint mt-12">提交时间：2026-05-18 20:36 · 第 2 次提交</div></div>
+        <div><div class="form-group"><label><span class="req">*</span>评分（0-100）</label><input id="homework-score" type="number" min="0" max="100" class="form-control" value="92"></div><div class="form-group"><label>评语</label><textarea id="homework-comment" class="form-control" maxlength="500">任务完成度较高，工作流结构清晰。建议补充异常分支说明。</textarea><div class="form-hint">保存后学生可在 WorkBuddy 实训页面查看。</div></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button class="btn btn-primary" onclick="saveHomeworkReview()">确定</button></div>
+  </div>
+</div>
+
 <script>
 const PAGE_CONFIG = { activeNav:'classmgr', title:'班级管理', breadcrumb:['教学管理','班级管理'] };
 </script>
@@ -371,6 +485,36 @@ document.querySelectorAll('.tabs .tab').forEach(t => {
     toast(`已切换到「${t.textContent}」`, 'info');
   });
 });
+
+// ============== 实训班级配置 ==============
+const trainingToggle = document.getElementById('class-training-toggle');
+const courseSelect = document.getElementById('class-course');
+const nodeChecks = () => [...document.querySelectorAll('.node-item > input[type=checkbox]')];
+function refreshNodeSelection(){
+  const checks=nodeChecks();
+  checks.forEach(c=>{const date=c.closest('.node-item').querySelector('input[type=date]');date.disabled=!c.checked;});
+  const selected=checks.filter(c=>c.checked);
+  document.getElementById('node-selection-count').textContent=`已选 ${selected.length} / 总数 ${checks.length}`;
+  const cards=document.querySelector('.assign-list');
+  cards.innerHTML=selected.length?`<span class="assign-card">📄 已关联课件 ${selected.length+1} 个</span><span class="assign-card">🎬 视频课件 ${Math.max(1,selected.length-1)} 个</span><span class="assign-card">📦 实训资源 ${selected.length*2} 个</span><span class="assign-card pinned">📐 课程模板 1 个</span>`:'<span class="text-mute text-sm">选择任务节点后自动关联课件与资源</span>';
+}
+function syncCourseTraining(){
+  const option=courseSelect.selectedOptions[0];
+  const isTraining=option?.dataset.training==='true'&&option?.dataset.ready==='true';
+  trainingToggle.disabled=!isTraining;
+  if(!isTraining){trainingToggle.checked=false;document.getElementById('training-node-section').style.display='none';}
+  document.getElementById('course-training-hint').textContent=!option?.value?'请选择课程':isTraining?'该课程已完成实训配置，可开启实训班级':'该课程为普通课程，不加载实训任务节点';
+}
+courseSelect.addEventListener('change',syncCourseTraining);
+trainingToggle.addEventListener('change',e=>{document.getElementById('training-node-section').style.display=e.target.checked?'block':'none';if(e.target.checked){refreshNodeSelection();toast('已加载该课程的实训任务节点','success');}});
+nodeChecks().forEach(c=>c.addEventListener('change',refreshNodeSelection));
+document.getElementById('select-all-nodes').addEventListener('click',()=>{nodeChecks().forEach(c=>c.checked=true);refreshNodeSelection();});
+document.getElementById('clear-all-nodes').addEventListener('click',()=>{nodeChecks().forEach(c=>c.checked=false);refreshNodeSelection();});
+document.getElementById('deadline-mode').addEventListener('change',e=>{const interval=e.target.value==='interval';document.getElementById('batch-weeks').style.display=interval?'block':'none';document.getElementById('batch-date').style.display=interval?'none':'block';});
+document.getElementById('apply-deadline').addEventListener('click',()=>{const selected=nodeChecks().filter(c=>c.checked);if(!selected.length){toast('请先选择任务节点','warning');return;}const mode=document.getElementById('deadline-mode').value;if(mode==='absolute'){const date=document.getElementById('batch-date').value;if(!date){toast('请选择截止日期','warning');return;}selected.forEach(c=>c.closest('.node-item').querySelector('input[type=date]').value=date);}else{const weeks=Math.max(1,+document.getElementById('batch-weeks').value||1);const start=new Date('2026-03-20');selected.forEach((c,i)=>{const d=new Date(start);d.setDate(d.getDate()+i*weeks*7);c.closest('.node-item').querySelector('input[type=date]').value=d.toISOString().slice(0,10);});}toast('已批量设置截止时间','success');});
+function saveClass(){if(!courseSelect.value){toast('请选择课程','warning');courseSelect.focus();return;}if(trainingToggle.checked){const selected=nodeChecks().filter(c=>c.checked);if(!selected.length){toast('实训班级至少选择一个任务节点','warning');return;}if(selected.some(c=>!c.closest('.node-item').querySelector('input[type=date]').value)){toast('请为所有已选任务设置截止时间','warning');return;}}closeModal('m-class');toast('班级信息已保存','success');}
+function saveHomeworkReview(){const score=document.getElementById('homework-score');if(score.value===''||+score.value<0||+score.value>100){toast('请输入 0-100 的有效评分','warning');score.focus();return;}closeModal('m-homework');toast('评分与评语已保存','success');}
+syncCourseTraining();refreshNodeSelection();
 </script>
 </body>
 </html>

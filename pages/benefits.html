@@ -308,8 +308,8 @@ function renderProfile(){
   const persExpired=u.endDate&&u.endDate<now2;
   const persActive=u.startDate&&u.startDate<=now2&&(!u.endDate||u.endDate>=now2);
   const consumeOrder=u.role==='teacher'
-    ?'① 教师企业权益 → ② 教师个人权益(教师版) → ③ 教师增量包 → ④ 学生企业权益 → ⑤ 学生个人权益 → ⑥ 学生增量包（学生在班级里使用智能体优先消耗教师 Token）'
-    :'① 企业权益 → ② 个人权益 → ③ 增量包';
+    ?'① 企业权益 → ② 个人权益 → ③ 个人增量包，你已开通教师版权益，可去班级管理页面绑定需要使用教师版权益的班级，班级内的用户在智能体使用页面，使用班级绑定和实训发布的智能体时，优先消耗你的权益额度。'
+    :'① 企业权益 → ② 个人权益 → ③ 个人增量包';
   const cf=corpBenefit?CORP_FEATURES[corpBenefit]:null;
   const pf=PERS_FEATURES[persBenefit]||PERS_FEATURES.none;
   function mergeMax(a,b,key){
@@ -354,7 +354,6 @@ function renderProfile(){
     ${isAdmin?'':`
     <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe">
       <div style="font-size:13px;color:#1d4ed8"><b>Token 消耗顺序：</b>${consumeOrder}</div>
-      <div style="font-size:13px;color:#1d4ed8;margin-top:6px"><b>权益变更规则：</b>升档/再购后旧权益立即失效，未用 Token 清零，新权益重新计算。</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:6px">

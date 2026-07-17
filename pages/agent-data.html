@@ -108,6 +108,13 @@
 .ds-tab{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border:none;background:transparent;transition:all .15s}
 .ds-tab.active{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .ds-tab.active[data-target="online"]{color:#d97706}
+
+/* 用户隔离开关 */
+.isolation-control{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:12px}
+.isolation-control .label{color:#64748b;font-weight:500}
+.isolation-control .status{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.isolation-control .status.on{color:#16a34a}
+.isolation-control .status.off{color:#64748b}
 </style>
 </head>
 <body>
@@ -142,7 +149,18 @@
             <div class="card-title" id="current-db-title">教学数据库</div>
             <div class="card-sub" id="current-db-desc">存储课程相关的学生学习数据</div>
           </div>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="isolation-control">
+              <span class="label">用户隔离</span>
+              <label class="toggle" style="transform:scale(.85)">
+                <input type="checkbox" id="user-isolation-toggle" onchange="toggleUserIsolation()" checked>
+                <span class="slider"></span>
+              </label>
+              <span class="status on" id="isolation-status">
+                <span id="isolation-icon">👤</span>
+                <span id="isolation-text">仅本人数据</span>
+              </span>
+            </div>
             <button class="btn btn-outline" onclick="startImportTable()">📥 导入数据表</button>
             <button class="btn btn-primary" onclick="openModal('modal-create-table')">+ 新建数据表</button>
           </div>
@@ -167,13 +185,26 @@
             <button class="btn btn-outline" onclick="startExport()">📤 导出数据</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;margin:4px 0 14px">
-          <span style="font-size:12px;color:#64748b">数据集：</span>
-          <div class="ds-tabs">
-            <button class="ds-tab active" data-target="test" onclick="switchDetailDataset('test')">🧪 测试数据</button>
-            <button class="ds-tab" data-target="online" onclick="switchDetailDataset('online')">🌐 线上数据</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:#64748b">数据集：</span>
+            <div class="ds-tabs">
+              <button class="ds-tab active" data-target="test" onclick="switchDetailDataset('test')">🧪 测试数据</button>
+              <button class="ds-tab" data-target="online" onclick="switchDetailDataset('online')">🌐 线上数据</button>
+            </div>
+            <span id="detail-ds-hint" style="font-size:11px;color:var(--text-mute)"></span>
           </div>
-          <span id="detail-ds-hint" style="font-size:11px;color:var(--text-mute)"></span>
+          <div class="isolation-control">
+            <span class="label">数据筛选</span>
+            <label class="toggle" style="transform:scale(.85)">
+              <input type="checkbox" id="detail-isolation-toggle" onchange="toggleDetailIsolation()" checked>
+              <span class="slider"></span>
+            </label>
+            <span class="status on" id="detail-isolation-status">
+              <span id="detail-isolation-icon">👤</span>
+              <span id="detail-isolation-text">仅本人创建</span>
+            </span>
+          </div>
         </div>
         <div style="overflow-x:auto">
           <table class="preview-table" id="detail-data-table">
@@ -301,6 +332,12 @@ const SAMPLE_DETAIL = {
   ],
 };
 
+// 模拟数据：标记哪些记录是当前用户创建的（演示用）
+const SAMPLE_DETAIL_OWNERSHIP = {
+  test: [true, false, true],  // 第1,3条是本人创建
+  online: [true, true, false, true, false],  // 第1,2,4条是本人创建
+};
+
 const DATASET_META = {
   test:   { label:'测试数据', icon:'🧪', tag:'ds-tag-test',   desc:'用于开发、调试、验证，数据与线上隔离，互不影响' },
   online: { label:'线上数据', icon:'🌐', tag:'ds-tag-online', desc:'正式生产环境使用，导入需谨慎，操作将记录审计日志' },
@@ -308,6 +345,8 @@ const DATASET_META = {
 
 let currentDbId = null;
 let detailDataset = 'test';   // 详情页当前查看的数据集
+let userIsolationEnabled = true;  // 用户隔离开关状态
+let detailIsolationEnabled = true;  // 详情页数据隔离状态
 
 // 渲染「导入目标」选择控件（默认测试数据）
 function renderDatasetSelector(idPrefix){
@@ -398,7 +437,17 @@ function renderTableList(){
     list.innerHTML = '<div class="empty"><div style="font-size:36px">📭</div><div style="margin-top:8px;color:var(--text-mute)">暂无数据表，点击上方按钮创建或导入</div></div>';
     return;
   }
-  list.innerHTML = tables.map(t=>`
+  // 根据用户隔离状态过滤数据表（演示：假设偶数ID的表是当前用户创建的）
+  const filteredTables = userIsolationEnabled
+    ? tables.filter((t, idx) => idx % 2 === 0)  // 模拟：只显示本人创建的表
+    : tables;  // 显示所有表
+
+  if(filteredTables.length === 0){
+    list.innerHTML = '<div class="empty"><div style="font-size:36px">📭</div><div style="margin-top:8px;color:var(--text-mute)">暂无您创建的数据表</div></div>';
+    return;
+  }
+
+  list.innerHTML = filteredTables.map(t=>`
     <div class="table-row" onclick="enterTableDetail('${t.name}')">
       <div class="table-icon">📋</div>
       <div><div style="font-size:13px;font-weight:600;color:var(--primary)">${t.name}</div></div>
@@ -428,7 +477,13 @@ function createTable(){
 function enterTableDetail(name){
   document.getElementById('detail-table-title').textContent = name;
   detailDataset = 'test';
+  detailIsolationEnabled = true;
   document.querySelectorAll('#view-table-detail .ds-tab').forEach(t=>t.classList.toggle('active', t.dataset.target==='test'));
+  document.getElementById('detail-isolation-toggle').checked = true;
+  const statusEl = document.getElementById('detail-isolation-status');
+  statusEl.className = 'status on';
+  document.getElementById('detail-isolation-icon').textContent = '👤';
+  document.getElementById('detail-isolation-text').textContent = '仅本人创建';
   renderDetailData();
   document.getElementById('import-records').innerHTML = '';
   switchView('view-table-detail');
@@ -441,10 +496,18 @@ function switchDetailDataset(target){
 }
 
 function renderDetailData(){
-  const rows = SAMPLE_DETAIL[detailDataset];
+  const allRows = SAMPLE_DETAIL[detailDataset];
+  const ownership = SAMPLE_DETAIL_OWNERSHIP[detailDataset];
   const m = DATASET_META[detailDataset];
-  document.getElementById('detail-data-body').innerHTML = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
-  document.getElementById('detail-table-sub').textContent = `${m.label} · 共 ${rows.length} 条记录 · 6 个字段`;
+
+  // 根据隔离状态过滤数据
+  let filteredRows = allRows;
+  if(detailIsolationEnabled){
+    filteredRows = allRows.filter((row, idx) => ownership[idx]);
+  }
+
+  document.getElementById('detail-data-body').innerHTML = filteredRows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  document.getElementById('detail-table-sub').textContent = `${m.label} · 共 ${filteredRows.length} 条记录 · 6 个字段`;
   document.getElementById('detail-ds-hint').textContent = m.label==='测试数据' ? '当前查看测试数据集' : '当前查看线上数据集（生产环境）';
 }
 
@@ -737,6 +800,52 @@ function showImportRecord(){
 function startExport(){
   toast('导出任务已提交，正在生成文件...','info');
   setTimeout(()=>{ toast('导出成功：教学数据库_学生成绩表_导出_20260610.xlsx','success'); },1500);
+}
+
+// ========== 用户隔离开关 ==========
+function toggleUserIsolation(){
+  userIsolationEnabled = document.getElementById('user-isolation-toggle').checked;
+  const statusEl = document.getElementById('isolation-status');
+  const iconEl = document.getElementById('isolation-icon');
+  const textEl = document.getElementById('isolation-text');
+
+  if(userIsolationEnabled){
+    statusEl.className = 'status on';
+    iconEl.textContent = '👤';
+    textEl.textContent = '仅本人数据';
+    toast('已开启用户隔离，仅显示您创建的数据表','success');
+  } else {
+    statusEl.className = 'status off';
+    iconEl.textContent = '👥';
+    textEl.textContent = '全部数据';
+    toast('已关闭用户隔离，显示所有用户的数据表（管理员视图）','info');
+  }
+
+  // 重新渲染数据表列表
+  renderTableList();
+}
+
+// ========== 详情页数据隔离开关 ==========
+function toggleDetailIsolation(){
+  detailIsolationEnabled = document.getElementById('detail-isolation-toggle').checked;
+  const statusEl = document.getElementById('detail-isolation-status');
+  const iconEl = document.getElementById('detail-isolation-icon');
+  const textEl = document.getElementById('detail-isolation-text');
+
+  if(detailIsolationEnabled){
+    statusEl.className = 'status on';
+    iconEl.textContent = '👤';
+    textEl.textContent = '仅本人创建';
+    toast('已开启数据筛选，仅显示您创建的记录','success');
+  } else {
+    statusEl.className = 'status off';
+    iconEl.textContent = '👥';
+    textEl.textContent = '全部数据';
+    toast('已关闭数据筛选，显示所有用户的记录（管理员视图）','info');
+  }
+
+  // 重新渲染详情数据
+  renderDetailData();
 }
 
 // ========== 初始化 ==========
