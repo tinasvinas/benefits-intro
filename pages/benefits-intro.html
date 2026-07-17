@@ -596,8 +596,8 @@ button { font: inherit; }
   </header>
 
   <nav class="plan-tabs" aria-label="权益类型">
-    <button class="plan-tab active" type="button" data-pane="corp">企业版</button>
-    <button class="plan-tab" type="button" data-pane="pers">个人版</button>
+    <button class="plan-tab active" type="button" data-pane="corp">企业权益</button>
+    <button class="plan-tab" type="button" data-pane="pers">个人权益</button>
     <button class="plan-tab" type="button" data-pane="addon">增量包</button>
   </nav>
 
@@ -659,12 +659,12 @@ const BENEFITS_CONFIG = {
   },
   addon: {
     packages: [
-      { name: "学校增量包", tag: "企业补充", price: "500 元", quota: "50,000,000 Token", action: "购买学校增量包", benefits: ["补充学校累计 Token", "不影响当前企业权益档位", "优先在个人权益前扣减"] },
-      { name: "个人增量包", tag: "个人补充", price: "100 元", quota: "10,000,000 Token", action: "购买个人增量包", benefits: ["按个人账户独立生效", "未消耗额度可继续使用", "权益配额用尽后自动扣减"] }
+      { name: "学校增量包", tag: "企业补充", price: "500 元", quota: "50,000,000 Token", action: "购买学校增量包", desc: "可叠加购买，企业权益到期后将无法使用增量包", benefits: ["补充学校累计 Token", "不影响当前企业权益档位", "优先在个人权益前扣减"] },
+      { name: "个人增量包", tag: "个人补充", price: "100 元", quota: "10,000,000 Token", action: "购买个人增量包", desc: "可叠加购买，个人权益到期后将无法使用增量包", benefits: ["按个人账户独立生效", "未消耗额度可继续使用", "权益配额用尽后自动扣减"] }
     ],
     note: [
       "增量包用于在权益配额用尽后补充 Token。",
-      "权益到期后将无法使用增量包，升档不影响未消耗的增量包。",
+      "升、降档不影响未消耗的增量包。",
       "扣减顺序：企业权益（含企业增量包）→ 个人权益 → 个人增量包。"
     ]
   }
@@ -742,7 +742,7 @@ function renderAddons() {
       <span class="plan-tag">${pkg.tag}</span>
       <div class="price-block">
         <div class="price-line"><span class="price-main">¥${price.main}</span><span class="price-unit">${price.unit}</span></div>
-        <div class="price-desc">一次购买，额度用完为止</div>
+        <div class="price-desc">${pkg.desc}</div>
       </div>
       <div class="quota"><div class="quota-row"><span class="quota-label">补充额度</span><span class="quota-value">${pkg.quota}</span></div></div>
       <button class="plan-action" type="button" data-tip="功能开发中，敬请期待">${pkg.action}</button>
