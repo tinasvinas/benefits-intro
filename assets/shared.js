@@ -152,20 +152,22 @@ function renderTopbar(target, opts={}){
 // ========== 侧边栏：一级导航与按需二级导航 ==========
 const PRIMARY_NAV = [
   { key:'market', name:'智能体市场', href:'index.html', icon:'home' },
-  { key:'training', name:'实训课程', href:'pages/training.html', icon:'book' },
+  { key:'training-center', name:'实训课程', icon:'book', children:[
+    // { key:'training', name:'课程中心', href:'pages/training.html', icon:'book' },
+    { key:'course-resource', name:'课程中心', href:'pages/course-resource.html', icon:'layers' },
+    { key:'wb-training-home', name:'我的实训', href:'pages/workbuddy-training.html', icon:'monitor' },
+  ]},
   { key:'agent-dev', name:'智能体开发', icon:'cube', children:[
     { key:'agent-dev-create', name:'创建智能体', href:'pages/agent-dev.html', icon:'cube' },
     { key:'agent-dev-my', name:'我的智能体', href:'pages/agent-dev.html', icon:'user' },
     { key:'agent-dev-db', name:'数据库', href:'pages/agent-data.html', icon:'database' },
   ]},
-  { key:'wb-training', name:'WorkBuddy 实训', href:'pages/workbuddy-training.html', icon:'monitor' },
   { key:'agent-use', name:'智能体使用', href:'pages/agent-use.html', icon:'chat' },
   { key:'forum', name:'学习论坛', href:'pages/forum.html', icon:'forum' },
   { key:'teaching', name:'教学管理', icon:'dashboard', children:[
     { key:'workbench', name:'工作台', href:'pages/teaching-workbench.html', icon:'dashboard' },
     { key:'unjoined', name:'未入班', href:'pages/unjoined.html', icon:'users' },
     { key:'course', name:'课程管理', href:'pages/course.html', icon:'list' },
-    { key:'course-resource', name:'课程资源管理', href:'pages/course-resource.html', icon:'layers' },
     { key:'classmgr', name:'班级管理', href:'pages/teaching-classmgr.html', icon:'group' },
     { key:'myclass', name:'我的班级', href:'pages/teaching-myclass.html', icon:'chart' },
     { key:'students', name:'学生列表', href:'pages/teaching-students.html', icon:'people' },
