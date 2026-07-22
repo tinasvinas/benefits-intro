@@ -145,26 +145,33 @@ const OFFICIAL_COURSE_FALLBACK = {
   },
   lessons: [],
   resources: [],
-  structure: []
+  structure: [],
+  additionalCourses: [{
+    code: 'WB-PPT-101', name: 'WorkBuddy PPT编写实训', official: true, publisher: '平台官方',
+    description: '使用 WorkBuddy 完成 PPT 需求分析、大纲编写、逐页生成、视觉优化、导出与验收。', totalHours: 10,
+    lessons: [{name:'01_PPT需求分析与受众定位.pdf'},{name:'02_PPT大纲与叙事结构.mp4'},{name:'03_逐页文案与素材提示词.pdf'},{name:'04_PPT视觉规范与版式设计.mp4'},{name:'05_PPT导出与验收清单.pdf'}],
+    resources: [{name:'ppt-outline-builder.skill.zip'},{name:'slide-quality-checker.skill.zip'},{name:'presentation-tools.mcp.json'},{name:'PPT需求brief模板.docx'},{name:'PPT视觉规范模板.pptx'},{name:'演示文稿验收清单.xlsx'},{name:'PPT演示示例素材包.zip'}]
+  }]
 };
 
 function countOfficialTasks(structure=[]){
   return structure.reduce((chapterTotal,chapter)=>chapterTotal+(chapter.sections||[]).reduce((sectionTotal,section)=>sectionTotal+(section.tasks||[]).length,0)+(chapter.tasks||[]).length,0);
 }
 
-function mapOfficialCourseToCenter(data){
-  const meta=data.course||{};
-  const lessons=Array.isArray(data.lessons)?data.lessons:[];
-  const resources=Array.isArray(data.resources)?data.resources:[];
+function mapCourseRecordToCenter(meta,lessons=[],resources=[],structure=[],options={}){
   return {
     code:meta.code||'WB-BASIC-101', name:meta.name||meta.course||'WorkBuddy基础培训',
-    stage:'官方实训', lessons:lessons.length, hours:`${meta.totalHours||0}课时`,
-    color:'linear-gradient(135deg,#0f766e,#155e75)', emoji:'🧠', status:'notstart', progress:0,
+    stage:options.stage||'官方实训', lessons:lessons.length, hours:`${meta.totalHours||0}课时`,
+    color:options.color||'linear-gradient(135deg,#0f766e,#155e75)', emoji:options.emoji||'🧠', status:'notstart', progress:0,
     desc:meta.description||'', teacher:meta.publisher||'平台官方',
     resources:[...lessons.map(item=>item.name),...resources.map(item=>item.name)],
-    taskCount:countOfficialTasks(data.structure), outcomes:meta.outcomes||[], official:true,
-    officialData:data
+    taskCount:options.taskCount||countOfficialTasks(structure), outcomes:meta.outcomes||[], official:true,
+    officialData:{course:meta,lessons,resources,structure}
   };
+}
+function mapOfficialCourseToCenter(data){
+  const meta=data.course||{};
+  return mapCourseRecordToCenter(meta,Array.isArray(data.lessons)?data.lessons:[],Array.isArray(data.resources)?data.resources:[],data.structure||{});
 }
 
 function publishedTypes(item){const types=Array.isArray(item?.publishTypes)?item.publishTypes:((item?.publishType==='official'||item?.publishType==='public')?[item.publishType]:[]);return types.filter(type=>type==='official'||type==='public');}
@@ -197,6 +204,11 @@ async function loadOfficialCourse(){
   const existingIndex=COURSES.findIndex(item=>item.code===course.code);
   if(existingIndex>=0)COURSES.splice(existingIndex,1);
   COURSES.unshift(course);
+  (Array.isArray(data.additionalCourses)?data.additionalCourses:[]).map(item=>mapCourseRecordToCenter(item,item.lessons||[],item.resources||[],item.structure||[],{color:'linear-gradient(135deg,#7c3aed,#2563eb)',emoji:'📊',taskCount:6})).reverse().forEach(item=>{
+    const index=COURSES.findIndex(courseItem=>courseItem.code===item.code);
+    if(index>=0)COURSES.splice(index,1);
+    COURSES.unshift(item);
+  });
   loadAdminPublishedOfficialCourses().reverse().forEach(item=>{
     const index=COURSES.findIndex(courseItem=>courseItem.code===item.code);
     if(index>=0)COURSES.splice(index,1);

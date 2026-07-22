@@ -168,5 +168,35 @@
       "至少完成文件系统或浏览器 MCP 的一次工具调用",
       "综合项目成果能够从 D 盘作业输出目录提交并被教师复核"
     ]
-  }
+  },
+  "additionalCourses": [
+    {
+      "code": "WB-PPT-101",
+      "course": "WorkBuddy PPT编写实训",
+      "name": "WorkBuddy PPT编写实训",
+      "official": true,
+      "publisher": "平台官方",
+      "type": "官方实训课程",
+      "description": "使用 WorkBuddy 完成 PPT 需求分析、大纲编写、逐页生成、视觉优化、导出与验收。",
+      "targetAudience": "需要使用 WorkBuddy 快速完成汇报、教学或项目演示文稿的学生",
+      "totalHours": 10,
+      "difficulty": "进阶",
+      "lessons": [
+        { "id": "PPT-L01", "name": "01_PPT需求分析与受众定位.pdf", "type": "PDF", "size": "4.6 MB" },
+        { "id": "PPT-L02", "name": "02_PPT大纲与叙事结构.mp4", "type": "MP4 视频", "size": "82 MB", "duration": "16:25" },
+        { "id": "PPT-L03", "name": "03_逐页文案与素材提示词.pdf", "type": "PDF", "size": "6.1 MB" },
+        { "id": "PPT-L04", "name": "04_PPT视觉规范与版式设计.mp4", "type": "MP4 视频", "size": "105 MB", "duration": "21:40" },
+        { "id": "PPT-L05", "name": "05_PPT导出与验收清单.pdf", "type": "PDF", "size": "3.8 MB" }
+      ],
+      "resources": [
+        { "id": "PPT-R01", "name": "ppt-outline-builder.skill.zip", "type": "Skills", "size": "5.8 MB" },
+        { "id": "PPT-R02", "name": "slide-quality-checker.skill.zip", "type": "Skills", "size": "4.7 MB" },
+        { "id": "PPT-R03", "name": "presentation-tools.mcp.json", "type": "MCP", "size": "16 KB" },
+        { "id": "PPT-R04", "name": "PPT需求brief模板.docx", "type": "自定义资源", "size": "42 KB" },
+        { "id": "PPT-R05", "name": "PPT视觉规范模板.pptx", "type": "自定义资源", "size": "1.8 MB" },
+        { "id": "PPT-R06", "name": "演示文稿验收清单.xlsx", "type": "自定义资源", "size": "86 KB" },
+        { "id": "PPT-R07", "name": "PPT演示示例素材包.zip", "type": "自定义资源", "size": "24.5 MB" }
+      ]
+    }
+  ]
 }
