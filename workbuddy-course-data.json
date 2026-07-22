@@ -1,0 +1,172 @@
+{
+  "course": {
+    "code": "WB-BASIC-101",
+    "course": "WorkBuddy基础培训",
+    "name": "WorkBuddy基础培训",
+    "official": true,
+    "publisher": "平台官方",
+    "type": "官方实训课程",
+    "description": "从工作区、项目目录和任务指令开始，逐步掌握 WorkBuddy、Skills 与 MCP 的基础使用方法。",
+    "targetAudience": "首次使用 WorkBuddy，需要完成基础实训环境配置与任务提交的学生",
+    "totalHours": 8,
+    "difficulty": "入门",
+    "outcomes": [
+      "能够登录 WorkBuddy 并创建独立项目空间",
+      "能够区分 C 盘全局环境与 D 盘项目工作空间",
+      "能够安装并调用基础 Skills，完成 MCP 工具连接",
+      "能够完成综合实训并从 D 盘提交项目成果"
+    ]
+  },
+  "lessons": [
+    { "id": "L01", "name": "01_WorkBuddy界面与账号登录.pdf", "type": "PDF", "size": "5.2 MB" },
+    { "id": "L02", "name": "02_项目空间与C-D盘规范.pdf", "type": "PDF", "size": "4.8 MB" },
+    { "id": "L03", "name": "03_任务指令与提示词设计.mp4", "type": "MP4 视频", "size": "96 MB", "duration": "18:40" },
+    { "id": "L04", "name": "04_Skills安装与调用指南.pdf", "type": "PDF", "size": "6.4 MB" },
+    { "id": "L05", "name": "05_MCP工具连接配置.mp4", "type": "MP4 视频", "size": "88 MB", "duration": "16:20" },
+    { "id": "L06", "name": "06_综合实训验收规范.pdf", "type": "PDF", "size": "3.1 MB" }
+  ],
+  "resources": [
+    { "id": "R01", "name": "workbuddy-file-manager.skill.zip", "type": "Skills", "size": "8.2 MB" },
+    { "id": "R02", "name": "prompt-coach.skill.zip", "type": "Skills", "size": "6.4 MB" },
+    { "id": "R03", "name": "task-checker.skill.zip", "type": "Skills", "size": "4.1 MB" },
+    { "id": "R04", "name": "filesystem.mcp.json", "type": "MCP", "size": "12 KB" },
+    { "id": "R05", "name": "browser.mcp.json", "type": "MCP", "size": "9 KB" },
+    { "id": "R06", "name": "http-tools.mcp.json", "type": "MCP", "size": "14 KB" },
+    { "id": "R07", "name": "workbuddy-basic-project-template.zip", "type": "自定义资源", "size": "18.6 MB" },
+    { "id": "R08", "name": "基础培训练习数据.csv", "type": "自定义资源", "size": "2.4 MB" },
+    { "id": "R09", "name": "WorkBuddy提交检查清单.md", "type": "自定义资源", "size": "18 KB" }
+  ],
+  "structure": [
+    {
+      "name": "第一章 WorkBuddy入门",
+      "desc": "完成登录、工作区认识与项目目录初始化。",
+      "allowSkip": true,
+      "sections": [
+        {
+          "name": "1.1 登录与工作区",
+          "desc": "认识 WorkBuddy 界面、账号和基础操作。",
+          "tasks": [
+            {
+              "name": "完成 WorkBuddy 登录与界面导航",
+              "desc": "登录 WorkBuddy，认识工作区、任务栏和常用入口。",
+              "lessonIds": ["L01"],
+              "resourceIds": [],
+              "workbuddyEnabled": true,
+              "deliverables": [{ "name": "学习记录", "type": "PDF", "required": true, "size": 20 }]
+            }
+          ]
+        },
+        {
+          "name": "1.2 项目空间与磁盘规范",
+          "desc": "理解 C 盘全局环境与 D 盘项目空间的区别。",
+          "tasks": [
+            {
+              "name": "创建首个 WorkBuddy 项目",
+              "desc": "按照项目规范创建项目，完成 D 盘目录初始化并保存项目配置。",
+              "lessonIds": ["L01", "L02"],
+              "resourceIds": ["R07"],
+              "workbuddyEnabled": true,
+              "deliverables": [
+                { "name": "项目配置文件", "type": "JSON", "required": true, "size": 20 },
+                { "name": "WorkBuddy 对话链接", "type": "对话链接", "required": true }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "第二章 Skills与MCP工具",
+      "desc": "安装 Skills 并连接 MCP 工具，完成基础能力配置。",
+      "sections": [
+        {
+          "name": "2.1 Skills安装与调用",
+          "desc": "安装 Skills 并在任务中调用文件处理与提示词辅助能力。",
+          "tasks": [
+            {
+              "name": "安装并调用第一个 Skill",
+              "desc": "将 Skill 安装到 WorkBuddy/资源/Skills/，完成一次调用并记录结果。",
+              "lessonIds": ["L04"],
+              "resourceIds": ["R01", "R02"],
+              "workbuddyEnabled": true,
+              "deliverables": [
+                { "name": "Skill 配置记录", "type": "PDF", "required": true, "size": 20 },
+                { "name": "WorkBuddy 对话链接", "type": "对话链接", "required": true }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "2.2 MCP工具连接",
+          "desc": "配置文件系统和浏览器 MCP 工具并验证连接。",
+          "tasks": [
+            {
+              "name": "配置文件系统与浏览器 MCP",
+              "desc": "完成 MCP 配置、权限检查和工具调用测试，输出可复核的连接结果。",
+              "lessonIds": ["L05", "L02"],
+              "resourceIds": ["R04", "R05"],
+              "workbuddyEnabled": true,
+              "deliverables": [
+                { "name": "MCP 配置文件", "type": "JSON", "required": true, "size": 20 },
+                { "name": "工具测试报告", "type": "PDF", "required": true, "size": 30 },
+                { "name": "WorkBuddy 对话链接", "type": "对话链接", "required": true }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "第三章 综合实训与验收",
+      "desc": "综合使用提示词、Skills 和 MCP 完成基础培训项目。",
+      "sections": [
+        {
+          "name": "3.1 任务指令与工作流",
+          "desc": "设计可复用的任务指令并组合工具完成工作流。",
+          "tasks": [
+            {
+              "name": "设计可复用的任务指令",
+              "desc": "设计任务指令、调用 Skill 和 MCP，完成一次可复用的 WorkBuddy 工作流。",
+              "lessonIds": ["L03"],
+              "resourceIds": ["R02", "R06"],
+              "workbuddyEnabled": true,
+              "deliverables": [
+                { "name": "任务指令说明.md", "type": "不限", "required": true, "size": 10 },
+                { "name": "WorkBuddy 对话链接", "type": "对话链接", "required": true }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "3.2 综合培训验收",
+          "desc": "完成综合任务并按清单提交成果。",
+          "tasks": [
+            {
+              "name": "完成 WorkBuddy 基础培训综合实训",
+              "desc": "综合使用 WorkBuddy、Skills 和 MCP 完成一个可演示的小项目，并从 D 盘作业输出提交成果。",
+              "lessonIds": ["L03", "L06"],
+              "resourceIds": ["R03", "R07", "R09"],
+              "workbuddyEnabled": true,
+              "deliverables": [
+                { "name": "综合项目包", "type": "ZIP", "required": true, "size": 200 },
+                { "name": "项目验收报告", "type": "PDF", "required": true, "size": 50 },
+                { "name": "WorkBuddy 对话链接", "type": "对话链接", "required": true }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assessment": {
+    "completionRule": "完成全部 6 个任务，并提交每个任务的必需提交物。",
+    "scoreWeights": { "工作区与项目规范": 20, "Skills配置": 25, "MCP连接": 25, "综合实训": 30 },
+    "passingScore": 60,
+    "finalAcceptance": [
+      "能够说明 C 盘全局环境与 D 盘项目空间的用途差异",
+      "至少成功安装并调用一个 Skills",
+      "至少完成文件系统或浏览器 MCP 的一次工具调用",
+      "综合项目成果能够从 D 盘作业输出目录提交并被教师复核"
+    ]
+  }
+}
