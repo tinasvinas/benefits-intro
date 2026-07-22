@@ -153,7 +153,7 @@ function renderTopbar(target, opts={}){
 const PRIMARY_NAV = [
   { key:'market', name:'智能体市场', href:'index.html', icon:'home' },
   { key:'training-center', name:'实训课程', icon:'book', children:[
-    // { key:'training', name:'课程中心', href:'pages/training.html', icon:'book' },
+    // { key:'training', name:'智能体实训', href:'pages/training.html', icon:'book' },
     { key:'course-resource', name:'课程中心', href:'pages/course-resource.html', icon:'layers' },
     { key:'wb-training-home', name:'我的实训', href:'pages/workbuddy-training.html', icon:'monitor' },
   ]},
