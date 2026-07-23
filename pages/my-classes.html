@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的班级 · 初发 Trufar</title>
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+.metric-filter{background:#f8fafc;border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.metric-filter.collapsed{display:none}
+.metric-group{margin-bottom:10px}
+.metric-group:last-child{margin-bottom:0}
+.metric-group-title{font-size:12px;color:var(--text-sub);font-weight:600;margin-bottom:8px}
+.metric-tags{display:flex;flex-wrap:wrap;gap:6px}
+.metric-tag{padding:4px 12px;border:1px solid var(--border);border-radius:14px;font-size:12px;cursor:pointer;background:#fff;color:#475569;transition:all .15s}
+.metric-tag.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.metric-tag:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--accent);padding:0;display:inline-flex;align-items:center;gap:4px;font-size:12px}
+.expand-btn svg{width:12px;height:12px;transition:transform .2s}
+.expand-btn.expanded svg{transform:rotate(90deg)}
+.sub-row td{background:#fafbfc !important;font-size:12px}
+.sub-row .agent-cell{padding-left:36px}
+.sub-row.hidden{display:none}
+
+.agent-pin{display:inline-block;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px}
+
+.export-record{padding:10px 14px;background:#f8fafc;border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.export-record .meta{color:var(--text-sub)}
+
+.load-more-row td{text-align:center;padding:6px !important;background:#f8fafc !important}
+.load-more-btn{background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;padding:4px 12px}
+.load-more-btn:hover{text-decoration:underline}
+
+.clickable-num{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:underline dotted}
+.clickable-num:hover{text-decoration:underline}
+
+.student-agent-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:6px;margin-bottom:6px;font-size:13px}
+.student-agent-item .name{font-weight:500;color:#1e293b}
+.student-agent-item .info{color:var(--text-sub);font-size:12px}
+
+.filter-bar .filter-item .agent-select{min-width:160px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar"></aside>
+<main id="main">
+  <header id="topbar"></header>
+  <div id="content">
+
+    <!-- Tab -->
+    <div class="tabs">
+      <span class="tab active" data-view="bind" onclick="switchTab('bind')">班级绑定</span>
+      <span class="tab" data-view="training" onclick="switchTab('training')">实训发布</span>
+    </div>
+
+    <!-- 筛选 -->
+    <div class="filter-bar">
+      <div class="filter-item"><label>授课学期</label>
+        <select class="form-control" id="f-semester"><option value="2025-2">2025-2026 第二学期</option><option value="2025-1">2025-2026 第一学期</option></select>
+      </div>
+      <div class="filter-item"><label>课程</label><input class="form-control" placeholder="模糊搜索课程" id="f-course"></div>
+      <div class="filter-item"><label>班级</label><input class="form-control" placeholder="模糊搜索班级" id="f-class"></div>
+      <div class="filter-item" id="agent-filter-wrap"><label>智能体</label>
+        <select class="form-control agent-select" id="f-agent">
+          <option value="">全部智能体</option>
+          <option value="代码纠错">代码纠错（码上）</option>
+          <option value="代码解读">代码解读（码上）</option>
+          <option value="知识问答">知识问答（码上）</option>
+          <option value="编程问答">编程问答（码上）</option>
+          <option value="数据结构图解">数据结构图解</option>
+          <option value="指针辅导专家">指针辅导专家</option>
+        </select>
+      </div>
+      <div class="filter-item"><label>时间</label>
+        <select class="form-control" id="f-time">
+          <option>近 7 天</option>
+          <option>昨天</option>
+          <option>近 30 天</option>
+          <option>自定义</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-outline" onclick="resetFilter()">重置</button>
+        <button class="btn btn-primary" onclick="doQuery()">查询</button>
+      </div>
+    </div>
+
+    <!-- 指标筛选 -->
+    <div class="metric-filter" id="metric-filter">
+      <div class="metric-group">
+        <div class="metric-group-title">📊 公共指标</div>
+        <div class="metric-tags">
+          <span class="metric-tag active" data-col="students">学生人数</span>
+          <span class="metric-tag active" data-col="login">登录次数</span>
+          <span class="metric-tag active" data-col="loginP">登录人数</span>
+          <span class="metric-tag active" data-col="visits">智能体访问次数</span>
+          <span class="metric-tag" data-col="duration">访问时长</span>
+          <span class="metric-tag active" data-col="posts">提问帖数量</span>
+          <span class="metric-tag active" data-col="answers">回答次数</span>
+          <span class="metric-tag" data-col="forum">论坛互动次数</span>
+        </div>
+      </div>
+      <div class="metric-group" id="special-metrics">
+        <div class="metric-group-title">🔧 智能体特殊指标 <span class="text-mute" style="font-size:11px;font-weight:400" id="special-hint">（按筛选的智能体动态变化，未选时提示「暂未选择智能体」）</span></div>
+        <div class="metric-tags" id="special-metric-tags">
+          <span class="text-mute text-sm">暂未选择智能体</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 列表 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title" id="list-title">班级指标列表</div>
+          <div class="card-sub" id="list-sub">合计行置顶，不计入分页；点击班级展开查看绑定智能体明细，超过 5 个显示「查看更多」</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="openModal('m-export-records')">📋 导出记录</button>
+          <button class="btn btn-primary" onclick="handleExport()">📤 导出</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl" id="main-table">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-12 flex-between" style="font-size:12px;color:var(--text-sub)">
+        <span id="page-info">共 7 条记录</span>
+        <div class="flex gap-4" id="pagination">
+          <span class="btn btn-sm btn-outline">‹</span>
+          <span class="btn btn-sm btn-primary">1</span>
+          <span class="btn btn-sm btn-outline">2</span>
+          <span class="btn btn-sm btn-outline">›</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 导出弹窗 -->
+<div class="modal-overlay" id="m-export">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>导出班级报表</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label><span class="req">*</span>授课学期</label>
+        <select class="form-control" id="export-semester">
+          <option value="">请选择授课学期</option>
+          <option value="2025-2">2025-2026 第二学期</option>
+          <option value="2025-1">2025-2026 第一学期</option>
+        </select>
+        <div class="form-hint">必选项，否则无法导出</div>
+      </div>
+      <div class="form-group">
+        <label>时间范围</label>
+        <input class="form-control" value="2026-05-14 ~ 2026-05-20" readonly>
+      </div>
+      <div style="background:#f8fafc;padding:12px;border-radius:6px;font-size:12px;color:#475569">
+        <div class="fw-600 mb-8">📦 导出文件：<span class="text-mute">yyyymmdd-yyyymmdd班级报表.xlsx</span></div>
+        <div>· 导出本学期所有班级的全量指标信息</div>
+        <div>· 包含学校管理员、教师、助教所在班级数据</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>取消</button>
+      <button class="btn btn-primary" onclick="confirmExport()">确定导出</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出记录 -->
+<div class="modal-overlay" id="m-export-records">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>导出记录</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body" id="export-records-body">
+      <div class="empty" id="export-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        暂无导出记录
+      </div>
+      <div id="export-list" style="display:none">
+        <div class="export-record" id="rec-1">
+          <div>
+            <div class="fw-600">20260520-20260514班级报表</div>
+            <div class="meta">2026-05-21 10:30 · 来自我的班级 · 导出类型：班级绑定</div>
+          </div>
+          <div class="flex gap-8">
+            <span class="badge badge-blue" id="rec-1-status">正在导出</span>
+          </div>
+        </div>
+        <div class="export-record">
+          <div>
+            <div class="fw-600">20260513-20260507班级报表</div>
+            <div class="meta">2026-05-14 09:15 · 来自我的班级 · 导出类型：班级绑定</div>
+          </div>
+          <div class="flex gap-8">
+            <span class="badge badge-green">导出成功</span>
+            <button class="btn btn-sm btn-link">下载</button>
+          </div>
+        </div>
+        <div class="export-record">
+          <div>
+            <div class="fw-600">20260506-20260430班级报表</div>
+            <div class="meta">2026-05-07 14:20 · 来自学生列表 · 导出类型：学生明细</div>
+          </div>
+          <div class="flex gap-8">
+            <span class="badge badge-red">导出失败</span>
+            <button class="btn btn-sm btn-link">重试</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-hint mt-12">⚠️ 同时仅支持 1 个导出任务，正在导出时无法创建新任务</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 实训发布详情弹窗 -->
+<div class="modal-overlay" id="m-training-detail">
+  <div class="modal lg">
+    <div class="modal-header">
+      <h3 id="training-detail-title">学生发布智能体</h3>
+      <button class="modal-close" data-close-modal>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="filter-bar" style="margin-bottom:12px;padding:10px 14px">
+        <div class="filter-item"><label>学期</label><select class="form-control" id="td-semester" disabled><option>2025-2026 第二学期</option></select></div>
+        <div class="filter-item"><label>课程</label><select class="form-control" id="td-course" disabled><option>C语言程序设计</option></select></div>
+        <div class="filter-item"><label>班级</label><select class="form-control" id="td-class" disabled><option>1班</option></select></div>
+      </div>
+      <div id="training-detail-list">
+        <div class="student-agent-item"><div><span class="name">张三</span><span class="info" style="margin-left:12px">学号: 2024001</span></div><div class="info">发布智能体: <b>C语言调试助手</b> · 2026-05-18</div></div>
+        <div class="student-agent-item"><div><span class="name">李四</span><span class="info" style="margin-left:12px">学号: 2024002</span></div><div class="info">发布智能体: <b>链表可视化工具</b> · 2026-05-17</div></div>
+        <div class="student-agent-item"><div><span class="name">王五</span><span class="info" style="margin-left:12px">学号: 2024003</span></div><div class="info">发布智能体: <b>排序算法演示</b> · 2026-05-16</div></div>
+        <div class="student-agent-item"><div><span class="name">赵六</span><span class="info" style="margin-left:12px">学号: 2024004</span></div><div class="info">发布智能体: <b>指针练习辅导</b> · 2026-05-15</div></div>
+        <div class="student-agent-item"><div><span class="name">孙七</span><span class="info" style="margin-left:12px">学号: 2024005</span></div><div class="info">发布智能体: <b>文件操作入门</b> · 2026-05-14</div></div>
+      </div>
+      <div class="mt-12 text-sm text-mute text-center">共 5 个学生发布了智能体</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-close-modal>关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGE_CONFIG = { activeNav:'myclass', title:'我的班级', breadcrumb:['教学管理','我的班级'] };
+</script>
+<script src="../assets/shared.js"></script>
+<script>
+// ========== 数据 ==========
+let currentTab = 'bind';
+let isExporting = false;
+
+const CLASSES = [
+  { id:1, course:'C语言程序设计', cls:'1班', training:true, sem:'2025-2026 第二学期', teacher:'王老师', students:'42/50', login:1280, loginP:38, visits:2150, posts:480, answers:1420, duration:'326h', forum:86, published:5 },
+  { id:2, course:'数据结构', cls:'A班', sem:'2025-2026 第二学期', teacher:'李老师', students:'38/40', login:1086, loginP:35, visits:1820, posts:380, answers:1180, duration:'248h', forum:62, published:3 },
+  { id:3, course:'Python程序设计', cls:'2班', sem:'2025-2026 第二学期', teacher:'赵老师', students:'45/60', login:982, loginP:40, visits:1650, posts:320, answers:980, duration:'210h', forum:54, published:4 },
+  { id:4, course:'软件工程', cls:'实训班', training:true, sem:'2025-2026 第二学期', teacher:'张老师', students:'52/60', login:854, loginP:46, visits:1480, posts:285, answers:820, duration:'186h', forum:48, published:8 },
+  { id:5, course:'计算机组成原理', cls:'1班', sem:'2025-2026 第二学期', teacher:'陈老师', students:'40/50', login:720, loginP:32, visits:1180, posts:220, answers:680, duration:'152h', forum:38, published:2 },
+  { id:6, course:'操作系统', cls:'A班', sem:'2025-2026 第二学期', teacher:'刘老师', students:'48/50', login:654, loginP:42, visits:986, posts:185, answers:540, duration:'128h', forum:30, published:0 },
+  { id:7, course:'计算机网络', cls:'2班', training:true, sem:'2025-2026 第二学期', teacher:'周老师', students:'35/45', login:588, loginP:30, visits:820, posts:160, answers:480, duration:'104h', forum:22, published:6 },
+];
+
+const ALL_AGENTS = [
+  { name:'代码纠错（码上）', visits:680, posts:152, answers:480 },
+  { name:'代码解读（码上）', visits:520, posts:128, answers:380 },
+  { name:'知识问答（码上）', visits:480, posts:115, answers:320 },
+  { name:'编程问答（码上）', visits:280, posts:55,  answers:160 },
+  { name:'数据结构图解',     visits:122, posts:18, answers:48 },
+  { name:'指针辅导专家',     visits:68,  posts:12, answers:34 },
+  { name:'算法动画演示',     visits:45,  posts:8,  answers:22 },
+];
+
+// 按提问帖数量倒序
+const SORTED_AGENTS = [...ALL_AGENTS].sort((a,b) => b.posts - a.posts);
+
+const SPECIAL_METRICS = {
+  '代码纠错': ['5步辅导完成数','求助老师次数','分享到论坛','点赞数'],
+  '代码解读': ['解读完成数','追问次数','收藏数'],
+  '知识问答': ['问答轮次','满意度评分','收藏数'],
+  '编程问答': ['代码提交数','通过率','分享到论坛'],
+};
+
+// ========== Tab 切换 ==========
+function switchTab(view){
+  currentTab = view;
+  document.querySelectorAll('.tabs .tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === view);
+  });
+  if(view === 'bind'){
+    document.getElementById('list-title').textContent = '班级指标列表';
+    document.getElementById('list-sub').textContent = '合计行置顶，不计入分页；点击班级展开查看绑定智能体明细，超过 5 个显示「查看更多」';
+  } else {
+    document.getElementById('list-title').textContent = '实训班级列表';
+    document.getElementById('list-sub').textContent = '查看实训班级发布智能体指标；点击发布数量查看学生发布详情';
+  }
+  renderTable();
+}
+
+// ========== 指标筛选联动 ==========
+document.getElementById('f-agent').addEventListener('change', function(){
+  const val = this.value;
+  const container = document.getElementById('special-metric-tags');
+  if(!val){
+    container.innerHTML = '<span class="text-mute text-sm">暂未选择智能体</span>';
+  } else {
+    const metrics = SPECIAL_METRICS[val] || ['自定义指标A','自定义指标B'];
+    container.innerHTML = metrics.map(m => `<span class="metric-tag">${m}</span>`).join('');
+    container.querySelectorAll('.metric-tag').forEach(t => {
+      t.addEventListener('click', () => t.classList.toggle('active'));
+    });
+  }
+  renderTable();
+});
+
+// ========== 渲染表格 ==========
+function renderTable(){
+  const thead = document.getElementById('thead');
+  const tbody = document.getElementById('tbody');
+  const agentFilter = document.getElementById('f-agent').value;
+
+  let cols, data;
+  if(currentTab === 'bind'){
+    cols = [
+      {key:'name', label:'课程 / 班级', width:'200'},
+      {key:'sem', label:'授课学期'},
+      {key:'teacher', label:'授课老师'},
+      {key:'students', label:'学生人数'},
+      {key:'login', label:'登录次数'},
+      {key:'loginP', label:'登录人数'},
+      {key:'visits', label:'访问次数'},
+      {key:'posts', label:'提问帖'},
+      {key:'answers', label:'回答次数'},
+      {key:'op', label:'操作'},
+    ];
+    data = agentFilter ? CLASSES.filter(c => true) : CLASSES; // 筛选智能体后只显示绑定该智能体的班级
+  } else {
+    cols = [
+      {key:'name', label:'课程 / 班级', width:'200'},
+      {key:'sem', label:'授课学期'},
+      {key:'teacher', label:'授课老师'},
+      {key:'students', label:'学生人数'},
+      {key:'published', label:'发布智能体'},
+      {key:'login', label:'登录次数'},
+      {key:'loginP', label:'登录人数'},
+      {key:'visits', label:'访问次数'},
+      {key:'posts', label:'提问帖'},
+      {key:'answers', label:'回答次数'},
+      {key:'op', label:'操作'},
+    ];
+    data = CLASSES.filter(c => c.training);
+  }
+
+  // thead
+  thead.innerHTML = '<tr>' + cols.map(c => `<th${c.width ? ' width="'+c.width+'"':''}>${c.label}</th>`).join('') + '</tr>';
+
+  // 合计行
+  const totalStudents = data.reduce((s,c) => s + parseInt(c.students), 0);
+  const totalCap = data.reduce((s,c) => s + parseInt(c.students.split('/')[1]), 0);
+  const totalLogin = data.reduce((s,c) => s + c.login, 0);
+  const totalLoginP = data.reduce((s,c) => s + c.loginP, 0);
+  const totalVisits = data.reduce((s,c) => s + c.visits, 0);
+  const totalPosts = data.reduce((s,c) => s + c.posts, 0);
+  const totalAnswers = data.reduce((s,c) => s + c.answers, 0);
+  const totalPublished = data.reduce((s,c) => s + (c.published||0), 0);
+
+  let summaryHtml = '<tr class="summary-row"><td><b>合计</b></td><td>—</td><td>—</td>';
+  summaryHtml += `<td>${data.reduce((s,c)=>s+parseInt(c.students),0)} / ${totalCap}</td>`;
+  if(currentTab === 'training') summaryHtml += `<td><span class="clickable-num" onclick="showTrainingDetail(null)">${totalPublished}</span></td>`;
+  summaryHtml += `<td>${totalLogin.toLocaleString()}</td><td>${totalLoginP}</td><td>${totalVisits.toLocaleString()}</td><td>${totalPosts.toLocaleString()}</td><td>${totalAnswers.toLocaleString()}</td><td>—</td></tr>`;
+
+  tbody.innerHTML = summaryHtml;
+
+  // 数据行
+  data.forEach(c => {
+    let rowHtml = '<tr>';
+    rowHtml += `<td>
+      <button class="expand-btn" onclick="toggleSub(${c.id}, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      ${c.training ? '<span class="badge badge-purple">实</span>' : ''} <b>${c.course}</b><br>
+      <span class="text-sm text-mute">${c.cls}</span>
+    </td>`;
+    rowHtml += `<td class="text-sm">${c.sem}</td>`;
+    rowHtml += `<td>${c.teacher}</td>`;
+    rowHtml += `<td>${c.students}</td>`;
+    if(currentTab === 'training') rowHtml += `<td><span class="clickable-num" onclick="showTrainingDetail(${c.id})">${c.published}</span></td>`;
+    rowHtml += `<td><b>${c.login.toLocaleString()}</b></td>`;
+    rowHtml += `<td>${c.loginP}</td>`;
+    rowHtml += `<td>${c.visits.toLocaleString()}</td>`;
+    rowHtml += `<td>${c.posts}</td>`;
+    rowHtml += `<td>${c.answers.toLocaleString()}</td>`;
+    rowHtml += `<td><a class="btn btn-sm btn-link" href="student-list.html">学生列表</a></td>`;
+    rowHtml += '</tr>';
+    tbody.insertAdjacentHTML('beforeend', rowHtml);
+
+    // 子行：智能体明细（按提问帖倒序，前5个）
+    const agentsToShow = agentFilter
+      ? SORTED_AGENTS.filter(a => a.name.includes(agentFilter))
+      : SORTED_AGENTS;
+    const first5 = agentsToShow.slice(0, 5);
+    const remaining = agentsToShow.length - 5;
+
+    first5.forEach(a => {
+      const colSpan = currentTab === 'training' ? 4 : 3;
+      let subHtml = `<tr class="sub-row hidden sub-${c.id}">`;
+      subHtml += `<td class="agent-cell" colspan="${colSpan}"><span style="color:#475569">└ ${a.name}</span></td>`;
+      subHtml += `<td>—</td><td>—</td><td>${a.visits}</td><td>${a.posts}</td><td>${a.answers}</td><td>—</td>`;
+      if(currentTab === 'training') subHtml += '';
+      subHtml += '</tr>';
+      tbody.insertAdjacentHTML('beforeend', subHtml);
+    });
+
+    // 查看更多行
+    if(remaining > 0 && !agentFilter){
+      const colTotal = currentTab === 'training' ? 11 : 10;
+      tbody.insertAdjacentHTML('beforeend',
+        `<tr class="sub-row hidden sub-${c.id} load-more-row"><td colspan="${colTotal}"><button class="load-more-btn" onclick="loadMoreAgents(${c.id}, this)">▼ 查看更多智能体（${remaining} 个）</button></td></tr>`
+      );
+    }
+  });
+
+  document.getElementById('page-info').textContent = `共 ${data.length} 条记录`;
+}
+
+// ========== 展开/收起 ==========
+function toggleSub(id, btn){
+  btn.classList.toggle('expanded');
+  document.querySelectorAll(`.sub-${id}`).forEach(r => r.classList.toggle('hidden'));
+}
+
+// ========== 查看更多（每次加载5个） ==========
+function loadMoreAgents(classId, btn){
+  const row = btn.closest('tr');
+  const currentSubs = document.querySelectorAll(`.sub-${classId}:not(.load-more-row)`).length;
+  const nextBatch = SORTED_AGENTS.slice(currentSubs, currentSubs + 5);
+  const colSpan = currentTab === 'training' ? 4 : 3;
+
+  nextBatch.forEach(a => {
+    const subHtml = `<tr class="sub-row sub-${classId}"><td class="agent-cell" colspan="${colSpan}"><span style="color:#475569">└ ${a.name}</span></td><td>—</td><td>—</td><td>${a.visits}</td><td>${a.posts}</td><td>${a.answers}</td><td>—</td></tr>`;
+    row.insertAdjacentHTML('beforebegin', subHtml);
+  });
+
+  const totalLoaded = currentSubs + nextBatch.length;
+  const stillRemaining = SORTED_AGENTS.length - totalLoaded;
+  if(stillRemaining <= 0){
+    row.remove();
+  } else {
+    btn.textContent = `▼ 查看更多智能体（${stillRemaining} 个）`;
+  }
+  toast(`已加载 ${nextBatch.length} 个智能体`, 'info');
+}
+
+// ========== 实训发布弹窗 ==========
+function showTrainingDetail(classId){
+  const cls = classId ? CLASSES.find(c=>c.id===classId) : null;
+  if(cls){
+    document.getElementById('training-detail-title').textContent = `${cls.course} - ${cls.cls} 学生发布智能体`;
+    document.getElementById('td-course').querySelector('option').textContent = cls.course;
+    document.getElementById('td-class').querySelector('option').textContent = cls.cls;
+  } else {
+    document.getElementById('training-detail-title').textContent = '全部实训班级 - 学生发布智能体';
+  }
+  openModal('m-training-detail');
+}
+
+// ========== 导出 ==========
+function handleExport(){
+  if(isExporting){
+    toast('同时仅支持1个导出任务，请稍后再试。', 'warning');
+    return;
+  }
+  openModal('m-export');
+}
+
+function confirmExport(){
+  const semester = document.getElementById('export-semester').value;
+  if(!semester){
+    toast('请选择授课学期后导出', 'warning');
+    return;
+  }
+  closeModal('m-export');
+  isExporting = true;
+  toast('导出任务已创建，请到导出记录查看', 'success');
+
+  // 显示导出记录
+  document.getElementById('export-empty').style.display = 'none';
+  document.getElementById('export-list').style.display = 'block';
+
+  // 模拟30秒轮询
+  let pollCount = 0;
+  const pollInterval = setInterval(() => {
+    pollCount++;
+    if(pollCount >= 3){
+      clearInterval(pollInterval);
+      document.getElementById('rec-1-status').className = 'badge badge-green';
+      document.getElementById('rec-1-status').textContent = '导出成功';
+      const parent = document.getElementById('rec-1-status').parentElement;
+      parent.insertAdjacentHTML('beforeend', '<button class="btn btn-sm btn-link">下载</button>');
+      isExporting = false;
+      toast('导出完成，可前往导出记录下载', 'success');
+    }
+  }, 10000);
+}
+
+// ========== 查询 ==========
+function doQuery(){
+  document.getElementById('metric-filter').classList.add('collapsed');
+  toast('已查询，指标筛选项已收起', 'success');
+  setTimeout(() => {
+    document.getElementById('metric-filter').classList.remove('collapsed');
+  }, 1500);
+  renderTable();
+}
+
+function resetFilter(){
+  document.getElementById('f-course').value = '';
+  document.getElementById('f-class').value = '';
+  document.getElementById('f-agent').value = '';
+  document.getElementById('f-agent').dispatchEvent(new Event('change'));
+  toast('已重置筛选项', 'info');
+}
+
+// ========== 指标 tag 点击 ==========
+document.querySelectorAll('.metric-tag').forEach(t => {
+  t.addEventListener('click', () => t.classList.toggle('active'));
+});
+
+// ========== 初始渲染 ==========
+renderTable();
+</script>
+</body>
+</html>
