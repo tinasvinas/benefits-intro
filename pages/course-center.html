@@ -426,6 +426,76 @@
             min-height: 28px
         }
 
+        .course-filter-combobox {
+            position: relative;
+            flex: 1;
+            min-width: 0
+        }
+
+        .course-filter-combobox .form-control {
+            width: 100%;
+            padding-right: 28px
+        }
+
+        .course-filter-toggle {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 26px;
+            height: 100%;
+            border: 0;
+            background: transparent;
+            color: var(--text-sub);
+            cursor: pointer;
+            transform: translateY(-50%)
+        }
+
+        .course-filter-options {
+            position: absolute;
+            z-index: 20;
+            top: calc(100% + 3px);
+            left: 0;
+            right: 0;
+            display: none;
+            max-height: 190px;
+            overflow-y: auto;
+            padding: 4px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background: var(--surface, #fff);
+            box-shadow: 0 8px 20px rgba(26, 55, 84, .14)
+        }
+
+        .course-filter-options.is-open {
+            display: block
+        }
+
+        .course-filter-option {
+            display: block;
+            width: 100%;
+            padding: 7px 8px;
+            border: 0;
+            border-radius: 3px;
+            background: transparent;
+            color: var(--text);
+            font-size: 11px;
+            line-height: 1.35;
+            text-align: left;
+            cursor: pointer
+        }
+
+        .course-filter-option:hover,
+        .course-filter-option.is-active {
+            background: var(--primary-soft, #edf5ff);
+            color: var(--primary, #2f80ed)
+        }
+
+        .course-filter-empty {
+            padding: 8px;
+            color: var(--text-sub);
+            font-size: 11px
+        }
+
         .binding-summary {
             display: flex;
             align-items: center;
@@ -452,29 +522,6 @@
             font-size: 10px
         }
 
-        .binding-options {
-            display: grid;
-            gap: 8px;
-            margin-top: 8px
-        }
-
-        .binding-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px
-        }
-
-        .binding-option>span:first-of-type {
-            flex: 1
-        }
-
-        .binding-option small {
-            color: var(--text-mute)
-        }
-
         .resource-home-toolbar,
         .resource-home-heading {
             display: flex;
@@ -487,7 +534,8 @@
         .resource-home-toolbar {
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 16px
+            margin-bottom: 16px;
+            justify-content: flex-start
         }
 
         .resource-home-toolbar .course-filter {
@@ -694,6 +742,14 @@
 
         .upload-target .form-control {
             flex: 1
+        }
+
+        #m-upload-resource {
+            z-index: 1010
+        }
+
+        #m-workbuddy-directory {
+            z-index: 1020
         }
 
         .directory-browser {
@@ -1284,7 +1340,8 @@
         }
 
         #node-list .section-index {
-            background: #ffad45;
+            background: #e8f1f8;
+            color: #4778a8;
             font-size: 0
         }
 
@@ -1320,7 +1377,7 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #ffad45
+            background: #eef4fa
         }
 
         #node-list .node-head {
@@ -1356,11 +1413,285 @@
             background: #fafbfc
         }
 
-        #node-list .hide-outline-numbers .chapter-index,
-        #node-list .hide-outline-numbers .section-index,
-        #node-list .hide-outline-numbers .node-index,
-        #node-list .hide-outline-numbers .node-card::before {
+        #node-list.hide-outline-numbers .chapter-index,
+        #node-list.hide-outline-numbers .section-index,
+        #node-list.hide-outline-numbers .node-index,
+        #node-list.hide-outline-numbers .node-card::before {
             opacity: 0
+        }
+
+        #pane-nodes,
+        #node-list {
+            min-width: 0;
+            max-width: 100%
+        }
+
+        #pane-nodes {
+            overflow: hidden
+        }
+
+        #pane-nodes>.card-header {
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        #pane-nodes .outline-toolbar {
+            flex-wrap: wrap
+        }
+
+        #node-list .chapter-card {
+            margin-bottom: 10px;
+            border: 1px solid #d7e2eb;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(38, 64, 89, .04)
+        }
+
+        #node-list .chapter-head {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: start;
+            gap: 8px;
+            min-height: 0;
+            padding: 8px 10px;
+            border-bottom: 1px solid #d7e2eb;
+            background: #edf4fa
+        }
+
+        #node-list .chapter-index {
+            width: auto;
+            min-width: 50px;
+            height: 24px;
+            padding: 0 8px;
+            border-radius: 5px;
+            background: #4778a8;
+            color: #fff;
+            font-size: 0
+        }
+
+        #node-list .chapter-index::after {
+            content: '第' counter(chapter) '章';
+            font-size: 10px
+        }
+
+        #node-list .chapter-title,
+        #node-list .section-title,
+        #node-list .node-info {
+            min-width: 0
+        }
+
+        #node-list .chapter-title b {
+            color: #263f56;
+            font-size: 13px;
+            line-height: 1.45
+        }
+
+        #node-list .chapter-title small,
+        #node-list .section-title small {
+            display: block;
+            margin: 2px 0 0;
+            line-height: 1.35;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .chapter-head>[data-manage-control],
+        #node-list .section-head>[data-manage-control],
+        #node-list .node-head>.flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 4px;
+            max-width: 100%
+        }
+
+        #node-list .section-card-outline {
+            margin: 8px 10px;
+            padding: 0;
+            border: 1px solid #dfe8ef;
+            border-left: 4px solid #7da9c9;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fbfdff
+        }
+
+        #node-list .section-head {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: start;
+            gap: 7px;
+            min-height: 0;
+            padding: 7px 10px;
+            border-bottom: 1px solid #e4ecf2;
+            background: #f8fbfd
+        }
+
+        #node-list .section-index {
+            width: auto;
+            min-width: 58px;
+            height: 22px;
+            padding: 0 7px;
+            border: 1px solid #cfe0ed;
+            border-radius: 4px;
+            background: #e8f1f8;
+            color: #4778a8;
+            font-size: 0
+        }
+
+        #node-list .section-index::after {
+            content: '第' counter(chapter) '.' counter(section) '节';
+            font-size: 10px
+        }
+
+        #node-list .section-title b {
+            color: #314f68;
+            font-size: 12px;
+            line-height: 1.45
+        }
+
+        #node-list .section-task-list {
+            margin: 0;
+            padding: 7px 10px 1px;
+            border: 0;
+            background: #fff
+        }
+
+        #node-list .chapter-task-list {
+            margin: 0;
+            padding: 7px 10px 1px;
+            border: 0;
+            border-bottom: 1px solid #e3e9ef;
+            background: #fafcfd
+        }
+
+        #node-list .chapter-task-label {
+            display: inline-flex;
+            margin: 0 0 6px;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: #eef3f7;
+            color: #657789
+        }
+
+        #node-list .node-card {
+            margin: 0 0 6px;
+            padding: 0;
+            border: 1px solid #e1e9ef;
+            border-left: 3px solid #9dbdd4;
+            border-radius: 7px;
+            overflow: hidden;
+            background: #fff
+        }
+
+        #node-list .node-card::before {
+            display: none
+        }
+
+        #node-list .node-head {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: start;
+            gap: 7px;
+            min-height: 0;
+            padding: 7px 10px;
+            background: #fff
+        }
+
+        #node-list .node-index {
+            position: static;
+            width: auto;
+            min-width: 52px;
+            height: 22px;
+            padding: 0 7px;
+            border: 1px solid #d4e2ed;
+            border-radius: 4px;
+            background: #eef4fa;
+            color: #4778a8;
+            font-size: 0
+        }
+
+        #node-list .node-index::after {
+            content: '任务' counter(task);
+            font-size: 10px
+        }
+
+        #node-list .chapter-head,
+        #node-list .section-head,
+        #node-list .node-head {
+            align-items: center
+        }
+
+        #node-list .chapter-title,
+        #node-list .section-title,
+        #node-list .node-info {
+            align-self: center
+        }
+
+        #node-list .node-info b {
+            color: #2c4961;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .node-info .text-xs {
+            line-height: 1.4;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .node-head>.flex {
+            align-items: center;
+            max-width: 270px
+        }
+
+        #node-list .node-detail {
+            margin: 0;
+            padding: 7px 10px 7px 65px;
+            border: 0;
+            border-top: 1px solid #edf0f2;
+            border-radius: 0;
+            background: #fafbfc;
+            overflow-wrap: anywhere
+        }
+
+        @media(max-width:1100px) {
+            #node-list .chapter-head,
+            #node-list .section-head,
+            #node-list .node-head {
+                grid-template-columns: auto minmax(0, 1fr)
+            }
+
+            #node-list .chapter-head>[data-manage-control],
+            #node-list .section-head>[data-manage-control],
+            #node-list .node-head>.flex {
+                grid-column: 2;
+                justify-content: flex-start;
+                max-width: none;
+                margin-top: 3px
+            }
+        }
+
+        @media(max-width:700px) {
+            #node-list .chapter-head,
+            #node-list .section-head,
+            #node-list .node-head {
+                grid-template-columns: 1fr
+            }
+
+            #node-list .chapter-head>[data-manage-control],
+            #node-list .section-head>[data-manage-control],
+            #node-list .node-head>.flex {
+                grid-column: 1
+            }
+
+            #node-list .section-card-outline {
+                margin: 9px 8px
+            }
+
+            #node-list .node-detail {
+                padding-left: 12px
+            }
         }
 
         .skip-config-badge {
@@ -1374,6 +1705,510 @@
             font-size: 9px;
             white-space: nowrap
         }
+
+        /* 章、节、任务使用虚线连接，强化目录层级关系 */
+        #node-list .section-card-outline,
+        #node-list .node-card {
+            overflow: visible
+        }
+
+        #node-list .section-card-outline::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            top: 22px;
+            width: 18px;
+            border-top: 1px dashed #b8cddd
+        }
+
+        #node-list .section-task-list,
+        #node-list .chapter-task-list {
+            position: relative
+        }
+
+        #node-list .section-task-list::before,
+        #node-list .chapter-task-list::before {
+            content: '';
+            position: absolute;
+            left: 13px;
+            top: 0;
+            bottom: 12px;
+            border-left: 1px dashed #b8cddd
+        }
+
+        #node-list .node-card::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: -18px;
+            top: 20px;
+            width: 17px;
+            height: 0;
+            border-top: 1px dashed #b8cddd;
+            border-radius: 0;
+            background: transparent
+        }
+
+        #node-list .outline-action-btn {
+            padding: 3px;
+            width: 24px;
+            height: 24px;
+            color: #5f7183
+        }
+
+        #node-list .outline-action-btn svg {
+            display: block;
+            width: 13px;
+            height: 13px
+        }
+
+        #node-list .outline-action-btn:hover:not(:disabled) {
+            color: #4778a8;
+            border-color: #9ebbd2;
+            background: #f3f8fc
+        }
+
+        #node-list .outline-action-btn.danger {
+            color: #b05b62
+        }
+
+        #node-list .outline-action-btn.danger:hover:not(:disabled) {
+            color: #b94d55;
+            border-color: #e4b4b8;
+            background: #fff7f7
+        }
+
+        #node-list .outline-drag-handle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 24px;
+            height: 24px;
+            border: 1px solid #cfdbe5;
+            border-radius: 4px;
+            background: #fff;
+            color: #5f7183;
+            cursor: grab;
+            user-select: none
+        }
+
+        #node-list .outline-drag-handle:hover,
+        #node-list .outline-drag-handle:focus-visible {
+            border-color: #9ebbd2;
+            outline: 0;
+            background: #f3f8fc;
+            color: #4778a8
+        }
+
+        #node-list .outline-drag-handle:active {
+            cursor: grabbing
+        }
+
+        #node-list .outline-drag-handle svg {
+            width: 13px;
+            height: 13px;
+            pointer-events: none
+        }
+
+        #node-list [data-drag-kind].is-dragging {
+            opacity: .45
+        }
+
+        #node-list [data-drag-kind].outline-drop-before {
+            box-shadow: inset 0 3px 0 #4778a8
+        }
+
+        #node-list [data-drag-kind].outline-drop-after {
+            box-shadow: inset 0 -3px 0 #4778a8
+        }
+
+        #node-list .node-name-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        #node-list .node-name-line b {
+            display: inline-flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 4px
+        }
+
+        #node-list .node-asset-counts {
+            color: #708395;
+            font-size: 10px;
+            font-weight: 400;
+            white-space: nowrap
+        }
+
+        #node-list .node-description-line {
+            margin-top: 3px;
+            color: #708395;
+            font-size: 11px;
+            line-height: 1.4;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .skip-config-badge.is-required {
+            background: #f0f3f6;
+            border-color: #d9e0e6;
+            color: #657789
+        }
+
+        /* 课程中心章节设计与“我的实训”课程章节使用同一套卡片结构与视觉参数 */
+        #node-list {
+            counter-reset: course-outline-chapter
+        }
+
+        #node-list .outline-chapter {
+            margin-bottom: 16px;
+            border: 1px solid #d7e2eb;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(38, 64, 89, .04);
+            counter-increment: course-outline-chapter;
+            counter-reset: course-outline-section
+        }
+
+        #node-list .outline-chapter-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 62px;
+            padding: 12px 14px;
+            border: 0;
+            border-bottom: 1px solid #d7e2eb;
+            background: #edf4fa
+        }
+
+        #node-list .outline-chapter-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0
+        }
+
+        #node-list .outline-chapter-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            min-width: 50px;
+            height: 24px;
+            padding: 0 8px;
+            border: 0;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: #4778a8;
+            color: #fff;
+            font-size: 0;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        #node-list .outline-chapter-index::after {
+            content: '第' counter(course-outline-chapter) '章';
+            font-size: 10px
+        }
+
+        #node-list .outline-chapter-head h3 {
+            min-width: 0;
+            color: #263f56;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        #node-list .outline-chapter-count {
+            margin-left: 0;
+            color: #718394;
+            font-size: 11px;
+            white-space: nowrap
+        }
+
+        #node-list .outline-section {
+            position: relative;
+            margin: 12px 14px;
+            padding: 0;
+            border: 1px solid #dfe8ef;
+            border-left: 4px solid #7da9c9;
+            border-radius: 7px;
+            overflow: hidden;
+            background: #fbfdff;
+            counter-increment: course-outline-section;
+            counter-reset: course-outline-task
+        }
+
+        #node-list .outline-section+.outline-section {
+            border-top: 1px solid #dfe8ef
+        }
+
+        #node-list .outline-section-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 48px;
+            margin: 0;
+            padding: 10px 12px;
+            border: 0;
+            border-bottom: 1px solid #e4ecf2;
+            background: #f8fbfd
+        }
+
+        #node-list .outline-section-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 58px;
+            min-width: 58px;
+            height: 22px;
+            padding: 0 7px;
+            border: 1px solid #cfe0ed;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: #e8f1f8;
+            color: #4778a8;
+            font-size: 0;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        #node-list .outline-section-index::after {
+            content: '第' counter(course-outline-chapter) '.' counter(course-outline-section) '节';
+            font-size: 10px
+        }
+
+        #node-list .outline-section-head>b {
+            min-width: 0;
+            color: #314f68;
+            font-size: 12px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        #node-list .outline-section-count {
+            margin-left: 0;
+            color: #7a8997;
+            font-size: 10px;
+            white-space: nowrap
+        }
+
+        #node-list .outline-description {
+            margin: 0;
+            padding: 8px 12px;
+            border-bottom: 1px solid #e4ecf2;
+            background: #fff;
+            color: #6f8191;
+            font-size: 11px;
+            line-height: 1.55;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .outline-description b {
+            color: #4b6479;
+            font-weight: 600
+        }
+
+        #node-list .outline-chapter-description {
+            padding-left: 14px;
+            background: #f8fbfd
+        }
+
+        #node-list .outline-section-direct {
+            counter-increment: none;
+            border-left-color: #9aaaba
+        }
+
+        #node-list .outline-section-direct .outline-section-index {
+            width: 64px;
+            min-width: 64px;
+            border-color: #d9e0e6;
+            background: #f0f3f6;
+            color: #657789
+        }
+
+        #node-list .outline-section-direct .outline-section-index::after {
+            content: '章级任务'
+        }
+
+        #node-list .outline-section .task-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: 54px minmax(0, 1fr) auto auto;
+            align-items: center;
+            gap: 10px;
+            min-height: 76px;
+            margin: 10px 12px;
+            padding: 12px;
+            border: 1px solid #e1e9ef;
+            border-radius: 6px;
+            box-sizing: border-box;
+            overflow: visible;
+            background: #fff;
+            box-shadow: none;
+            cursor: default;
+            counter-increment: course-outline-task
+        }
+
+        #node-list .outline-section .task-card:hover {
+            border-color: #9dbdd4;
+            background: #fafdff;
+            box-shadow: none
+        }
+
+        #node-list .outline-section .task-no {
+            position: static;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            min-width: 48px;
+            height: 26px;
+            padding: 0 7px;
+            border: 1px solid #d4e2ed;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: #eef4fa;
+            color: #4778a8;
+            font-size: 0;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0
+        }
+
+        #node-list .outline-section .task-no::after {
+            content: '任务' counter(course-outline-task);
+            font-size: 10px
+        }
+
+        #node-list .task-card>div:not([data-manage-control]) {
+            min-width: 0
+        }
+
+        #node-list .task-name {
+            color: #2c4961;
+            font-size: 13px;
+            font-weight: 700;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .task-name-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        #node-list .task-desc {
+            margin: 3px 0;
+            color: #607487;
+            font-size: 11px;
+            line-height: 1.55;
+            overflow-wrap: anywhere
+        }
+
+        #node-list .task-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: #81909d;
+            font-size: 10px
+        }
+
+        #node-list .skip-allow-note {
+            margin-left: 8px;
+            color: #9a6b1f;
+            font-size: 10px
+        }
+
+        #node-list .outline-chapter-head>[data-manage-control],
+        #node-list .outline-section-head>[data-manage-control],
+        #node-list .task-card>[data-manage-control] {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-width: 100%
+        }
+
+        #node-list .outline-chapter-head>[data-manage-control],
+        #node-list .outline-section-head>[data-manage-control] {
+            margin-left: auto
+        }
+
+        #node-list .outline-section::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 0;
+            bottom: 0;
+            border-left: 1px dashed #b8cddd
+        }
+
+        #node-list .outline-section::after {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 24px;
+            width: 10px;
+            border-top: 1px dashed #b8cddd
+        }
+
+        #node-list .outline-section .task-card::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: -15px;
+            top: 24px;
+            width: 14px;
+            height: 0;
+            border: 0;
+            border-top: 1px dashed #b8cddd;
+            border-radius: 0;
+            background: transparent
+        }
+
+        #node-list.hide-outline-numbers .outline-chapter-index,
+        #node-list.hide-outline-numbers .outline-section-index,
+        #node-list.hide-outline-numbers .task-no,
+        #node-list.hide-outline-numbers .task-card::before {
+            opacity: 0
+        }
+
+        @media(max-width:760px) {
+            #node-list .outline-chapter-head,
+            #node-list .outline-section-head {
+                align-items: flex-start;
+                flex-wrap: wrap
+            }
+
+            #node-list .outline-section .task-card {
+                grid-template-columns: 48px minmax(0, 1fr);
+                align-items: start
+            }
+
+            #node-list .outline-section .task-card>div:not([data-manage-control]) {
+                min-width: 0
+            }
+
+            #node-list .outline-section .task-card>[data-manage-control] {
+                grid-column: 2;
+                justify-self: start
+            }
+        }
     </style>
 </head>
 
@@ -1384,22 +2219,24 @@
         <div id="content">
             <section id="resource-home">
                 <div class="resource-home-toolbar">
-                    <div>
-                        <div class="card-title">课程设计</div>
-                        <div class="card-sub">统一配置实训课程目录、课件、资源和 WorkBuddy 任务</div>
+                    <div class="course-filter"><label for="resource-course-filter">课程资源：</label>
+                        <div class="course-filter-combobox" id="resource-course-filter-combobox">
+                            <input id="resource-course-filter" class="form-control" type="text" role="combobox"
+                                aria-autocomplete="list" aria-controls="resource-course-filter-options"
+                                aria-expanded="false" autocomplete="off" placeholder="请输入课程资源名称"
+                                onfocus="openResourceCourseFilter()"
+                                oninput="filterResourceCourses(this.value, true)"
+                                onkeydown="handleResourceCourseFilterKeydown(event)">
+                            <button class="course-filter-toggle" type="button" aria-label="展开课程资源名称选项"
+                                onclick="toggleResourceCourseFilter(event)">⌄</button>
+                            <div id="resource-course-filter-options" class="course-filter-options" role="listbox"></div>
+                        </div>
                     </div>
-                    <div class="course-filter"><label for="resource-course-filter">实训课程</label><select
-                            id="resource-course-filter" class="form-control"
-                            onchange="filterResourceCourses(this.value)">
-                            <option value="">全部实训课程</option>
-                            <option value="WorkBuddy基础培训">WorkBuddy基础培训</option>
-                            <option value="WorkBuddy PPT编写实训">WorkBuddy PPT编写实训</option>
-                        </select></div>
                 </div>
                 <section class="resource-home-section">
                     <div class="resource-home-heading">
                         <div>
-                            <h2>实训课程模板</h2>
+                            <h2>课程中心模板</h2>
                             <p>可复制使用的标准实训课程，课程内容统一只读展示</p>
                         </div><span class="badge badge-blue">官方</span>
                     </div>
@@ -1408,9 +2245,9 @@
                 <section class="resource-home-section">
                     <div class="resource-home-heading">
                         <div>
-                            <h2>我的实训课程</h2>
-                            <p>按章、小节和任务设计课程；系统管理员可设置为初发官方课程或我的实训课</p>
-                        </div><button class="btn btn-primary" onclick="openCreateResource()">+ 新增课程</button>
+                            <h2>我的课程资源</h2>
+                            <p>按章、小节和任务设计课程</p>
+                        </div><button class="btn btn-primary" onclick="openCreateResource()">+ 新增课程资源</button>
                     </div>
                     <div id="course-list" class="course-card-grid"></div>
                 </section>
@@ -1421,19 +2258,17 @@
                     <div class="flex-between">
                         <div><span class="badge badge-blue" id="ctx-code">WB-BASIC-101</span>
                             <h2 id="ctx-name">WorkBuddy基础培训 · 实训课程</h2>
-                            <div id="ctx-meta" style="font-size:12px;opacity:.85">新增人：白小乐 · WorkBuddy 实训课程</div>
+                            <div id="ctx-meta" style="font-size:12px;opacity:.85">WorkBuddy 实训课程</div>
                             <div class="binding-summary" id="binding-summary"></div>
                         </div>
-                        <div class="flex gap-8"><button id="publish-course-detail" class="btn btn-sm btn-primary"
-                                type="button" onclick="openPublicationModal()">发布范围</button><button
-                                id="copy-official-detail" class="btn btn-sm btn-primary" type="button"
-                                onclick="copyActiveOfficialCourse()">复制课程</button><button id="edit-course-detail"
-                                class="btn btn-sm btn-outline" type="button"
-                                onclick="openEditCourseInfo()">编辑基本信息</button><button id="delete-course-detail"
+                        <div class="flex gap-8"><button id="edit-course-detail" class="btn btn-sm btn-outline"
+                                type="button" onclick="openEditCourseInfo()">基本信息</button><button
+                                id="publish-course-detail" class="btn btn-sm btn-primary" type="button"
+                                onclick="openPublicationModal()">发布范围</button><button id="delete-course-detail"
                                 class="btn btn-sm btn-danger-outline" type="button"
-                                onclick="deleteCourseResource(event,activeCourseIndex)">删除课程</button><button
-                                id="manage-binding-detail" class="btn btn-sm btn-outline" type="button"
-                                onclick="openBindingModal()">管理班级绑定</button></div>
+                                onclick="deleteCourseResource(event,activeCourseIndex)">删除</button><button
+                                id="copy-official-detail" class="btn btn-sm btn-primary" type="button"
+                                onclick="copyActiveOfficialCourse()">复制课程</button></div>
                     </div>
                     <div class="context-stats">
                         <div><b id="stat-lessons">5</b><span>课件</span></div>
@@ -1450,7 +2285,6 @@
                         <div class="card-header">
                             <div>
                                 <div class="card-title">课件列表</div>
-                                <div class="card-sub">支持 PDF、DOCX、PPTX、XLSX 文档，以及 MP4、MOV 视频</div>
                             </div><button class="btn btn-primary" data-manage-control
                                 onclick="openModal('m-upload-lesson')">+ 上传课件</button>
                         </div>
@@ -1492,7 +2326,7 @@
                                     onclick="openChapterModal()">+ 新增章</button><button class="btn btn-primary"
                                     onclick="openNodeModal()">+ 新增任务</button></div>
                         </div>
-                        <div class="course-outline-directory-title">目录</div>
+
                         <div id="node-list"></div>
                         <label class="chapter-number-switch"><span>显示章节序号</span><input type="checkbox" checked
                                 onchange="document.getElementById('node-list').classList.toggle('hide-outline-numbers', !this.checked)"><i></i></label>
@@ -1504,10 +2338,10 @@
     <div class="modal-overlay" id="m-create-resource">
         <div class="modal">
             <div class="modal-header">
-                <h3 id="create-resource-modal-title">新增课程</h3><button class="modal-close" data-close-modal>×</button>
+                <h3 id="create-resource-modal-title">新增课程资源</h3><button class="modal-close" data-close-modal>×</button>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label><span class="req">*</span>课程名称</label><input id="resource-title"
+                <div class="form-group"><label><span class="req">*</span>课程资源名称</label><input id="resource-title"
                         class="form-control" maxlength="50" placeholder="如 WorkBuddy PPT编写实训"></div>
                 <div class="form-group binding-create-panel">
                     <div class="binding-create-head">
@@ -1525,7 +2359,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group"><label>课程说明</label><textarea id="resource-desc" class="form-control"
+                <div class="form-group"><label>课程资源说明</label><textarea id="resource-desc" class="form-control"
                         maxlength="500" placeholder="说明课程适用范围和教学目标"></textarea></div>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button
@@ -1539,13 +2373,30 @@
                 <h3>编辑课程基本信息</h3><button class="modal-close" data-close-modal>×</button>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label><span class="req">*</span>课程名称</label><input id="edit-resource-title"
-                        class="form-control" maxlength="50"></div>
-                <div class="form-group"><label>课程说明</label><textarea id="edit-resource-desc" class="form-control"
+                <div class="form-group"><label><span class="req">*</span>课程资源名称</label><input
+                        id="edit-resource-title" class="form-control" maxlength="50"
+                        placeholder="如 WorkBuddy PPT编写实训"></div>
+                <div class="form-group binding-create-panel">
+                    <div class="binding-create-head">
+                        <div>
+                            <div class="binding-create-title">是否绑定到班级</div>
+                            <div class="binding-create-desc">默认关闭；打开后才可选择班级，关闭时保存为个人备课资源。</div>
+                        </div><label class="toggle"><input id="edit-bind-toggle" type="checkbox"
+                                onchange="toggleEditBindings()"><span class="slider"></span></label>
+                    </div>
+                    <div id="edit-binding-fields" style="display:none">
+                        <div class="divider"></div><label for="edit-binding-select"><span
+                                class="req">*</span>选择班级</label>
+                        <select id="edit-binding-select" class="form-control">
+                            <option value="">请选择班级</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>课程资源说明</label><textarea id="edit-resource-desc" class="form-control"
                         maxlength="500" placeholder="说明课程适用范围和教学目标"></textarea></div>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button
-                    class="btn btn-primary" onclick="saveCourseInfo()">保存</button></div>
+                    class="btn btn-primary" onclick="saveCourseInfo()">确定</button></div>
         </div>
     </div>
     <div class="modal-overlay" id="m-course-publication">
@@ -1557,29 +2408,16 @@
                 <div class="form-group">
                     <div class="publication-options">
                         <label class="publication-option"><input type="checkbox" name="course-publication-type"
-                                value="official"><span><b>实训课程模板</b><small>发布到“实训课程 > 课程中心 >
-                                    实训课程模板”。</small></span></label>
+                                value="official"><span><b>课程中心模板</b><small>发布到“课程中心 >
+                                    课程中心模板”。</small></span></label>
                         <label class="publication-option"><input type="checkbox" name="course-publication-type"
-                                value="public"><span><b>初发官方课程</b><small>发布到“实训课程 > 我的实训 >
-                                    初发官方课程”，学生无需加入班级即可学习。</small></span></label>
+                                value="public"><span><b>初发官方课程</b><small>发布到“我的实训 >
+                                    官方课程资源”，学生无需加入班级即可学习。</small></span></label>
                     </div>
                 </div>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button
                     class="btn btn-primary" onclick="saveCoursePublication()">确定</button></div>
-        </div>
-    </div>
-    <div class="modal-overlay" id="m-bind-class">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>管理班级绑定</h3><button class="modal-close" data-close-modal>×</button>
-            </div>
-            <div class="modal-body">
-                <div class="tip-bar"><span class="ico">i</span><span>仅可绑定你负责的班级。已开课班级调整后会立即影响学生使用的资源。</span></div>
-                <div id="binding-options" class="binding-options"></div>
-            </div>
-            <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button
-                    class="btn btn-primary" onclick="saveBindings()">保存绑定</button></div>
         </div>
     </div>
     <div class="modal-overlay" id="m-upload-lesson">
@@ -1589,8 +2427,8 @@
             </div>
             <div class="modal-body">
                 <div class="form-group"><label><span class="req">*</span>选择文件</label><input id="lesson-upload-file"
-                        class="form-control" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.mov">
-                    <div class="form-hint">文档：PDF/DOCX/PPTX/XLSX；视频：MP4/MOV，单文件不超过 500 MB</div>
+                        class="form-control" type="file" accept=".pdf,.docx,.txt,.md,.xlsx,.csv,.pptx,.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.mp4,.webm,.mp3,.wav,.zip,.html,.htm,.css,.scss,.sass,.less,.js,.jsx,.mjs,.cjs,.ts,.tsx,.vue,.php,.php3,.php4,.c,.h,.cpp,.cc,.cxx,.hpp,.cs,.java,.go,.rs,.kt,.kts,.swift,.dart,.scala,.sc,.m,.mm,.vb,.py,.pyw,.rb,.pl,.pm,.lua,.sh,.bash,.zsh,.ps1,.r,.R,.json,.yaml,.yml,.xml,.toml,.sql,.ini,.conf,.cfg,.env,.hs,.ex,.exs,.clj,.erl,.groovy">
+                    <div class="form-hint">支持类型：文档(PDF/DOCX/TXT/MD)、表格(XLSX/CSV)、演示(PPTX)、图片(JPG/JPEG/PNG/GIF/BMP/SVG/WebP)、视频(MP4/WebM)、音频(MP3/WAV)、压缩包(ZIP)、代码源文件；单文件不超过 500 MB</div>
                 </div>
                 <div class="form-group"><label>课件说明</label><textarea id="lesson-upload-desc"
                         class="form-control"></textarea></div>
@@ -1688,18 +2526,17 @@
                         </div><input id="node-lesson-search" class="node-asset-search" type="search"
                             placeholder="搜索课件名称或类型" oninput="renderNodeLessonPicker()">
                         <div id="node-lesson-picker-list" class="node-asset-picker-list"></div><input
-                            id="node-lesson-upload" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.mov"
+                            id="node-lesson-upload" type="file" accept=".pdf,.docx,.txt,.md,.xlsx,.csv,.pptx,.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.mp4,.webm,.mp3,.wav,.zip,.html,.htm,.css,.scss,.sass,.less,.js,.jsx,.mjs,.cjs,.ts,.tsx,.vue,.php,.php3,.php4,.c,.h,.cpp,.cc,.cxx,.hpp,.cs,.java,.go,.rs,.kt,.kts,.swift,.dart,.scala,.sc,.m,.mm,.vb,.py,.pyw,.rb,.pl,.pm,.lua,.sh,.bash,.zsh,.ps1,.r,.R,.json,.yaml,.yml,.xml,.toml,.sql,.ini,.conf,.cfg,.env,.hs,.ex,.exs,.clj,.erl,.groovy"
                             hidden onchange="attachNodeAsset('lesson',this)">
                     </section>
                     <section class="node-asset-picker">
                         <div class="node-asset-picker-head">
                             <div><b>关联资源</b><small id="node-resource-selected-count">已选 0 项</small></div><button
                                 class="btn btn-sm btn-outline" type="button"
-                                onclick="document.getElementById('node-resource-upload').click()">+ 上传资源</button>
+                                onclick="openNodeResourceUpload()">+ 上传资源</button>
                         </div><input id="node-resource-search" class="node-asset-search" type="search"
                             placeholder="搜索资源名称或分类" oninput="renderNodeResourcePicker()">
-                        <div id="node-resource-picker-list" class="node-asset-picker-list"></div><input
-                            id="node-resource-upload" type="file" hidden onchange="attachNodeAsset('resource',this)">
+                        <div id="node-resource-picker-list" class="node-asset-picker-list"></div>
                     </section>
                 </div>
                 <div class="workbuddy-config-box">
@@ -1716,11 +2553,12 @@
                 <div class="workbuddy-config-box">
                     <div class="workbuddy-config-head">
                         <div>
-                            <div class="workbuddy-config-title">允许学生跳过本任务</div>
-                            <div class="workbuddy-config-desc">开启后，学生可在“我的实训”直接跳过该任务；未开启时需完成必需作业后才能进入下一任务。</div>
+                            <div class="workbuddy-config-title">允许跳过本任务</div>
+                            <div class="workbuddy-config-desc">开启后，可在“我的实训”直接跳过该任务；未开启时需完成必需作业后才能进入下一任务。</div>
                         </div>
                         <div class="workbuddy-config-state"><label class="toggle"><input id="node-allow-skip"
-                                    type="checkbox"><span class="slider"></span></label></div>
+                                    type="checkbox" onchange="updateNodeAllowSkipState()"><span
+                                    class="slider"></span></label><span id="node-allow-skip-state">不可跳过</span></div>
                     </div>
                 </div>
                 <div class="deliverable-box">
@@ -1747,18 +2585,14 @@
                 <div class="form-row">
                     <div class="form-group"><label>提交类型</label><select id="deliverable-type" class="form-control"
                             onchange="toggleDeliverableTypeFields()">
-                            <option>PDF</option>
-                            <option>ZIP</option>
-                            <option>源代码</option>
-                            <option>PNG/JPG</option>
-                            <option>不限</option>
+                            <option>文件</option>
                             <option>对话链接</option>
                         </select></div>
                     <div class="form-group" id="deliverable-size-group"><label>大小限制（MB）</label><input
                             id="deliverable-size" type="number" class="form-control" value="50"></div>
                 </div>
                 <div class="form-group" id="deliverable-pattern-group"><label>命名规范</label><input
-                        id="deliverable-pattern" class="form-control" value="学号_姓名_任务名称"></div>
+                        id="deliverable-pattern" class="form-control" value="学号_姓名_作业名称"></div>
                 <div id="deliverable-link-hint" class="form-hint" style="display:none;margin-bottom:10px">学生提交 WorkBuddy
                     对话分享链接，无需上传文件。</div>
                 <div class="flex gap-16"><label><input id="deliverable-required" type="checkbox" checked>
@@ -1795,10 +2629,11 @@
                         maxlength="200" placeholder="说明本节学习内容"></textarea></div>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" data-close-modal>取消</button><button
-                    class="btn btn-primary" onclick="saveSection()">保存</button></div>
+                    class="btn btn-primary" onclick="saveSection()">确定</button></div>
         </div>
     </div>
     <script>
+        const PAGE_MEMORY_STORAGE = (() => { const data = new Map(); return { getItem: key => data.has(key) ? data.get(key) : null, setItem: (key, value) => data.set(key, String(value)), removeItem: key => data.delete(key) }; })();
         const PAGE_CONFIG = { activeNav: 'course-resource', title: '课程中心', breadcrumb: ['实训课程', '课程中心'], breadcrumbLinks: ['', ''] };
         const MY_CLASSES = [{ id: 'c1', course: 'WorkBuddy基础培训', name: '基础培训1班', code: 'WB01', status: '已开课' }, { id: 'c2', course: 'WorkBuddy基础培训', name: '基础培训2班', code: 'WB02', status: '未开课' }, { id: 'c3', course: 'WorkBuddy PPT编写实训', name: 'PPT编写1班', code: 'PPT01', status: '未开课' }];
         const COURSE_DATA = [{ code: 'WB-BASIC-101', course: 'WorkBuddy基础培训', name: 'WorkBuddy基础培训 · 实训资源', lessons: 6, resources: 9, chapters: 3, sections: 6, tasks: 6, desc: '覆盖 WorkBuddy 工作区、Skills、MCP 与综合实训提交规范', classIds: ['c1'] }, { code: 'WB-PPT-101', course: 'WorkBuddy PPT编写实训', name: 'WorkBuddy PPT编写实训 · 实训资源', lessons: 5, resources: 7, chapters: 3, sections: 6, tasks: 6, desc: '使用 WorkBuddy 完成 PPT 需求分析、大纲编写、逐页生成、视觉优化和导出验收', classIds: ['c3'] }, { code: 'WB-BASIC-DRAFT', course: 'WorkBuddy基础培训', name: 'WorkBuddy基础培训 · 个人备课版', lessons: 4, resources: 5, chapters: 2, sections: 4, tasks: 4, desc: '用于个人备课与内容调整，当前尚未绑定任何班级', classIds: [], copiedFrom: 'WB-BASIC-101' }];
@@ -1820,17 +2655,17 @@
         const COURSE_STRUCTURE_VERSION = 'workbuddy-basic-v1';
         function activeCourseStructureVersion() { return activeCourseContentCode === 'WB-PPT-101' ? 'workbuddy-ppt-v1' : COURSE_STRUCTURE_VERSION; }
         function normalizeCourseDeliverables() { const normalizeTask = task => { task.allowSkip = task.allowSkip === true; task.deliverables = (task.deliverables || []).map(deliverable => { const normalized = { ...deliverable }; if (normalized.screenshot || /截图|需要截图/.test(normalized.name || '')) { normalized.name = 'WorkBuddy 对话链接'; normalized.type = '对话链接'; normalized.size = 0; normalized.pattern = ''; } delete normalized.screenshot; return normalized; }); }; COURSE_STRUCTURE.forEach(chapter => { chapter.tasks = Array.isArray(chapter.tasks) ? chapter.tasks : []; chapter.sections = Array.isArray(chapter.sections) ? chapter.sections : []; delete chapter.allowSkip; chapter.tasks.forEach(normalizeTask); chapter.sections.forEach(section => { section.tasks = Array.isArray(section.tasks) ? section.tasks : []; delete section.allowSkip; section.tasks.forEach(normalizeTask); }); }); }
-        function loadCourseStructure() { try { const storageKey = activeContentStorageKey(COURSE_STRUCTURE_KEY), versionKey = `${storageKey}-version`, version = activeCourseStructureVersion(); if (localStorage.getItem(versionKey) !== version) { localStorage.removeItem(storageKey); localStorage.setItem(versionKey, version); } const saved = JSON.parse(localStorage.getItem(storageKey) || 'null'); if (Array.isArray(saved) && saved.every(chapter => Array.isArray(chapter.sections))) { COURSE_STRUCTURE.splice(0, COURSE_STRUCTURE.length, ...saved); } } catch { } normalizeCourseDeliverables(); }
-        function persistCourseStructure() { const storageKey = activeContentStorageKey(COURSE_STRUCTURE_KEY); localStorage.setItem(storageKey, JSON.stringify(COURSE_STRUCTURE)); localStorage.setItem(`${storageKey}-version`, activeCourseStructureVersion()); }
+        function loadCourseStructure() { try { const storageKey = activeContentStorageKey(COURSE_STRUCTURE_KEY), versionKey = `${storageKey}-version`, version = activeCourseStructureVersion(); if (PAGE_MEMORY_STORAGE.getItem(versionKey) !== version) { PAGE_MEMORY_STORAGE.removeItem(storageKey); PAGE_MEMORY_STORAGE.setItem(versionKey, version); } const saved = JSON.parse(PAGE_MEMORY_STORAGE.getItem(storageKey) || 'null'); if (Array.isArray(saved) && saved.every(chapter => Array.isArray(chapter.sections))) { COURSE_STRUCTURE.splice(0, COURSE_STRUCTURE.length, ...saved); } } catch { } normalizeCourseDeliverables(); }
+        function persistCourseStructure() { const storageKey = activeContentStorageKey(COURSE_STRUCTURE_KEY); PAGE_MEMORY_STORAGE.setItem(storageKey, JSON.stringify(COURSE_STRUCTURE)); PAGE_MEMORY_STORAGE.setItem(`${storageKey}-version`, activeCourseStructureVersion()); }
         const WORKBUDDY_TASK_CONFIG_KEY = 'workbuddy-task-desktop-config';
-        function readWorkBuddyTaskConfig() { try { return JSON.parse(localStorage.getItem(activeContentStorageKey(WORKBUDDY_TASK_CONFIG_KEY)) || '{}'); } catch { return {}; } }
+        function readWorkBuddyTaskConfig() { try { return JSON.parse(PAGE_MEMORY_STORAGE.getItem(activeContentStorageKey(WORKBUDDY_TASK_CONFIG_KEY)) || '{}'); } catch { return {}; } }
         function loadWorkBuddyTaskConfig() { const config = readWorkBuddyTaskConfig(); flatTasks().forEach((item, index) => { if (Object.prototype.hasOwnProperty.call(config, index)) item.task.workbuddyEnabled = config[index] !== false; }); }
-        function persistWorkBuddyTaskConfig(index, enabled) { const config = readWorkBuddyTaskConfig(); config[index] = enabled; localStorage.setItem(activeContentStorageKey(WORKBUDDY_TASK_CONFIG_KEY), JSON.stringify(config)); }
-        function readCoursePublications() { try { const value = JSON.parse(localStorage.getItem(COURSE_PUBLICATION_KEY) || '[]'); return Array.isArray(value) ? value : []; } catch { return []; } }
-        function persistCoursePublications() { localStorage.setItem(COURSE_PUBLICATION_KEY, JSON.stringify(COURSE_PUBLICATIONS)); }
+        function persistWorkBuddyTaskConfig(index, enabled) { const config = readWorkBuddyTaskConfig(); config[index] = enabled; PAGE_MEMORY_STORAGE.setItem(activeContentStorageKey(WORKBUDDY_TASK_CONFIG_KEY), JSON.stringify(config)); }
+        function readCoursePublications() { try { const value = JSON.parse(PAGE_MEMORY_STORAGE.getItem(COURSE_PUBLICATION_KEY) || '[]'); return Array.isArray(value) ? value : []; } catch { return []; } }
+        function persistCoursePublications() { PAGE_MEMORY_STORAGE.setItem(COURSE_PUBLICATION_KEY, JSON.stringify(COURSE_PUBLICATIONS)); }
         function publicationFor(code) { return COURSE_PUBLICATIONS.find(item => item.sourceCode === code); }
         function publicationTypes(publication) { if (!publication) return []; if (Array.isArray(publication.publishTypes)) return publication.publishTypes.filter(type => type === 'official' || type === 'public'); if (publication.publishType === 'official' || publication.publishType === 'public') return [publication.publishType]; return []; }
-        function publicationMeta(type) { return type === 'official' ? { label: '实训课程模板', badge: 'badge-blue', destination: '课程中心 > 实训课程模板' } : type === 'public' ? { label: '初发官方课程', badge: 'badge-green', destination: '我的实训 > 初发官方课程' } : { label: '我的实训课程', badge: 'badge-gray', destination: '仅保留在我的实训课程' }; }
+        function publicationMeta(type) { return type === 'official' ? { label: '课程中心模板', badge: 'badge-blue', destination: '课程中心 > 课程中心模板' } : type === 'public' ? { label: '初发官方课程', badge: 'badge-green', destination: '我的实训 > 初发官方课程' } : { label: '我的课程资源', badge: 'badge-gray', destination: '仅保留在我的课程资源' }; }
         function officialCourseList() { const published = COURSE_PUBLICATIONS.filter(item => publicationTypes(item).includes('official')).map(item => ({ ...item, code: item.displayCode || `OFF-${item.sourceCode}`, official: true, publishedFromMine: true, classIds: [] })); return [...OFFICIAL_COURSE_DATA, ...published]; }
         function getActiveResource() { return (activeScope === 'official' ? officialCourseList() : COURSE_DATA)[activeCourseIndex]; }
         function loadActiveCourseContent(course) {
@@ -1855,39 +2690,46 @@
         }
         function classLabel(id) { const c = MY_CLASSES.find(x => x.id === id); return c ? `${c.name} · ${c.code}` : ''; }
         function deleteCourseButton(scope, index) { return scope === 'mine' ? `<button class="btn btn-sm btn-danger-outline" type="button" data-card-action onclick="deleteCourseResource(event,${index})">删除</button>` : ''; }
-        function courseListHtml(list, scope) { const counts = structureCounts(); return list.map((c, i) => ({ c, i })).filter(entry => !entry.c.archived).map(({ c, i }) => { const adminAction = scope === 'mine' && isSystemAdmin() ? `<button class="btn btn-sm btn-outline" type="button" data-card-action onclick="openPublicationModal(event,${i})">发布范围</button>` : ''; return `<article class="course-card" data-index="${i}" data-scope="${scope}" data-course="${c.course}"><div class="course-card-head"><div class="course-card-badges"><span class="badge ${scope === 'official' ? 'badge-blue' : c.classIds.length ? 'badge-green' : 'badge-gray'}">${scope === 'official' ? '官方课程' : c.classIds.length ? `已绑定 ${c.classIds.length} 个班级` : '未绑定'}</span></div><span class="course-card-code">${c.code}</span></div><h3>${c.name}</h3><p class="course-card-desc">${c.desc}</p><div class="course-card-stats"><span><b>${c.chapters ?? counts.chapters}</b>章</span><span><b>${c.sections ?? counts.sections}</b>小节</span><span><b>${c.tasks ?? counts.tasks}</b>任务</span></div><div class="course-card-actions"><button class="btn btn-sm ${scope === 'official' ? 'btn-outline' : 'btn-primary'}" type="button">${scope === 'official' ? '查看详情' : '课程设计'}</button>${scope === 'official' ? `<button class="btn btn-sm btn-primary" type="button" data-card-action onclick="openCopyOfficialCourse(event,${i})">复制课程</button>` : `<button class="btn btn-sm btn-outline" type="button" data-card-action onclick="openEditCourseInfo(event,${i})">编辑信息</button>${adminAction}${deleteCourseButton(scope, i)}`}</div></article>`; }).join(''); }
-        function refreshCourseCards() { document.getElementById('official-course-list').innerHTML = courseListHtml(officialCourseList(), 'official'); document.getElementById('course-list').innerHTML = COURSE_DATA.some(item => !item.archived) ? courseListHtml(COURSE_DATA, 'mine') : `<div class="empty" style="grid-column:1/-1;padding:30px">暂无我的实训课程，可点击“新增课程”开始设计</div>`; filterResourceCourses(document.getElementById('resource-course-filter')?.value || ''); }
+        function courseListHtml(list, scope) { const counts = structureCounts(); return list.map((c, i) => ({ c, i })).filter(entry => !entry.c.archived).map(({ c, i }) => { const adminAction = scope === 'mine' && isSystemAdmin() ? `<button class="btn btn-sm btn-outline" type="button" data-card-action onclick="openPublicationModal(event,${i})">发布范围</button>` : ''; return `<article class="course-card" data-index="${i}" data-scope="${scope}" data-course="${c.course}"><div class="course-card-head"><div class="course-card-badges"><span class="badge ${scope === 'official' ? 'badge-blue' : c.classIds.length ? 'badge-green' : 'badge-gray'}">${scope === 'official' ? '课程资源模板' : c.classIds.length ? `已绑定 ${c.classIds.length} 个班级` : '未绑定'}</span></div><span class="course-card-code">${c.code}</span></div><h3>${c.name}</h3><p class="course-card-desc">${c.desc}</p><div class="course-card-stats"><span><b>${c.chapters ?? counts.chapters}</b>章</span><span><b>${c.sections ?? counts.sections}</b>小节</span><span><b>${c.tasks ?? counts.tasks}</b>任务</span></div><div class="course-card-actions"><button class="btn btn-sm ${scope === 'official' ? 'btn-outline' : 'btn-primary'}" type="button">${scope === 'official' ? '查看课程' : '课程设计'}</button>${scope === 'official' ? `<button class="btn btn-sm btn-primary" type="button" data-card-action onclick="openCopyOfficialCourse(event,${i})">复制课程</button>` : `<button class="btn btn-sm btn-outline" type="button" data-card-action onclick="openEditCourseInfo(event,${i})">基本信息</button>${adminAction}${deleteCourseButton(scope, i)}`}</div></article>`; }).join(''); }
+        function refreshCourseCards() { document.getElementById('official-course-list').innerHTML = courseListHtml(officialCourseList(), 'official'); document.getElementById('course-list').innerHTML = COURSE_DATA.some(item => !item.archived) ? courseListHtml(COURSE_DATA, 'mine') : `<div class="empty" style="grid-column:1/-1;padding:30px">暂无我的课程资源，可点击“新增课程资源”开始设计</div>`; filterResourceCourses(document.getElementById('resource-course-filter')?.value || ''); }
         function renderCourses() { COURSE_PUBLICATIONS = readCoursePublications(); const query = new URLSearchParams(location.search).get('course'); refreshCourseCards(); if (query) { const officialList = officialCourseList(); const queryScope = officialList.some(c => c.code === query) ? 'official' : 'mine'; const list = queryScope === 'official' ? officialList : COURSE_DATA; const active = list.findIndex(c => !c.archived && c.code === query); if (active >= 0) { openResourceCourse(queryScope, active); return; } } showResourceHome(); }
-        function filterResourceCourses(course) { document.querySelectorAll('#official-course-list .course-card,#course-list .course-card').forEach(item => { item.style.display = !course || item.dataset.course === course ? '' : 'none'; }); }
+        let resourceCourseFilterActiveIndex = -1;
+        function resourceCourseFilterNames() { return [...new Set([...officialCourseList(), ...COURSE_DATA].filter(item => !item.archived && item.course).map(item => item.course))].sort((a, b) => a.localeCompare(b, 'zh-CN')); }
+        function renderResourceCourseFilterOptions(query = '') { const wrap = document.getElementById('resource-course-filter-options'); if (!wrap) return; const keyword = query.trim().toLowerCase(), names = resourceCourseFilterNames().filter(name => name.toLowerCase().includes(keyword)); wrap.replaceChildren(); const values = keyword ? names : ['', ...names]; if (!values.length) { const empty = document.createElement('div'); empty.className = 'course-filter-empty'; empty.textContent = '暂无匹配的课程资源'; wrap.appendChild(empty); return; } values.forEach(value => { const option = document.createElement('button'); option.type = 'button'; option.className = 'course-filter-option'; option.setAttribute('role', 'option'); option.dataset.value = value; option.textContent = value ; option.addEventListener('click', () => selectResourceCourseFilter(value)); wrap.appendChild(option); }); resourceCourseFilterActiveIndex = -1; }
+        function openResourceCourseFilter() { const input = document.getElementById('resource-course-filter'), wrap = document.getElementById('resource-course-filter-options'); if (!input || !wrap) return; renderResourceCourseFilterOptions(input.value); wrap.classList.add('is-open'); input.setAttribute('aria-expanded', 'true'); }
+        function closeResourceCourseFilter() { const input = document.getElementById('resource-course-filter'), wrap = document.getElementById('resource-course-filter-options'); wrap?.classList.remove('is-open'); input?.setAttribute('aria-expanded', 'false'); resourceCourseFilterActiveIndex = -1; }
+        function toggleResourceCourseFilter(event) { event.stopPropagation(); const wrap = document.getElementById('resource-course-filter-options'); if (wrap?.classList.contains('is-open')) closeResourceCourseFilter(); else { document.getElementById('resource-course-filter')?.focus(); openResourceCourseFilter(); } }
+        function selectResourceCourseFilter(value) { const input = document.getElementById('resource-course-filter'); if (!input) return; input.value = value; filterResourceCourses(value); closeResourceCourseFilter(); input.focus(); }
+        function handleResourceCourseFilterKeydown(event) { const wrap = document.getElementById('resource-course-filter-options'); if (event.key === 'Escape') { closeResourceCourseFilter(); return; } if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter') return; if (!wrap?.classList.contains('is-open')) openResourceCourseFilter(); const options = [...wrap.querySelectorAll('.course-filter-option')]; if (!options.length) return; event.preventDefault(); if (event.key === 'Enter') { const selected = options[resourceCourseFilterActiveIndex] || options[0]; selected.click(); return; } resourceCourseFilterActiveIndex = event.key === 'ArrowDown' ? (resourceCourseFilterActiveIndex + 1) % options.length : (resourceCourseFilterActiveIndex - 1 + options.length) % options.length; options.forEach((option, index) => option.classList.toggle('is-active', index === resourceCourseFilterActiveIndex)); options[resourceCourseFilterActiveIndex].scrollIntoView({ block: 'nearest' }); }
+        function filterResourceCourses(course, showOptions = false) { const keyword = (course || '').trim().toLowerCase(); document.querySelectorAll('#official-course-list .course-card,#course-list .course-card').forEach(item => { item.style.display = !keyword || (item.dataset.course || '').toLowerCase().includes(keyword) ? '' : 'none'; }); if (showOptions) openResourceCourseFilter(); else if (document.getElementById('resource-course-filter-options')?.classList.contains('is-open')) renderResourceCourseFilterOptions(course); }
         function showResourceHome() { document.getElementById('resource-home').style.display = 'block'; document.getElementById('resource-detail').classList.remove('active'); document.getElementById('content').scrollTop = 0; }
         function openResourceCourse(scope, i) { selectResourceCourse(scope, i); document.getElementById('resource-home').style.display = 'none'; document.getElementById('resource-detail').classList.add('active'); document.getElementById('content').scrollTop = 0; }
-        function selectResourceCourse(scope, i) { activeScope = scope; activeCourseIndex = i; document.querySelectorAll('.course-card').forEach(el => el.classList.toggle('active', el.dataset.scope === scope && Number(el.dataset.index) === i)); const c = getActiveResource(); loadActiveCourseContent(c); document.getElementById('ctx-code').textContent = c.code; document.getElementById('ctx-name').textContent = c.name; document.getElementById('ctx-meta').textContent = scope === 'official' ? `官方课程资源 · 只读查看 · ${c.desc}` : `新增人：白小乐 · ${c.desc}`; document.getElementById('stat-lessons').textContent = c.lessons; document.getElementById('stat-resources').textContent = c.resources; document.getElementById('binding-summary').innerHTML = scope === 'official' ? '<span class="badge badge-blue">官方课程资源 · 内容只读，可复制后编辑</span>' : `${c.classIds.length ? `<span class="badge badge-green">已绑定 ${c.classIds.length} 个班级</span>${c.classIds.map(id => `<span class="binding-class">${classLabel(id)}</span>`).join('')}` : '<span class="badge badge-gray">未绑定班级</span><span class="text-xs text-mute">当前仅作为个人备课资源</span>'}`; applyResourceScopeMode(); }
+        function selectResourceCourse(scope, i) { activeScope = scope; activeCourseIndex = i; document.querySelectorAll('.course-card').forEach(el => el.classList.toggle('active', el.dataset.scope === scope && Number(el.dataset.index) === i)); const c = getActiveResource(); loadActiveCourseContent(c); document.getElementById('ctx-code').textContent = c.code; document.getElementById('ctx-name').textContent = c.name; document.getElementById('ctx-meta').textContent = scope === 'official' ? `官方课程资源 · 只读查看 · ${c.desc}` : `${c.desc}`; document.getElementById('stat-lessons').textContent = c.lessons; document.getElementById('stat-resources').textContent = c.resources; document.getElementById('binding-summary').innerHTML = scope === 'official' ? '<span class="badge badge-blue">官方课程资源</span>' : `${c.classIds.length ? `<span class="badge badge-green">已绑定 ${c.classIds.length} 个班级</span>` : '<span class="badge badge-gray">未绑定班级</span><span class="text-xs text-mute">当前仅作为个人备课资源</span>'}`; applyResourceScopeMode(); }
         function selectCourse(i) { openResourceCourse('mine', i); }
         function isSystemAdmin() { return typeof getRole === 'function' && getRole() === 'sys-admin'; }
-        function applyResourceScopeMode() { const official = activeScope === 'official'; document.querySelectorAll('[data-manage-control]').forEach(el => { el.style.display = official ? 'none' : ''; }); document.getElementById('publish-course-detail').style.display = !official && isSystemAdmin() ? 'inline-flex' : 'none'; document.getElementById('copy-official-detail').style.display = official ? 'inline-flex' : 'none'; document.getElementById('edit-course-detail').style.display = official ? 'none' : 'inline-flex'; document.getElementById('delete-course-detail').style.display = official ? 'none' : 'inline-flex'; document.getElementById('manage-binding-detail').style.display = official ? 'none' : 'inline-flex'; document.querySelectorAll('[data-resource-use]').forEach(el => { el.textContent = official ? '查看' : '使用'; }); document.querySelector('#pane-lessons .card-title').textContent = official ? '课件' : '课件管理'; document.querySelector('#pane-resources .card-title').textContent = official ? '课程资源' : '资源管理'; document.querySelector('#pane-nodes .card-title').textContent = official ? '课程章节' : '课程章节设计'; }
+        function applyResourceScopeMode() { const official = activeScope === 'official'; document.querySelectorAll('[data-manage-control]').forEach(el => { el.style.display = official ? 'none' : ''; }); document.getElementById('publish-course-detail').style.display = !official && isSystemAdmin() ? 'inline-flex' : 'none'; document.getElementById('copy-official-detail').style.display = official ? 'inline-flex' : 'none'; document.getElementById('edit-course-detail').style.display = official ? 'none' : 'inline-flex'; document.getElementById('delete-course-detail').style.display = official ? 'none' : 'inline-flex'; document.querySelectorAll('[data-resource-use]').forEach(el => { el.textContent = official ? '查看' : '使用'; }); document.querySelector('#pane-lessons .card-title').textContent = official ? '课件' : '课件管理'; document.querySelector('#pane-resources .card-title').textContent = official ? '课程资源' : '资源管理'; document.querySelector('#pane-nodes .card-title').textContent = official ? '课程章节' : '课程章节设计'; }
         function openPublicationModal(event, index) { event?.stopPropagation(); if (!isSystemAdmin()) { toast('仅系统管理员可设置课程发布范围', 'warning'); return; } if (Number.isInteger(index)) { activeScope = 'mine'; activeCourseIndex = index; } if (activeScope !== 'mine') return; const course = getActiveResource(), current = publicationTypes(publicationFor(course.code)); document.querySelectorAll('input[name="course-publication-type"]').forEach(input => { input.checked = current.includes(input.value); }); openModal('m-course-publication'); }
-        function saveCoursePublication() { if (!isSystemAdmin() || activeScope !== 'mine') return; const course = getActiveResource(), publishTypes = [...document.querySelectorAll('input[name="course-publication-type"]:checked')].map(input => input.value), counts = structureCounts(); COURSE_PUBLICATIONS = COURSE_PUBLICATIONS.filter(item => item.sourceCode !== course.code); if (publishTypes.length) { const category = /软件/.test(course.course) ? '软件工程' : /AI|智能|数据/.test(course.course) ? '人工智能' : '程序设计'; COURSE_PUBLICATIONS.push({ sourceCode: course.code, displayCode: `${publishTypes.includes('official') ? 'OFF' : 'OPEN'}-${course.code}`, publishTypes, publishType: publishTypes[0], course: course.course, name: course.name, desc: course.desc, lessons: course.lessons, resources: course.resources, chapters: counts.chapters, sections: counts.sections, tasks: counts.tasks, hours: Math.max(1, Math.ceil(counts.tasks * 1.5)), category, publisher: '系统管理员', learners: 0, progress: 0, updatedAt: '2026-07-22' }); } persistCoursePublications(); closeModal('m-course-publication'); refreshCourseCards(); selectResourceCourse('mine', activeCourseIndex); toast(publishTypes.length ? `发布范围已设置：${publishTypes.map(type => publicationMeta(type).label).join('、')}` : '已取消全部发布范围，仅保留在我的实训课程', 'success'); }
-        function classOptionsHtml(selectedIds) { return MY_CLASSES.map(c => `<label class="binding-option"><input type="checkbox" data-class-id="${c.id}" ${selectedIds.includes(c.id) ? 'checked' : ''}><span><b>${c.course} / ${c.name}</b><br><small>班级码 ${c.code}</small></span><span class="badge ${c.status === '已开课' ? 'badge-green' : 'badge-gray'}">${c.status}</span></label>`).join('') || '<div class="empty">暂无可绑定的本人班级</div>'; }
-        function resetCreateResourceModal() { copyingOfficialIndex = -1; document.getElementById('create-resource-modal-title').textContent = '新增课程'; document.getElementById('create-resource-submit').textContent = '新增并进入课程设计'; document.getElementById('resource-title').value = ''; document.getElementById('resource-desc').value = ''; document.getElementById('create-bind-toggle').checked = false; document.getElementById('create-binding-select').innerHTML = '<option value="">请选择班级</option>'; toggleCreateBindings(); }
+        function saveCoursePublication() { if (!isSystemAdmin() || activeScope !== 'mine') return; const course = getActiveResource(), publishTypes = [...document.querySelectorAll('input[name="course-publication-type"]:checked')].map(input => input.value), counts = structureCounts(); COURSE_PUBLICATIONS = COURSE_PUBLICATIONS.filter(item => item.sourceCode !== course.code); if (publishTypes.length) { const category = /软件/.test(course.course) ? '软件工程' : /AI|智能|数据/.test(course.course) ? '人工智能' : '程序设计'; COURSE_PUBLICATIONS.push({ sourceCode: course.code, displayCode: `${publishTypes.includes('official') ? 'OFF' : 'OPEN'}-${course.code}`, publishTypes, publishType: publishTypes[0], course: course.course, name: course.name, desc: course.desc, lessons: course.lessons, resources: course.resources, chapters: counts.chapters, sections: counts.sections, tasks: counts.tasks, hours: Math.max(1, Math.ceil(counts.tasks * 1.5)), category, publisher: '系统管理员', learners: 0, progress: 0, updatedAt: '2026-07-22' }); } persistCoursePublications(); closeModal('m-course-publication'); refreshCourseCards(); selectResourceCourse('mine', activeCourseIndex); toast(publishTypes.length ? `发布范围已设置：${publishTypes.map(type => publicationMeta(type).label).join('、')}` : '已取消全部发布范围，仅保留在我的课程资源', 'success'); }
+        function resetCreateResourceModal() { copyingOfficialIndex = -1; document.getElementById('create-resource-modal-title').textContent = '新增课程资源'; document.getElementById('create-resource-submit').textContent = '确定'; document.getElementById('resource-title').value = ''; document.getElementById('resource-desc').value = ''; document.getElementById('create-bind-toggle').checked = false; document.getElementById('create-binding-select').innerHTML = '<option value="">请选择班级</option>'; toggleCreateBindings(); }
         function openCreateResource() { resetCreateResourceModal(); openModal('m-create-resource'); }
         function toggleCreateBindings() { const fields = document.getElementById('create-binding-fields'); const enabled = document.getElementById('create-bind-toggle').checked; fields.style.display = enabled ? 'block' : 'none'; if (enabled) refreshCreateBindings(); else document.getElementById('create-binding-select').value = ''; }
         function refreshCreateBindings() { if (!document.getElementById('create-bind-toggle').checked) return; const select = document.getElementById('create-binding-select'), current = select.value; select.innerHTML = '<option value="">请选择班级</option>' + MY_CLASSES.map(c => `<option value="${c.id}">${c.course} / ${c.name} · ${c.code} · ${c.status}</option>`).join(''); if (MY_CLASSES.some(c => c.id === current)) select.value = current; }
         function nextCourseCode(sourceCode = 'COURSE') { const base = sourceCode.replace(/^OFF-/, '').replace(/[^A-Z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 24) || 'COURSE'; let sequence = COURSE_DATA.length + 1, code = `${base}-${String(sequence).padStart(3, '0')}`; while (COURSE_DATA.some(item => item.code === code)) { sequence += 1; code = `${base}-${String(sequence).padStart(3, '0')}`; } return code; }
-        function openCopyOfficialCourse(event, index) { event?.stopPropagation(); const source = officialCourseList()[index]; if (!source) return; resetCreateResourceModal(); copyingOfficialIndex = index; document.getElementById('create-resource-modal-title').textContent = '复制官方实训课程'; document.getElementById('create-resource-submit').textContent = '复制并进入设计'; document.getElementById('resource-title').value = `${source.name.replace(/^官方\s*·\s*/, '')}（副本）`; document.getElementById('resource-desc').value = source.desc; openModal('m-create-resource'); }
+        function openCopyOfficialCourse(event, index) { event?.stopPropagation(); const source = officialCourseList()[index]; if (!source) return; resetCreateResourceModal(); copyingOfficialIndex = index; document.getElementById('create-resource-modal-title').textContent = '复制课程'; document.getElementById('create-resource-submit').textContent = '确定'; document.getElementById('resource-title').value = `${source.name.replace(/^官方\s*·\s*/, '')}（副本）`; document.getElementById('resource-desc').value = source.desc; openModal('m-create-resource'); }
         function copyActiveOfficialCourse() { if (activeScope !== 'official') return; openCopyOfficialCourse(null, activeCourseIndex); }
-        function saveCourseResource() { const title = document.getElementById('resource-title'); if (!title.value.trim()) { toast('请输入课程名称', 'warning'); title.focus(); return; } const bindEnabled = document.getElementById('create-bind-toggle').checked, selectedClassId = document.getElementById('create-binding-select').value; const selected = bindEnabled && selectedClassId ? [selectedClassId] : []; if (bindEnabled && !selected.length) { toast('开启班级绑定后，请选择班级', 'warning'); document.getElementById('create-binding-select').focus(); return; } const source = copyingOfficialIndex >= 0 ? officialCourseList()[copyingOfficialIndex] : null, selectedClass = MY_CLASSES.find(item => item.id === selectedClassId), titleValue = title.value.trim(), courseName = selectedClass?.course || source?.course || titleValue; COURSE_DATA.push({ code: nextCourseCode(source?.code), course: courseName, name: titleValue, lessons: source ? source.lessons : 0, resources: source ? source.resources : 0, desc: document.getElementById('resource-desc').value.trim() || '暂无课程说明', classIds: selected, copiedFrom: source?.code || '' }); activeScope = 'mine'; activeCourseIndex = COURSE_DATA.length - 1; const copied = !!source; copyingOfficialIndex = -1; closeModal('m-create-resource'); renderCourses(); openResourceCourse('mine', activeCourseIndex); toast(copied ? `官方课程已复制到我的实训课程${selected.length ? '，并绑定班级' : ''}` : selected.length ? '课程已新增并绑定班级' : '课程已新增，当前未绑定班级', 'success'); }
-        function openEditCourseInfo(event, index) { event?.stopPropagation(); if (Number.isInteger(index)) { activeScope = 'mine'; activeCourseIndex = index; } if (activeScope === 'official') { toast('官方课程需复制后才能修改', 'info'); return; } const c = getActiveResource(); document.getElementById('edit-resource-title').value = c.name; document.getElementById('edit-resource-desc').value = c.desc === '暂无课程说明' || c.desc === '暂无资源说明' ? '' : c.desc; openModal('m-edit-course'); }
-        function saveCourseInfo() { if (activeScope === 'official') return; const c = getActiveResource(), title = document.getElementById('edit-resource-title'); if (!title.value.trim()) { toast('请输入课程名称', 'warning'); title.focus(); return; } c.name = title.value.trim(); c.desc = document.getElementById('edit-resource-desc').value.trim() || '暂无课程说明'; closeModal('m-edit-course'); refreshCourseCards(); if (document.getElementById('resource-detail').classList.contains('active')) selectResourceCourse('mine', activeCourseIndex); toast('课程基本信息已更新', 'success'); }
+        function saveCourseResource() { const title = document.getElementById('resource-title'); if (!title.value.trim()) { toast('请输入课程资源名称', 'warning'); title.focus(); return; } const bindEnabled = document.getElementById('create-bind-toggle').checked, selectedClassId = document.getElementById('create-binding-select').value; const selected = bindEnabled && selectedClassId ? [selectedClassId] : []; if (bindEnabled && !selected.length) { toast('开启班级绑定后，请选择班级', 'warning'); document.getElementById('create-binding-select').focus(); return; } const source = copyingOfficialIndex >= 0 ? officialCourseList()[copyingOfficialIndex] : null, selectedClass = MY_CLASSES.find(item => item.id === selectedClassId), titleValue = title.value.trim(), courseName = selectedClass?.course || source?.course || titleValue; COURSE_DATA.push({ code: nextCourseCode(source?.code), course: courseName, name: titleValue, lessons: source ? source.lessons : 0, resources: source ? source.resources : 0, desc: document.getElementById('resource-desc').value.trim() || '暂无课程说明', classIds: selected, copiedFrom: source?.code || '' }); activeScope = 'mine'; activeCourseIndex = COURSE_DATA.length - 1; const copied = !!source; copyingOfficialIndex = -1; closeModal('m-create-resource'); renderCourses(); openResourceCourse('mine', activeCourseIndex); toast(copied ? `官方课程已复制到我的课程资源${selected.length ? '，并绑定班级' : ''}` : selected.length ? '课程已新增并绑定班级' : '课程已新增，当前未绑定班级', 'success'); }
+        function openEditCourseInfo(event, index) { event?.stopPropagation(); if (Number.isInteger(index)) { activeScope = 'mine'; activeCourseIndex = index; } if (activeScope === 'official') { toast('官方课程需复制后才能修改', 'info'); return; } const c = getActiveResource(), classIds = Array.isArray(c.classIds) ? c.classIds : []; document.getElementById('edit-resource-title').value = c.name; document.getElementById('edit-resource-desc').value = c.desc === '暂无课程说明' || c.desc === '暂无资源说明' ? '' : c.desc; document.getElementById('edit-bind-toggle').checked = classIds.length > 0; refreshEditBindings(classIds[0] || ''); toggleEditBindings(); openModal('m-edit-course'); }
+        function toggleEditBindings() { const fields = document.getElementById('edit-binding-fields'), enabled = document.getElementById('edit-bind-toggle').checked; fields.style.display = enabled ? 'block' : 'none'; if (enabled) refreshEditBindings(); else document.getElementById('edit-binding-select').value = ''; }
+        function refreshEditBindings(selectedId = null) { const select = document.getElementById('edit-binding-select'), current = selectedId ?? select.value; select.innerHTML = '<option value="">请选择班级</option>' + MY_CLASSES.map(c => `<option value="${c.id}">${c.course} / ${c.name} · ${c.code} · ${c.status}</option>`).join(''); if (MY_CLASSES.some(c => c.id === current)) select.value = current; }
+        function saveCourseInfo() { if (activeScope === 'official') return; const c = getActiveResource(), title = document.getElementById('edit-resource-title'), bindEnabled = document.getElementById('edit-bind-toggle').checked, selectedClassId = document.getElementById('edit-binding-select').value, selected = bindEnabled && selectedClassId ? [selectedClassId] : [], currentClassIds = Array.isArray(c.classIds) ? c.classIds : []; if (!title.value.trim()) { toast('请输入课程资源名称', 'warning'); title.focus(); return; } if (bindEnabled && !selected.length) { toast('开启班级绑定后，请选择班级', 'warning'); document.getElementById('edit-binding-select').focus(); return; } const changed = JSON.stringify([...currentClassIds].sort()) !== JSON.stringify([...selected].sort()), affectsOpened = changed && MY_CLASSES.some(x => x.status === '已开课' && (currentClassIds.includes(x.id) || selected.includes(x.id))); if (affectsOpened && !confirm('绑定关系涉及已开课班级，保存后会立即影响学生可见的实训资源，确认继续？')) return; c.name = title.value.trim(); c.desc = document.getElementById('edit-resource-desc').value.trim() || '暂无课程说明'; c.classIds = selected; const selectedClass = MY_CLASSES.find(item => item.id === selectedClassId); if (selectedClass) c.course = selectedClass.course; closeModal('m-edit-course'); refreshCourseCards(); if (document.getElementById('resource-detail').classList.contains('active')) selectResourceCourse('mine', activeCourseIndex); toast(selected.length ? '课程基本信息已更新，并绑定班级' : '课程基本信息已更新，当前未绑定班级', 'success'); }
         function deleteCourseResource(event, index) { event?.stopPropagation(); const course = COURSE_DATA[index]; if (!course || course.archived) return; const boundCount = Array.isArray(course.classIds) ? course.classIds.length : 0; const prompt = boundCount ? `“${course.name}”已绑定 ${boundCount} 个班级，删除后将归档课程并解除绑定，确认继续？` : `确认删除“${course.name}”？`; if (!confirm(prompt)) return; const code = course.code; if (boundCount) { course.archived = true; course.archivedAt = '2026-07-22'; course.classIds = []; } else COURSE_DATA.splice(index, 1); COURSE_PUBLICATIONS = COURSE_PUBLICATIONS.filter(item => item.sourceCode !== code); persistCoursePublications(); if (activeScope === 'mine' && activeCourseIndex === index) showResourceHome(); activeScope = 'mine'; activeCourseIndex = Math.max(0, Math.min(activeCourseIndex, COURSE_DATA.length - 1)); refreshCourseCards(); toast(boundCount ? '课程已归档，原班级绑定已解除' : '课程已删除', 'success'); }
-        function openBindingModal() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } const c = getActiveResource(); document.getElementById('binding-options').innerHTML = classOptionsHtml(c.classIds); openModal('m-bind-class'); }
-        function saveBindings() { const c = getActiveResource(); const selected = [...document.querySelectorAll('#binding-options input:checked')].map(x => x.dataset.classId); const changed = JSON.stringify([...c.classIds].sort()) !== JSON.stringify([...selected].sort()); const affectsOpened = changed && MY_CLASSES.some(x => x.status === '已开课' && (c.classIds.includes(x.id) || selected.includes(x.id))); if (affectsOpened && !confirm('绑定关系涉及已开课班级，保存后会立即影响学生可见的实训资源，确认继续？')) return; c.classIds = selected; closeModal('m-bind-class'); refreshCourseCards(); selectResourceCourse(activeScope, activeCourseIndex); toast(selected.length ? `已绑定 ${selected.length} 个班级` : '已取消全部班级绑定，资源转为个人备课状态', 'success'); }
         const NODE_UPLOADS = { lesson: [], resource: [] };
         const LESSON_RESOURCES = [{ id: 'wb-lesson-1', name: '01_WorkBuddy界面与账号登录.pdf', type: 'PDF 文档', size: '5.2 MB', duration: '—', uploaded: '2026-07-01' }, { id: 'wb-lesson-2', name: '02_项目空间与C-D盘规范.pdf', type: 'PDF 文档', size: '4.8 MB', duration: '—', uploaded: '2026-07-01' }, { id: 'wb-lesson-3', name: '03_任务指令与提示词设计.mp4', type: 'MP4 视频', size: '96 MB', duration: '18:40', uploaded: '2026-07-02' }, { id: 'wb-lesson-4', name: '04_Skills安装与调用指南.pdf', type: 'PDF 文档', size: '6.4 MB', duration: '—', uploaded: '2026-07-02' }, { id: 'wb-lesson-5', name: '05_MCP工具连接配置.mp4', type: 'MP4 视频', size: '88 MB', duration: '16:20', uploaded: '2026-07-03' }, { id: 'wb-lesson-6', name: '06_综合实训验收规范.pdf', type: 'PDF 文档', size: '3.1 MB', duration: '—', uploaded: '2026-07-03' }];
         const LESSON_RESOURCES_KEY = 'training-lesson-resources';
         const LESSON_RESOURCES_VERSION = 'workbuddy-basic-v1';
         function activeLessonResourcesVersion() { return activeCourseContentCode === 'WB-PPT-101' ? 'workbuddy-ppt-v1' : LESSON_RESOURCES_VERSION; }
-        function loadLessonResources() { try { const storageKey = activeContentStorageKey(LESSON_RESOURCES_KEY), versionKey = `${storageKey}-version`, version = activeLessonResourcesVersion(); if (localStorage.getItem(versionKey) !== version) { localStorage.removeItem(storageKey); localStorage.setItem(versionKey, version); } const saved = JSON.parse(localStorage.getItem(storageKey) || 'null'); if (Array.isArray(saved) && saved.length) LESSON_RESOURCES.splice(0, LESSON_RESOURCES.length, ...saved); } catch { } }
-        function persistLessonResources() { const storageKey = activeContentStorageKey(LESSON_RESOURCES_KEY); localStorage.setItem(storageKey, JSON.stringify(LESSON_RESOURCES)); localStorage.setItem(`${storageKey}-version`, activeLessonResourcesVersion()); }
+        function loadLessonResources() { try { const storageKey = activeContentStorageKey(LESSON_RESOURCES_KEY), versionKey = `${storageKey}-version`, version = activeLessonResourcesVersion(); if (PAGE_MEMORY_STORAGE.getItem(versionKey) !== version) { PAGE_MEMORY_STORAGE.removeItem(storageKey); PAGE_MEMORY_STORAGE.setItem(versionKey, version); } const saved = JSON.parse(PAGE_MEMORY_STORAGE.getItem(storageKey) || 'null'); if (Array.isArray(saved) && saved.length) LESSON_RESOURCES.splice(0, LESSON_RESOURCES.length, ...saved); } catch { } }
+        function persistLessonResources() { const storageKey = activeContentStorageKey(LESSON_RESOURCES_KEY); PAGE_MEMORY_STORAGE.setItem(storageKey, JSON.stringify(LESSON_RESOURCES)); PAGE_MEMORY_STORAGE.setItem(`${storageKey}-version`, activeLessonResourcesVersion()); }
         const SKILL_RESOURCES = [{ id: 'skill-1', name: 'workbuddy-file-manager.skill.zip', meta: '培训示例 Skills · WorkBuddy/资源/Skills/', size: '8.2 MB' }, { id: 'skill-2', name: 'prompt-coach.skill.zip', meta: '培训示例 Skills · WorkBuddy/资源/Skills/', size: '6.4 MB' }, { id: 'skill-3', name: 'task-checker.skill.zip', meta: '培训示例 Skills · WorkBuddy/资源/Skills/', size: '4.1 MB' }];
         const MCP_RESOURCES = [{ id: 'mcp-1', name: 'filesystem.mcp.json', meta: '培训示例 MCP · WorkBuddy/资源/MCP/', size: '12 KB' }, { id: 'mcp-2', name: 'browser.mcp.json', meta: '培训示例 MCP · WorkBuddy/资源/MCP/', size: '9 KB' }, { id: 'mcp-3', name: 'http-tools.mcp.json', meta: '培训示例 MCP · WorkBuddy/资源/MCP/', size: '14 KB' }];
         const CUSTOM_RESOURCES = [{ id: 'custom-1', name: 'workbuddy-basic-project-template.zip', meta: '培训示例自定义资源 · WorkBuddy/资源/自定义/项目模板/', size: '18.6 MB', folder: 'WorkBuddy/资源/自定义/项目模板/' }, { id: 'custom-2', name: '基础培训练习数据.csv', meta: '培训示例自定义资源 · WorkBuddy/资源/自定义/数据集/', size: '2.4 MB', folder: 'WorkBuddy/资源/自定义/数据集/' }, { id: 'custom-3', name: 'WorkBuddy提交检查清单.md', meta: '培训示例自定义资源 · WorkBuddy/资源/自定义/参考资料/', size: '18 KB', folder: 'WorkBuddy/资源/自定义/参考资料/' }];
@@ -1897,9 +2739,11 @@
         const PPT_CUSTOM_RESOURCES = [{ id: 'ppt-custom-1', name: 'PPT需求brief模板.docx', meta: 'PPT 编写自定义资源 · WorkBuddy/资源/自定义/参考资料/', size: '42 KB', folder: 'WorkBuddy/资源/自定义/参考资料/' }, { id: 'ppt-custom-2', name: 'PPT视觉规范模板.pptx', meta: 'PPT 编写自定义资源 · WorkBuddy/资源/自定义/项目模板/', size: '1.8 MB', folder: 'WorkBuddy/资源/自定义/项目模板/' }, { id: 'ppt-custom-3', name: '演示文稿验收清单.xlsx', meta: 'PPT 编写自定义资源 · WorkBuddy/资源/自定义/数据集/', size: '86 KB', folder: 'WorkBuddy/资源/自定义/数据集/' }, { id: 'ppt-custom-4', name: 'PPT演示示例素材包.zip', meta: 'PPT 编写自定义资源 · WorkBuddy/资源/自定义/项目模板/', size: '24.5 MB', folder: 'WorkBuddy/资源/自定义/项目模板/' }];
         const COURSE_CONTENT_LIBRARY = { 'WB-BASIC-101': { structure: JSON.parse(JSON.stringify(COURSE_STRUCTURE)), lessons: LESSON_RESOURCES.map(item => ({ ...item })), skills: SKILL_RESOURCES.map(item => ({ ...item })), mcp: MCP_RESOURCES.map(item => ({ ...item })), custom: CUSTOM_RESOURCES.map(item => ({ ...item })) }, 'WB-PPT-101': { structure: JSON.parse(JSON.stringify(PPT_COURSE_STRUCTURE)), lessons: PPT_LESSON_RESOURCES.map(item => ({ ...item })), skills: PPT_SKILL_RESOURCES.map(item => ({ ...item })), mcp: PPT_MCP_RESOURCES.map(item => ({ ...item })), custom: PPT_CUSTOM_RESOURCES.map(item => ({ ...item })) } };
         let selectedWorkBuddyPath = 'WorkBuddy/资源/自定义/';
+        let resourceUploadFromNode = false;
         function deliverableLabel(d) { return `${d.name}（${d.type}${d.required ? ' · 必需' : ' · 可选'}）`; }
         function useResource() { toast(activeScope === 'official' ? '官方课程资源已打开' : '资源已加入当前实训工作区', activeScope === 'official' ? 'info' : 'success'); }
-        function openResourceUpload() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } document.getElementById('resource-upload-type').value = 'skills'; document.getElementById('resource-upload-file').value = ''; document.getElementById('resource-upload-desc').value = ''; toggleResourceUploadType(); openModal('m-upload-resource'); }
+        function openResourceUpload(fromNode = false) { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } resourceUploadFromNode = fromNode; document.getElementById('resource-upload-type').value = 'skills'; document.getElementById('resource-upload-file').value = ''; document.getElementById('resource-upload-desc').value = ''; toggleResourceUploadType(); openModal('m-upload-resource'); }
+        function openNodeResourceUpload() { openResourceUpload(true); }
         function toggleResourceUploadType() { const type = document.getElementById('resource-upload-type').value; const path = type === 'skills' ? 'WorkBuddy/资源/Skills/' : type === 'mcp' ? 'WorkBuddy/资源/MCP/' : selectedWorkBuddyPath; document.getElementById('resource-upload-path').value = path; document.getElementById('choose-workbuddy-path').style.display = type === 'custom' ? 'inline-flex' : 'none'; document.getElementById('resource-upload-path-hint').textContent = type === 'custom' ? '可查看 WorkBuddy 虚拟桌面目录并选择任意层级。' : `${type === 'skills' ? 'Skills' : 'MCP'} 将上传到固定目录。`; }
         function directoryPreviewItems(path) { const map = { 'WorkBuddy/': ['课件/', '资源/', '作业文件夹/'], 'WorkBuddy/资源/': ['Skills/', 'MCP/', '自定义/'], 'WorkBuddy/资源/自定义/': ['项目模板/', '数据集/', '参考资料/'] }; return map[path] || ['当前目录暂无子目录']; }
         function openWorkBuddyDirectory() { document.getElementById('workbuddy-selected-path').textContent = selectedWorkBuddyPath; document.querySelectorAll('#workbuddy-directory-tree .directory-node').forEach(node => node.classList.toggle('active', node.dataset.path === selectedWorkBuddyPath)); renderWorkBuddyDirectoryPreview(selectedWorkBuddyPath); openModal('m-workbuddy-directory'); }
@@ -1909,11 +2753,56 @@
         function nextAssetId(prefix) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }
         function lessonTypeFromName(name) { const ext = (name.split('.').pop() || '').toUpperCase(); if (['MP4', 'MOV'].includes(ext)) return `${ext} 视频`; return `${ext || '文件'} 文档`; }
         function updateActiveAssetCount(kind, delta = 1) { if (activeScope === 'official') return; const course = getActiveResource(); const key = kind === 'lesson' ? 'lessons' : 'resources'; course[key] = Math.max(0, (Number(course[key]) || 0) + delta); const stat = document.getElementById(kind === 'lesson' ? 'stat-lessons' : 'stat-resources'); if (stat) stat.textContent = course[key]; refreshCourseCards(); }
-        function renderLessons() { const body = document.getElementById('lesson-body'); if (!body) return; body.innerHTML = LESSON_RESOURCES.map(item => `<tr><td class="file-name">${item.name}</td><td>${item.type}</td><td>${item.size}</td><td>${item.duration || '—'}</td><td>${item.uploaded || '刚刚'}</td><td><button class="btn btn-sm btn-link" onclick="toast('${item.type.includes('视频') ? '开始播放视频 Demo' : '课件预览已打开'}','info')">${item.type.includes('视频') ? '播放' : '预览'}</button></td></tr>`).join(''); }
-        function saveLessonUpload() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } const input = document.getElementById('lesson-upload-file'), file = input.files && input.files[0]; if (!file) { toast('请选择要上传的课件文件', 'warning'); input.focus(); return; } LESSON_RESOURCES.push({ id: nextAssetId('lesson'), name: file.name, type: lessonTypeFromName(file.name), size: formatResourceSize(file.size), duration: '—', uploaded: '刚刚', desc: document.getElementById('lesson-upload-desc').value.trim() }); persistLessonResources(); input.value = ''; document.getElementById('lesson-upload-desc').value = ''; closeModal('m-upload-lesson'); renderLessons(); renderNodeLessonPicker(); updateActiveAssetCount('lesson'); toast('课件已上传，并已同步到课件管理列表', 'success'); }
-        function saveResourceUpload() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } const type = document.getElementById('resource-upload-type').value, input = document.getElementById('resource-upload-file'), file = input.files && input.files[0]; if (!file) { toast('请选择要上传的资源文件', 'warning'); input.focus(); return; } const path = document.getElementById('resource-upload-path').value; const target = type === 'skills' ? SKILL_RESOURCES : type === 'mcp' ? MCP_RESOURCES : CUSTOM_RESOURCES; const label = type === 'skills' ? 'Skills' : type === 'mcp' ? 'MCP' : '自定义上传'; target.push({ id: nextAssetId(type), name: file.name, size: formatResourceSize(file.size), meta: `${label} 上传 · ${path}`, folder: path, desc: document.getElementById('resource-upload-desc').value.trim() }); input.value = ''; document.getElementById('resource-upload-desc').value = ''; closeModal('m-upload-resource'); renderResources(); renderNodeResourcePicker(); updateActiveAssetCount('resource'); toast(`资源已上传到 ${path}`, 'success'); }
+        function renderLessons() { const body = document.getElementById('lesson-body'); if (!body) return; body.innerHTML = LESSON_RESOURCES.map(item => `<tr><td class="file-name">${item.name}</td><td>${item.type}</td><td>${item.size}</td><td>${item.duration || '—'}</td><td>${item.uploaded || '刚刚'}</td><td><button class="btn btn-sm btn-link" onclick="toast('${item.type.includes('视频') ? '开始播放视频 Demo' : '课件预览已打开'}','info')">${item.type.includes('视频') ? '播放' : '预览'}</button><button class="btn btn-sm btn-danger-outline" onclick="deleteLesson('${item.id}')">删除</button></td></tr>`).join(''); }
+        function deleteLesson(id) {
+            if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; }
+            const index = LESSON_RESOURCES.findIndex(item => item.id === id);
+            if (index < 0) return;
+            if (!confirm('确认删除该课件？删除后不可恢复')) return;
+            LESSON_RESOURCES.splice(index, 1);
+            if (typeof nodeDraftLessonIds !== 'undefined') { const di = nodeDraftLessonIds.indexOf(id); if (di >= 0) nodeDraftLessonIds.splice(di, 1); }
+            persistLessonResources();
+            renderLessons();
+            renderNodeLessonPicker();
+            updateActiveAssetCount('lesson', -1);
+            toast('课件已删除', 'success');
+        }
+        const LESSON_ALLOWED_EXT = ['.pdf','.docx','.txt','.md','.xlsx','.csv','.pptx','.jpg','.jpeg','.png','.gif','.bmp','.svg','.webp','.mp4','.webm','.mp3','.wav','.zip','.html','.htm','.css','.scss','.sass','.less','.js','.jsx','.mjs','.cjs','.ts','.tsx','.vue','.php','.php3','.php4','.c','.h','.cpp','.cc','.cxx','.hpp','.cs','.java','.go','.rs','.kt','.kts','.swift','.dart','.scala','.sc','.m','.mm','.vb','.py','.pyw','.rb','.pl','.pm','.lua','.sh','.bash','.zsh','.ps1','.r','.R','.json','.yaml','.yml','.xml','.toml','.sql','.ini','.conf','.cfg','.env','.hs','.ex','.exs','.clj','.erl','.groovy'];
+        function lessonExtOf(name) { const i = name.lastIndexOf('.'); return i < 0 ? '' : name.slice(i).toLowerCase(); }
+        function isValidLessonFile(name) { return LESSON_ALLOWED_EXT.includes(lessonExtOf(name)); }
+        function saveLessonUpload() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } const input = document.getElementById('lesson-upload-file'), file = input.files && input.files[0]; if (!file) { toast('请选择要上传的课件文件', 'warning'); input.focus(); return; } if (!isValidLessonFile(file.name)) { toast('不支持的文件类型，仅支持文档/表格/演示/图片/视频/音频/压缩包/代码类文件', 'warning'); input.focus(); return; } LESSON_RESOURCES.push({ id: nextAssetId('lesson'), name: file.name, type: lessonTypeFromName(file.name), size: formatResourceSize(file.size), duration: '—', uploaded: '刚刚', desc: document.getElementById('lesson-upload-desc').value.trim() }); persistLessonResources(); input.value = ''; document.getElementById('lesson-upload-desc').value = ''; closeModal('m-upload-lesson'); renderLessons(); renderNodeLessonPicker(); updateActiveAssetCount('lesson'); toast('课件已上传，并已同步到课件管理列表', 'success'); }
+        function saveResourceUpload() { if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; } const type = document.getElementById('resource-upload-type').value, input = document.getElementById('resource-upload-file'), file = input.files && input.files[0]; if (!file) { toast('请选择要上传的资源文件', 'warning'); input.focus(); return; } const path = document.getElementById('resource-upload-path').value; const target = type === 'skills' ? SKILL_RESOURCES : type === 'mcp' ? MCP_RESOURCES : CUSTOM_RESOURCES; const label = type === 'skills' ? 'Skills' : type === 'mcp' ? 'MCP' : '自定义上传'; const fromNode = resourceUploadFromNode, item = { id: nextAssetId(type), name: file.name, size: formatResourceSize(file.size), meta: `${label} 上传 · ${path}`, folder: path, desc: document.getElementById('resource-upload-desc').value.trim() }; target.push(item); if (fromNode) { if (!nodeDraftResourceIds.includes(item.id)) nodeDraftResourceIds.push(item.id); document.getElementById('node-resource-search').value = ''; } resourceUploadFromNode = false; input.value = ''; document.getElementById('resource-upload-desc').value = ''; closeModal('m-upload-resource'); renderResources(); renderNodeResourcePicker(); updateActiveAssetCount('resource'); toast(fromNode ? `资源已上传到 ${path}，并已关联到当前任务` : `资源已上传到 ${path}`, 'success'); }
         function formatResourceSize(bytes) { if (!bytes) return '—'; if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`; return `${(bytes / 1024 / 1024).toFixed(1)} MB`; }
-        function resourceItemHtml(item) { const data = typeof item === 'string' ? { name: item, meta: '课程内置资源', folder: 'WorkBuddy/' } : item; return `<div class="resource-card"><b>${data.name}</b><span class="text-xs text-mute">${data.meta || 'WorkBuddy/'}${data.size && data.size !== '—' ? ` · ${data.size}` : ''}</span><div class="mt-8"><button class="btn btn-sm btn-link" data-resource-use onclick="useResource()">使用</button><button class="btn btn-sm btn-link" data-manage-control>替换</button></div></div>`; }
+        function resourceItemHtml(item) { const data = typeof item === 'string' ? { name: item, meta: '课程内置资源', folder: 'WorkBuddy/' } : item; return `<div class="resource-card"><b>${data.name}</b><span class="text-xs text-mute">${data.meta || 'WorkBuddy/'}${data.size && data.size !== '—' ? ` · ${data.size}` : ''}</span><div class="mt-8"><button class="btn btn-sm btn-link" onclick="downloadResource('${data.id}')">下载</button><button class="btn btn-sm btn-link" data-manage-control>替换</button><button class="btn btn-sm btn-danger-outline" data-manage-control onclick="deleteResource('${data.id}')">删除</button></div></div>`; }
+        function findResourceById(id) { return [SKILL_RESOURCES, MCP_RESOURCES, CUSTOM_RESOURCES].map(arr => arr.find(item => item.id === id)).find(Boolean); }
+        function downloadResource(id) {
+            const data = findResourceById(id);
+            if (!data) return;
+            const content = ['WorkBuddy 实训资源（示例占位文件）', `资源名称：${data.name}`, `资源说明：${data.meta || 'WorkBuddy/'}`, `资源大小：${data.size || '—'}`, data.folder ? `所在目录：${data.folder}` : ''].filter(Boolean).join('\n');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = data.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast('资源文件已开始下载', 'success');
+        }
+        function deleteResource(id) {
+            if (activeScope === 'official') { toast('官方课程资源仅支持查看', 'info'); return; }
+            const data = findResourceById(id);
+            if (!data) return;
+            if (!confirm('确认删除该资源？删除后不可恢复')) return;
+            [SKILL_RESOURCES, MCP_RESOURCES, CUSTOM_RESOURCES].forEach(arr => { const idx = arr.findIndex(item => item.id === id); if (idx >= 0) arr.splice(idx, 1); });
+            const di = nodeDraftResourceIds.indexOf(id);
+            if (di >= 0) nodeDraftResourceIds.splice(di, 1);
+            renderResources();
+            renderNodeResourcePicker();
+            updateActiveAssetCount('resource', -1);
+            toast('资源已删除', 'success');
+        }
         function renderResources() { const groups = { Skills: SKILL_RESOURCES, MCP: MCP_RESOURCES, '自定义上传': CUSTOM_RESOURCES }; document.getElementById('resource-groups').innerHTML = Object.entries(groups).map(([g, items]) => `<div class="resource-group"><div class="flex-between mb-8"><b>${g}</b><span class="badge badge-gray">${items.length}</span></div>${items.length ? `<div class="resource-grid">${items.map(resourceItemHtml).join('')}</div>` : `<div class="empty" style="padding:12px">暂无${g}资源</div>`}</div>`).join(''); applyResourceScopeMode(); renderNodeResourcePicker(); }
         function structureDisplayName(name, level) { const value = (name || '').trim(); if (level === 'chapter') return value.replace(/^第[一二三四五六七八九十百零〇0-9]+章[\s、.·-]*/, '') || value; if (level === 'section') return value.replace(/^第[一二三四五六七八九十百零〇0-9]+节[\s、.·-]*/, '').replace(/^\d+(?:\.\d+)+[\s、.·-]*/, '') || value; if (level === 'task') return value.replace(/^任务\s*\d+[\s:：、.·-]*/, '') || value; return value; }
         function taskCardHtml(n, chapterIndex, sectionIndex, taskIndex) { const deliverables = n.deliverables || []; const workbuddyEnabled = n.workbuddyEnabled !== false; return `<div class="node-card"><div class="node-head"><span class="node-index">任务${taskIndex + 1}</span><div class="node-info"><b>${structureDisplayName(n.name, 'task')}</b><span class="node-runtime-badge ${workbuddyEnabled ? 'enabled' : 'disabled'}">${workbuddyEnabled ? 'WorkBuddy 已启用' : '学习资源模式'}</span><div class="text-xs text-mute mt-8">${n.desc} · 课件 ${n.lesson} · 资源 ${n.resource} · 作业：${deliverables.map(deliverableLabel).join('、') || '未配置'}</div></div><div class="flex gap-4"><button class="btn btn-sm btn-link" onclick="toggleNode(this)">展开详情</button><span data-manage-control><button class="btn btn-sm btn-outline" onclick="moveNode(${chapterIndex},${sectionIndex},${taskIndex},-1)" ${taskIndex === 0 ? 'disabled' : ''}>上移</button><button class="btn btn-sm btn-outline" onclick="moveNode(${chapterIndex},${sectionIndex},${taskIndex},1)" ${taskIndex === COURSE_STRUCTURE[chapterIndex].sections[sectionIndex].tasks.length - 1 ? 'disabled' : ''}>下移</button><button class="btn btn-sm btn-link" onclick="openNodeModal(${chapterIndex},${sectionIndex},${taskIndex})">编辑</button><button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="deleteNode(${chapterIndex},${sectionIndex},${taskIndex})">删除</button></span></div></div><div class="node-detail"><b>任务要求：</b>${n.desc}<br><b>运行方式：</b>${workbuddyEnabled ? '进入任务默认打开 WorkBuddy 虚拟桌面' : '在任务主区域直接展示学习资源'}<br><b>作业：</b>${deliverables.map(deliverableLabel).join('、') || '未配置'}<br><b>关联内容：</b>${n.lesson} 个课件、${n.resource} 个资源</div></div>`; }
@@ -1931,16 +2820,17 @@
         function deliverableMeta(d) { const base = `${d.type} · ${d.required ? '必需' : '可选'}`; return d.type === '对话链接' ? `${base} · 无需上传文件` : `${base} · ${d.size || 50}MB`; }
         function renderDeliverables() { const wrap = document.getElementById('deliverable-list'); if (!wrap) return; wrap.innerHTML = nodeDraftDeliverables.map((d, i) => `<div class="deliverable-row"><span><b>${d.name}</b> <small>${deliverableMeta(d)}</small></span><button class="btn btn-sm btn-link" type="button" onclick="openDeliverableModal(${i})">编辑</button><button class="btn btn-sm btn-link" type="button" style="color:var(--danger)" onclick="deleteDeliverable(${i})">删除</button></div>`).join('') || '<div class="empty" style="padding:12px">暂无作业，请新增配置</div>'; }
         function toggleDeliverableTypeFields() { const isLink = document.getElementById('deliverable-type').value === '对话链接'; document.getElementById('deliverable-size-group').style.display = isLink ? 'none' : ''; document.getElementById('deliverable-pattern-group').style.display = isLink ? 'none' : ''; document.getElementById('deliverable-link-hint').style.display = isLink ? 'block' : 'none'; }
-        function openDeliverableModal(i = -1) { editingDeliverable = i; const d = i < 0 ? { name: '', type: 'PDF', size: 50, required: true, pattern: '学号_姓名_任务名称' } : nodeDraftDeliverables[i]; document.getElementById('deliverable-modal-title').textContent = i < 0 ? '新增作业' : '编辑作业'; document.getElementById('deliverable-name').value = d.name; document.getElementById('deliverable-type').value = d.type; document.getElementById('deliverable-size').value = d.size || 50; document.getElementById('deliverable-pattern').value = d.pattern || '学号_姓名_任务名称'; document.getElementById('deliverable-required').checked = d.required !== false; toggleDeliverableTypeFields(); openModal('m-deliverable'); }
+        function openDeliverableModal(i = -1) { editingDeliverable = i; const d = i < 0 ? { name: '', type: 'PDF', size: 50, required: true, pattern: '学号_姓名_任务名称' } : nodeDraftDeliverables[i]; document.getElementById('deliverable-modal-title').textContent = i < 0 ? '新增作业' : '编辑作业'; document.getElementById('deliverable-name').value = d.name; document.getElementById('deliverable-type').value = d.type; document.getElementById('deliverable-size').value = d.size || 50; document.getElementById('deliverable-pattern').value = d.pattern || '学号_姓名_文件名称'; document.getElementById('deliverable-required').checked = d.required !== false; toggleDeliverableTypeFields(); openModal('m-deliverable'); }
         function saveDeliverable() { const name = document.getElementById('deliverable-name'); if (!name.value.trim()) { toast('请输入作业名称', 'warning'); name.focus(); return; } const type = document.getElementById('deliverable-type').value, isLink = type === '对话链接'; const d = { name: name.value.trim(), type, size: isLink ? 0 : +document.getElementById('deliverable-size').value || 50, pattern: isLink ? '' : document.getElementById('deliverable-pattern').value.trim(), required: document.getElementById('deliverable-required').checked }; if (editingDeliverable < 0) nodeDraftDeliverables.push(d); else nodeDraftDeliverables[editingDeliverable] = d; closeModal('m-deliverable'); renderDeliverables(); }
         function deleteDeliverable(i) { if (!confirm('确认删除该作业配置？')) return; nodeDraftDeliverables.splice(i, 1); renderDeliverables(); }
         function allNodeResources() { return [{ group: 'Skills', items: SKILL_RESOURCES }, { group: 'MCP', items: MCP_RESOURCES }, { group: '自定义上传', items: CUSTOM_RESOURCES }].flatMap(entry => entry.items.map(item => ({ ...item, group: entry.group }))); }
         function toggleNodeAsset(kind, id, checked) { const selected = kind === 'lesson' ? nodeDraftLessonIds : nodeDraftResourceIds; if (checked && !selected.includes(id)) selected.push(id); if (!checked) { const index = selected.indexOf(id); if (index >= 0) selected.splice(index, 1); } if (kind === 'lesson') renderNodeLessonPicker(); else renderNodeResourcePicker(); }
         function moveNodeLesson(id, direction) { const index = nodeDraftLessonIds.indexOf(id), target = index + direction; if (index < 0 || target < 0 || target >= nodeDraftLessonIds.length) return;[nodeDraftLessonIds[index], nodeDraftLessonIds[target]] = [nodeDraftLessonIds[target], nodeDraftLessonIds[index]]; renderNodeLessonPicker(); }
-        function renderNodeLessonPicker() { const wrap = document.getElementById('node-lesson-picker-list'); if (!wrap) return; const query = (document.getElementById('node-lesson-search')?.value || '').trim().toLowerCase(); const byId = Object.fromEntries(LESSON_RESOURCES.map(item => [item.id, item])); const ordered = nodeDraftLessonIds.map(id => byId[id]).filter(Boolean); const unselected = LESSON_RESOURCES.filter(item => !nodeDraftLessonIds.includes(item.id)); const items = [...ordered, ...unselected].filter(item => `${item.name} ${item.type}`.toLowerCase().includes(query)); document.getElementById('node-lesson-selected-count').textContent = `已选 ${nodeDraftLessonIds.length} 项 · 按此顺序预览`; wrap.innerHTML = items.length ? items.map(item => { const selectedIndex = nodeDraftLessonIds.indexOf(item.id), selected = selectedIndex >= 0; return `<div class="node-asset-option"><input type="checkbox" value="${item.id}" ${selected ? 'checked' : ''} onchange="toggleNodeAsset('lesson',this.value,this.checked)"><span class="node-asset-option-main"><b class="node-asset-option-name" title="${item.name}">${item.name}</b><small class="node-asset-option-meta">${item.type} · ${item.size}</small></span>${selected ? `<span class="node-asset-order"><span class="node-asset-order-index">预览 ${selectedIndex + 1}</span><button class="btn btn-sm btn-outline" type="button" title="上移" onclick="moveNodeLesson('${item.id}',-1)" ${selectedIndex === 0 ? 'disabled' : ''}>↑</button><button class="btn btn-sm btn-outline" type="button" title="下移" onclick="moveNodeLesson('${item.id}',1)" ${selectedIndex === nodeDraftLessonIds.length - 1 ? 'disabled' : ''}>↓</button></span>` : '<span class="node-asset-option-state">未选择</span>'}</div>`; }).join('') : '<div class="node-asset-empty">没有匹配的课件，可直接上传新课件</div>'; }
+        function renderNodeLessonPicker() { const wrap = document.getElementById('node-lesson-picker-list'); if (!wrap) return; const query = (document.getElementById('node-lesson-search')?.value || '').trim().toLowerCase(); const byId = Object.fromEntries(LESSON_RESOURCES.map(item => [item.id, item])); const ordered = nodeDraftLessonIds.map(id => byId[id]).filter(Boolean); const unselected = LESSON_RESOURCES.filter(item => !nodeDraftLessonIds.includes(item.id)); const items = [...ordered, ...unselected].filter(item => `${item.name} ${item.type}`.toLowerCase().includes(query)); document.getElementById('node-lesson-selected-count').textContent = `已选 ${nodeDraftLessonIds.length} 项 · 可调整顺序`; wrap.innerHTML = items.length ? items.map(item => { const selectedIndex = nodeDraftLessonIds.indexOf(item.id), selected = selectedIndex >= 0; return `<div class="node-asset-option"><input type="checkbox" value="${item.id}" ${selected ? 'checked' : ''} onchange="toggleNodeAsset('lesson',this.value,this.checked)"><span class="node-asset-option-main"><b class="node-asset-option-name" title="${item.name}">${item.name}</b><small class="node-asset-option-meta">${item.type} · ${item.size}</small></span>${selected ? `<span class="node-asset-order"><span class="node-asset-order-index">顺序 ${selectedIndex + 1}</span><button class="btn btn-sm btn-outline" type="button" title="上移" onclick="moveNodeLesson('${item.id}',-1)" ${selectedIndex === 0 ? 'disabled' : ''}>↑</button><button class="btn btn-sm btn-outline" type="button" title="下移" onclick="moveNodeLesson('${item.id}',1)" ${selectedIndex === nodeDraftLessonIds.length - 1 ? 'disabled' : ''}>↓</button></span>` : '<span class="node-asset-option-state">未选择</span>'}</div>`; }).join('') : '<div class="node-asset-empty">没有匹配的课件，可直接上传新课件</div>'; }
         function renderNodeResourcePicker() { const wrap = document.getElementById('node-resource-picker-list'); if (!wrap) return; const query = (document.getElementById('node-resource-search')?.value || '').trim().toLowerCase(); const items = allNodeResources().filter(item => `${item.name} ${item.group} ${item.meta || ''}`.toLowerCase().includes(query)); document.getElementById('node-resource-selected-count').textContent = `已选 ${nodeDraftResourceIds.length} 项`; wrap.innerHTML = items.length ? items.map(item => { const selected = nodeDraftResourceIds.includes(item.id); return `<label class="node-asset-option"><input type="checkbox" value="${item.id}" ${selected ? 'checked' : ''} onchange="toggleNodeAsset('resource',this.value,this.checked)"><span class="node-asset-option-main"><b class="node-asset-option-name" title="${item.name}">${item.name}</b><small class="node-asset-option-meta">${item.group} · ${item.size || '—'}</small></span>${selected ? '<span class="node-asset-option-state">已选择</span>' : '<span></span>'}</label>`; }).join('') : '<div class="node-asset-empty">没有匹配的资源，可直接上传新资源</div>'; }
-        function attachNodeAsset(kind, input) { const file = input && input.files && input.files[0]; if (!file) return; NODE_UPLOADS[kind].push(file.name); nodeDraftAssets[kind].push(file.name); if (kind === 'lesson') { const item = { id: nextAssetId('lesson'), name: file.name, type: lessonTypeFromName(file.name), size: formatResourceSize(file.size), duration: '—', uploaded: '刚刚' }; LESSON_RESOURCES.push(item); persistLessonResources(); nodeDraftLessonIds.push(item.id); document.getElementById('node-lesson-search').value = ''; renderLessons(); renderNodeLessonPicker(); updateActiveAssetCount('lesson'); } else { const item = { id: nextAssetId('custom'), name: file.name, size: formatResourceSize(file.size), meta: '任务弹窗上传 · WorkBuddy/资源/自定义/', folder: 'WorkBuddy/资源/自定义/' }; CUSTOM_RESOURCES.push(item); nodeDraftResourceIds.push(item.id); document.getElementById('node-resource-search').value = ''; renderResources(); updateActiveAssetCount('resource'); } toast(`${kind === 'lesson' ? '课件' : '资源'}已上传、自动选中，并同步到对应管理列表`, 'success'); input.value = ''; }
-        function updateNodeWorkBuddyState() { const enabled = document.getElementById('node-workbuddy-enabled').checked; document.getElementById('node-workbuddy-state').textContent = enabled ? '已启用' : '未启用'; }
+        function attachNodeAsset(kind, input) { const file = input && input.files && input.files[0]; if (!file) return; if (kind === 'lesson' && !isValidLessonFile(file.name)) { toast('不支持的文件类型，仅支持文档/表格/演示/图片/视频/音频/压缩包/代码类文件', 'warning'); input.value = ''; return; } NODE_UPLOADS[kind].push(file.name); nodeDraftAssets[kind].push(file.name); if (kind === 'lesson') { const item = { id: nextAssetId('lesson'), name: file.name, type: lessonTypeFromName(file.name), size: formatResourceSize(file.size), duration: '—', uploaded: '刚刚' }; LESSON_RESOURCES.push(item); persistLessonResources(); nodeDraftLessonIds.push(item.id); document.getElementById('node-lesson-search').value = ''; renderLessons(); renderNodeLessonPicker(); updateActiveAssetCount('lesson'); } else { const item = { id: nextAssetId('custom'), name: file.name, size: formatResourceSize(file.size), meta: '任务弹窗上传 · WorkBuddy/资源/自定义/', folder: 'WorkBuddy/资源/自定义/' }; CUSTOM_RESOURCES.push(item); nodeDraftResourceIds.push(item.id); document.getElementById('node-resource-search').value = ''; renderResources(); updateActiveAssetCount('resource'); } toast(`${kind === 'lesson' ? '课件' : '资源'}已上传、自动选中，并同步到对应管理列表`, 'success'); input.value = ''; }
+        function updateNodeWorkBuddyState() { const enabled = document.getElementById('node-workbuddy-enabled').checked; document.getElementById('node-workbuddy-state').textContent = enabled ? '已启用' : '未启用'; updateNodeAllowSkipState(); }
+        function updateNodeAllowSkipState() { const enabled = document.getElementById('node-allow-skip').checked; document.getElementById('node-allow-skip-state').textContent = enabled ? '可跳过' : '不可跳过'; }
         function ensureNodePlacementFields() { }
         function refreshNodeSectionOptions(selectedSection = null) { const chapterIndex = +document.getElementById('node-chapter').value; const select = document.getElementById('node-section'); const sections = COURSE_STRUCTURE[chapterIndex]?.sections || []; select.innerHTML = '<option value="">不指定（默认第一个小节）</option>' + sections.map((section, index) => `<option value="${index}">${section.name}</option>`).join(''); select.disabled = !sections.length; if (Number.isInteger(selectedSection) && sections[selectedSection]) select.value = String(selectedSection); else select.value = ''; }
         function openNodeModal(chapterIndex = null, sectionIndex = null, taskIndex = null) { if (!COURSE_STRUCTURE.length) { toast('请先新增章', 'warning'); return; } const isEditing = taskIndex !== null && taskIndex !== undefined; if (chapterIndex === null) { chapterIndex = COURSE_STRUCTURE.findIndex(chapter => chapter.sections.length); if (chapterIndex < 0) { toast('请先在章下新增小节', 'warning'); return; } } if (!COURSE_STRUCTURE[chapterIndex]?.sections.length) { toast('请先在该章下新增小节', 'warning'); return; } editingNode = isEditing ? { chapterIndex, sectionIndex, taskIndex } : null; const n = isEditing ? COURSE_STRUCTURE[chapterIndex].sections[sectionIndex].tasks[taskIndex] : null; const chapterSelect = document.getElementById('node-chapter'); chapterSelect.innerHTML = COURSE_STRUCTURE.map((chapter, index) => `<option value="${index}">${chapter.name}</option>`).join(''); chapterSelect.value = String(chapterIndex); refreshNodeSectionOptions(Number.isInteger(sectionIndex) ? sectionIndex : null); nodeDraftDeliverables = (n?.deliverables || []).map(x => ({ ...x })); nodeDraftAssets = { lesson: [], resource: [] }; const availableLessonIds = LESSON_RESOURCES.map(item => item.id); const availableResourceIds = allNodeResources().map(item => item.id); nodeDraftLessonIds = isEditing ? (Array.isArray(n.lessonIds) ? n.lessonIds.filter(id => availableLessonIds.includes(id)) : availableLessonIds.slice(0, Number(n.lesson) || 0)) : []; nodeDraftResourceIds = isEditing ? (Array.isArray(n.resourceIds) ? n.resourceIds.filter(id => availableResourceIds.includes(id)) : availableResourceIds.slice(0, Number(n.resource) || 0)) : []; document.getElementById('node-lesson-search').value = ''; document.getElementById('node-resource-search').value = ''; document.getElementById('node-modal-title').textContent = isEditing ? '编辑任务' : '新增任务'; document.getElementById('node-name').value = n?.name || ''; document.getElementById('node-desc').value = n?.desc || ''; document.getElementById('node-workbuddy-enabled').checked = n ? n.workbuddyEnabled !== false : true; updateNodeWorkBuddyState(); renderDeliverables(); renderNodeLessonPicker(); renderNodeResourcePicker(); openModal('m-node'); }
@@ -1959,8 +2849,73 @@
         function saveSection() { const name = document.getElementById('section-name'); if (!name.value.trim()) { toast('请输入小节名称', 'warning'); name.focus(); return; } const sections = COURSE_STRUCTURE[editingSection.chapter].sections; const old = editingSection.section < 0 ? null : sections[editingSection.section]; const item = { name: structureDisplayName(name.value, 'section'), desc: document.getElementById('section-desc').value.trim(), tasks: old?.tasks || [] }; if (editingSection.section < 0) sections.push(item); else sections[editingSection.section] = item; persistCourseStructure(); closeModal('m-section'); renderNodes(); refreshCourseCards(); toast(editingSection.section < 0 ? '小节已新增' : '小节已更新', 'success'); }
         function openNodeModal(chapterIndex = null, sectionIndex = null, taskIndex = null) { if (!COURSE_STRUCTURE.length) { toast('请先新增章', 'warning'); return; } const isEditing = Number.isInteger(taskIndex); if (chapterIndex === null) chapterIndex = 0; const chapter = COURSE_STRUCTURE[chapterIndex]; if (!chapter) return; const parent = taskParent(chapterIndex, Number.isInteger(sectionIndex) ? sectionIndex : null); if (!parent) return; editingNode = isEditing ? { chapterIndex, sectionIndex: Number.isInteger(sectionIndex) ? sectionIndex : null, taskIndex } : null; const n = isEditing ? parent.tasks[taskIndex] : null; const chapterSelect = document.getElementById('node-chapter'); chapterSelect.innerHTML = COURSE_STRUCTURE.map((item, index) => `<option value="${index}">${item.name}</option>`).join(''); chapterSelect.value = String(chapterIndex); refreshNodeSectionOptions(Number.isInteger(sectionIndex) ? sectionIndex : null); document.getElementById('node-modal-title').textContent = isEditing ? '编辑任务' : '新增任务'; document.getElementById('node-name').value = n?.name || ''; document.getElementById('node-desc').value = n?.desc || ''; document.getElementById('node-workbuddy-enabled').checked = n ? n.workbuddyEnabled !== false : true; document.getElementById('node-allow-skip').checked = n?.allowSkip === true; nodeDraftDeliverables = (n?.deliverables || []).map(x => ({ ...x })); nodeDraftAssets = { lesson: [], resource: [] }; const availableLessonIds = LESSON_RESOURCES.map(item => item.id); const availableResourceIds = allNodeResources().map(item => item.id); nodeDraftLessonIds = isEditing ? (Array.isArray(n.lessonIds) ? n.lessonIds.filter(id => availableLessonIds.includes(id)) : availableLessonIds.slice(0, Number(n.lesson) || 0)) : []; nodeDraftResourceIds = isEditing ? (Array.isArray(n.resourceIds) ? n.resourceIds.filter(id => availableResourceIds.includes(id)) : availableResourceIds.slice(0, Number(n.resource) || 0)) : []; document.getElementById('node-lesson-search').value = ''; document.getElementById('node-resource-search').value = ''; updateNodeWorkBuddyState(); renderDeliverables(); renderNodeLessonPicker(); renderNodeResourcePicker(); openModal('m-node'); }
         function saveNode() { const name = document.getElementById('node-name'), desc = document.getElementById('node-desc'); if (!name.value.trim()) { toast('请输入任务名称', 'warning'); name.focus(); return; } const chapterIndex = +document.getElementById('node-chapter').value; const selectedSectionValue = document.getElementById('node-section').value; const sectionIndex = selectedSectionValue === '' ? null : +selectedSectionValue; const targetParent = taskParent(chapterIndex, sectionIndex); if (!targetParent) { toast('请选择有效的所属章', 'warning'); return; } const workbuddyEnabled = document.getElementById('node-workbuddy-enabled').checked; const allowSkip = document.getElementById('node-allow-skip').checked; const item = { name: name.value.trim(), desc: desc.value.trim(), lessonIds: [...nodeDraftLessonIds], resourceIds: [...nodeDraftResourceIds], lesson: nodeDraftLessonIds.length, resource: nodeDraftResourceIds.length, deliverables: nodeDraftDeliverables.map(x => ({ ...x })), workbuddyEnabled, allowSkip }; if (editingNode) { const oldParent = taskParent(editingNode.chapterIndex, editingNode.sectionIndex); const samePlacement = editingNode.chapterIndex === chapterIndex && editingNode.sectionIndex === sectionIndex; if (samePlacement) targetParent.tasks[editingNode.taskIndex] = item; else { oldParent?.tasks?.splice(editingNode.taskIndex, 1); targetParent.tasks.push(item); } } else targetParent.tasks.push(item); persistCourseStructure(); const savedIndex = flatTasks().findIndex(entry => entry.task === item); persistWorkBuddyTaskConfig(savedIndex, workbuddyEnabled); renderNodes(); refreshCourseCards(); closeModal('m-node'); toast(editingNode ? '任务已更新' : '任务已新增', 'success'); }
+        const COURSE_OUTLINE_ACTION_ICONS = {
+            up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>',
+            down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="m18 13-6 6-6-6"/></svg>',
+            move: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="m7 8 5-5 5 5"/><path d="m7 16 5 5 5-5"/></svg>',
+            drag: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>',
+            edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+            delete: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>'
+        };
+        function courseOutlineIconAction(icon, label, handler, disabled = false, danger = false) { return `<button type="button" class="btn btn-sm btn-icon outline-action-btn${danger ? ' danger' : ''}" title="${label}" aria-label="${label}" onclick="${handler}" ${disabled ? 'disabled' : ''}>${COURSE_OUTLINE_ACTION_ICONS[icon]}</button>`; }
+        let courseOutlineDrag = null;
+        function courseOutlineDragHandle(kind, chapterIndex, sectionIndex, taskIndex, label) { const placement = Number.isInteger(sectionIndex) ? sectionIndex : 'null'; const taskPlacement = Number.isInteger(taskIndex) ? taskIndex : 'null'; return `<span class="outline-drag-handle" role="button" tabindex="0" draggable="true" title="${label}" aria-label="${label}" ondragstart="startCourseOutlineDrag(event,'${kind}',${chapterIndex},${placement},${taskPlacement})" ondragend="endCourseOutlineDrag()" onkeydown="moveCourseOutlineByKeyboard(event,'${kind}',${chapterIndex},${placement},${taskPlacement})">${COURSE_OUTLINE_ACTION_ICONS.drag}</span>`; }
+        function startCourseOutlineDrag(event, kind, chapterIndex, sectionIndex, taskIndex) { courseOutlineDrag = { kind, chapterIndex, sectionIndex, taskIndex }; event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', 'course-outline'); const item = event.currentTarget.closest('[data-drag-kind]'); if (item) requestAnimationFrame(() => item.classList.add('is-dragging')); }
+        function clearCourseOutlineDropIndicators() { document.querySelectorAll('#node-list .outline-drop-before,#node-list .outline-drop-after').forEach(item => item.classList.remove('outline-drop-before', 'outline-drop-after')); }
+        function endCourseOutlineDrag() { clearCourseOutlineDropIndicators(); document.querySelectorAll('#node-list .is-dragging').forEach(item => item.classList.remove('is-dragging')); courseOutlineDrag = null; }
+        function isCourseOutlineDropAllowed(kind, chapterIndex, sectionIndex) { if (!courseOutlineDrag || courseOutlineDrag.kind !== kind) return false; if (kind === 'chapter') return true; if (courseOutlineDrag.chapterIndex !== chapterIndex) return false; return kind === 'section' || courseOutlineDrag.sectionIndex === sectionIndex; }
+        function isCourseOutlineDropAfter(event, kind, target) { const surface = kind === 'chapter' ? target.querySelector(':scope>.outline-chapter-head') : kind === 'section' ? target.querySelector(':scope>.outline-section-head') : target; const rect = (surface || target).getBoundingClientRect(); return event.clientY >= rect.top + rect.height / 2; }
+        function allowCourseOutlineDrop(event, kind, chapterIndex, sectionIndex) { if (!courseOutlineDrag || courseOutlineDrag.kind !== kind) return; event.stopPropagation(); if (!isCourseOutlineDropAllowed(kind, chapterIndex, sectionIndex)) { clearCourseOutlineDropIndicators(); return; } event.preventDefault(); event.dataTransfer.dropEffect = 'move'; clearCourseOutlineDropIndicators(); const target = event.currentTarget; target.classList.add(isCourseOutlineDropAfter(event, kind, target) ? 'outline-drop-after' : 'outline-drop-before'); }
+        function dropCourseOutlineItem(event, kind, chapterIndex, sectionIndex, taskIndex) { if (!courseOutlineDrag || courseOutlineDrag.kind !== kind) return; event.stopPropagation(); if (!isCourseOutlineDropAllowed(kind, chapterIndex, sectionIndex)) return; event.preventDefault(); const source = courseOutlineDrag; const targetElement = event.currentTarget; const after = targetElement.classList.contains('outline-drop-after') || isCourseOutlineDropAfter(event, kind, targetElement); let items; let sourceIndex; let targetIndex; let label; if (kind === 'chapter') { items = COURSE_STRUCTURE; sourceIndex = source.chapterIndex; targetIndex = chapterIndex; label = '章'; } else if (kind === 'section') { items = COURSE_STRUCTURE[chapterIndex]?.sections; sourceIndex = source.sectionIndex; targetIndex = sectionIndex; label = '小节'; } else { items = taskParent(chapterIndex, sectionIndex)?.tasks; sourceIndex = source.taskIndex; targetIndex = taskIndex; label = '任务'; } if (!items || sourceIndex === targetIndex) { endCourseOutlineDrag(); return; } const [moved] = items.splice(sourceIndex, 1); let insertIndex = targetIndex + (after ? 1 : 0); if (sourceIndex < insertIndex) insertIndex -= 1; if (insertIndex === sourceIndex) { items.splice(sourceIndex, 0, moved); endCourseOutlineDrag(); return; } items.splice(insertIndex, 0, moved); endCourseOutlineDrag(); persistCourseStructure(); renderNodes(); toast(`${label}顺序已调整`, 'success'); }
+        function moveCourseOutlineByKeyboard(event, kind, chapterIndex, sectionIndex, taskIndex) { if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return; event.preventDefault(); const direction = event.key === 'ArrowUp' ? -1 : 1; if (kind === 'chapter') moveChapter(chapterIndex, direction); else if (kind === 'section') moveSection(chapterIndex, sectionIndex, direction); else moveNode(chapterIndex, sectionIndex, taskIndex, direction); }
+        taskCardHtml = function (n, chapterIndex, sectionIndex, taskIndex) {
+            const deliverables = n.deliverables || [];
+            const workbuddyEnabled = n.workbuddyEnabled !== false;
+            const canSkip = n.allowSkip === true;
+            const placement = Number.isInteger(sectionIndex) ? sectionIndex : 'null';
+            const description = n.desc ? `<div class="task-desc">${n.desc}</div>` : '';
+            return `<article class="task-card node-card" data-drag-kind="task" ondragover="allowCourseOutlineDrop(event,'task',${chapterIndex},${placement})" ondrop="dropCourseOutlineItem(event,'task',${chapterIndex},${placement},${taskIndex})"><span class="task-no node-index">任务${taskIndex + 1}</span><div><div class="task-name-line"><div class="task-name">${structureDisplayName(n.name, 'task')}</div><span class="skip-config-badge ${canSkip ? '' : 'is-required'}">${canSkip ? '可跳过' : '不可跳过'}</span><span class="badge ${workbuddyEnabled ? 'badge-green' : 'badge-gray'}">${workbuddyEnabled ? 'WorkBuddy 虚拟桌面' : '学习资源模式'}</span></div>${description}<div class="task-meta"><span>课件 ${Number(n.lesson) || 0} · 资源 ${Number(n.resource) || 0} · 作业 ${deliverables.length}</span></div></div><div class="task-manage-actions" data-manage-control>${courseOutlineDragHandle('task', chapterIndex, sectionIndex, taskIndex, '拖拽移动任务')}${courseOutlineIconAction('edit', '编辑任务', `openNodeModal(${chapterIndex},${placement},${taskIndex})`)}${courseOutlineIconAction('delete', '删除任务', `deleteNode(${chapterIndex},${placement},${taskIndex})`, false, true)}</div></article>`;
+        };
+        renderNodes = function () {
+            document.getElementById('node-list').innerHTML = COURSE_STRUCTURE.map((chapter, chapterIndex) => {
+                const chapterTasks = directTaskList(chapter);
+                const chapterTaskTotal = chapterTasks.length + (chapter.sections || []).reduce((total, section) => total + (section.tasks || []).length, 0);
+                const directHtml = chapterTasks.length ? `<section class="outline-section outline-section-direct"><div class="outline-section-head section-head"><span class="outline-section-index section-index">章级任务</span><b>不属于小节</b><span class="outline-section-count">${chapterTasks.length} 个任务</span></div>${chapterTasks.map((task, taskIndex) => taskCardHtml(task, chapterIndex, null, taskIndex)).join('')}</section>` : '';
+                const sectionsHtml = (chapter.sections || []).map((section, sectionIndex) => `<section class="outline-section section-card-outline" data-drag-kind="section" ondragover="allowCourseOutlineDrop(event,'section',${chapterIndex},${sectionIndex})" ondrop="dropCourseOutlineItem(event,'section',${chapterIndex},${sectionIndex},null)"><div class="outline-section-head section-head"><span class="outline-section-index section-index">第${sectionIndex + 1}节</span><b>${structureDisplayName(section.name, 'section')}</b><span class="outline-section-count">${section.tasks.length} 个任务</span><div class="section-manage-actions" data-manage-control><button type="button" class="btn btn-sm btn-link" onclick="openNodeModal(${chapterIndex},${sectionIndex})">+ 任务</button>${courseOutlineDragHandle('section', chapterIndex, sectionIndex, null, '拖拽移动小节')}${courseOutlineIconAction('edit', '编辑小节', `openSectionModal(${chapterIndex},${sectionIndex})`)}${courseOutlineIconAction('delete', '删除小节', `deleteSection(${chapterIndex},${sectionIndex})`, false, true)}</div></div><div class="outline-description"><b>节简介：</b>${section.desc || '暂无节简介'}</div>${section.tasks.length ? section.tasks.map((task, taskIndex) => taskCardHtml(task, chapterIndex, sectionIndex, taskIndex)).join('') : '<div class="empty" style="padding:12px">本小节暂无任务</div>'}</section>`).join('');
+                return `<section class="outline-chapter chapter-card" data-drag-kind="chapter" ondragover="allowCourseOutlineDrop(event,'chapter',${chapterIndex},null)" ondrop="dropCourseOutlineItem(event,'chapter',${chapterIndex},null,null)"><div class="outline-chapter-head chapter-head"><div class="outline-chapter-title chapter-title"><span class="outline-chapter-index chapter-index">第${chapterIndex + 1}章</span><h3>${structureDisplayName(chapter.name, 'chapter')}</h3><span class="outline-chapter-count">${chapterTaskTotal} 个任务</span></div><div class="chapter-manage-actions" data-manage-control><button type="button" class="btn btn-sm btn-link" onclick="openSectionModal(${chapterIndex})">+ 小节</button><button type="button" class="btn btn-sm btn-link" onclick="openNodeModal(${chapterIndex})">+ 章级任务</button>${courseOutlineDragHandle('chapter', chapterIndex, null, null, '拖拽移动章')}${courseOutlineIconAction('edit', '编辑章', `openChapterModal(${chapterIndex})`)}${courseOutlineIconAction('delete', '删除章', `deleteChapter(${chapterIndex})`, false, true)}</div></div><div class="outline-description outline-chapter-description"><b>章简介：</b>${chapter.desc || '暂无章简介'}</div>${directHtml}${sectionsHtml || (!directHtml ? '<div class="outline-empty">本章暂无小节或章级任务，请新增内容</div>' : '')}</section>`;
+            }).join('') || '<div class="empty">暂无课程章节，请新增章</div>';
+            updateStructureStats();
+            applyResourceScopeMode();
+            reorderCourseChapterActions();
+        };
+        function reorderCourseChapterActions() {
+            document.querySelectorAll('#node-list .chapter-head>[data-manage-control]').forEach(group => {
+                const children = Array.from(group.children);
+                const byText = text => children.find(item => item.textContent.trim() === text);
+                const byLabel = label => children.find(item => item.getAttribute('aria-label') === label);
+                [byText('+ 小节'), byText('+ 章级任务'), byLabel('拖拽移动章'), byLabel('编辑章'), byLabel('删除章')]
+                    .filter(Boolean)
+                    .forEach(item => group.appendChild(item));
+            });
+        }
+        renderNodeLessonPicker = function () {
+            const wrap = document.getElementById('node-lesson-picker-list');
+            if (!wrap) return;
+            const query = (document.getElementById('node-lesson-search')?.value || '').trim().toLowerCase();
+            const byId = Object.fromEntries(LESSON_RESOURCES.map(item => [item.id, item]));
+            const ordered = nodeDraftLessonIds.map(id => byId[id]).filter(Boolean);
+            const unselected = LESSON_RESOURCES.filter(item => !nodeDraftLessonIds.includes(item.id));
+            const items = [...ordered, ...unselected].filter(item => `${item.name} ${item.type}`.toLowerCase().includes(query));
+            document.getElementById('node-lesson-selected-count').textContent = `已选 ${nodeDraftLessonIds.length} 项 · 可调整顺序`;
+            wrap.innerHTML = items.length ? items.map(item => {
+                const selected = nodeDraftLessonIds.includes(item.id);
+                const selectedIndex = nodeDraftLessonIds.indexOf(item.id);
+                return `<div class="node-asset-option"><input type="checkbox" value="${item.id}" ${selected ? 'checked' : ''} onchange="toggleNodeAsset('lesson',this.value,this.checked)"><span class="node-asset-option-main"><b class="node-asset-option-name" title="${item.name}">${item.name}</b><small class="node-asset-option-meta">${item.type} · ${item.size}</small></span>${selected ? `<span class="node-asset-order"><span class="node-asset-order-index">顺序 ${selectedIndex + 1}</span><button class="btn btn-sm btn-outline" type="button" title="上移" onclick="moveNodeLesson('${item.id}',-1)" ${selectedIndex === 0 ? 'disabled' : ''}>↑</button><button class="btn btn-sm btn-outline" type="button" title="下移" onclick="moveNodeLesson('${item.id}',1)" ${selectedIndex === nodeDraftLessonIds.length - 1 ? 'disabled' : ''}>↓</button></span>` : '<span class="node-asset-option-state">未选择</span>'}</div>`;
+            }).join('') : '<div class="node-asset-empty">没有匹配的课件，可直接上传新课件</div>';
+        };
         function finishUpload(id, msg) { closeModal(id); toast(msg, 'success'); }
         document.addEventListener('roleChanged', () => { refreshCourseCards(); if (document.getElementById('resource-detail').classList.contains('active')) applyResourceScopeMode(); });
+        document.addEventListener('click', event => { if (!event.target.closest('#resource-course-filter-combobox')) closeResourceCourseFilter(); });
         document.addEventListener('DOMContentLoaded', () => { loadCourseStructure(); loadLessonResources(); persistCourseStructure(); persistLessonResources(); loadWorkBuddyTaskConfig(); renderCourses(); renderLessons(); renderResources(); renderNodes(); document.getElementById('resource-home').addEventListener('click', e => { if (e.target.closest('[data-card-action]')) return; const item = e.target.closest('.course-card'); if (item) { const list = item.dataset.scope === 'official' ? officialCourseList() : COURSE_DATA; openResourceCourse(item.dataset.scope, +item.dataset.index); toast(`已进入${list[+item.dataset.index].name}`, 'info'); } }); document.getElementById('workbuddy-directory-tree').addEventListener('click', e => { const node = e.target.closest('.directory-node'); if (node) selectWorkBuddyPath(node.dataset.path); }); document.querySelector('.tabs').addEventListener('click', e => { const tab = e.target.closest('.tab'); if (!tab) return; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active')); tab.classList.add('active'); document.getElementById('pane-' + tab.dataset.tab).classList.add('active'); }); });
     </script>
     <script src="../assets/shared.js"></script>

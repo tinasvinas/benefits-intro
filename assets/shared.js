@@ -23,11 +23,13 @@ const CURRENT_USER = {
   studentId:'2024001',
 };
 
-// 持久化角色到 sessionStorage（简单演示）
-function getRole(){ return sessionStorage.getItem('demo_role') || CURRENT_USER.role }
-function setRole(r){ sessionStorage.setItem('demo_role', r); applyRole(); }
-function getTenant(){ return sessionStorage.getItem('demo_tenant') || ROLES[getRole()].tenant }
-function setTenant(t){ sessionStorage.setItem('demo_tenant', t); applyRole(); }
+// 演示身份仅保留在当前页面内存中，刷新后恢复初始角色和租户。
+let ACTIVE_ROLE = CURRENT_USER.role;
+let ACTIVE_TENANT = CURRENT_USER.tenant;
+function getRole(){ return ACTIVE_ROLE }
+function setRole(r){ ACTIVE_ROLE = ROLES[r] ? r : CURRENT_USER.role; ACTIVE_TENANT = ROLES[ACTIVE_ROLE].tenant; applyRole(); }
+function getTenant(){ return ACTIVE_TENANT }
+function setTenant(t){ ACTIVE_TENANT = t; applyRole(); }
 
 function applyRole(){
   const r = getRole();

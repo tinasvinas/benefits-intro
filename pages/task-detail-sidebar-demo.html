@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>任务详情 · 课程任务左侧栏 展示示例（视频 + PDF）</title>
+<style>
+  :root {
+    --primary: #356782;
+    --primary-soft: #edf4fb;
+    --border: #e1e6ea;
+    --text: #31465b;
+    --text-sub: #8a97a3;
+    --bg: #f4f7fa;
+    --success: #2a8e6c;
+    --orange: #e08a2b;
+    --gray: #6b7783;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+  }
+  /* 顶部说明条 */
+  .demo-header {
+    padding: 14px 22px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .demo-header h1 { font-size: 16px; margin: 0; color: var(--primary); }
+  .demo-header p { margin: 0; color: var(--text-sub); font-size: 12px; }
+
+  /* 整体布局：左栏 + 右内容 */
+  .demo-shell {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    padding: 18px 22px;
+    align-items: start;
+  }
+
+  /* ===== 左侧栏 ===== */
+  .workspace-sidebar {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 660px;
+  }
+  .workspace-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+  .workspace-tab {
+    flex: 1;
+    padding: 11px 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .workspace-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; }
+
+  .workspace-pane { display: none; flex: 1 1 auto; min-height: 0; }
+  .workspace-pane.active { display: block; }
+
+  .task-lessons-scroll { flex: 1 1 auto; min-height: 0; padding: 14px; overflow-y: auto; }
+
+  .current-task-location {
+    padding: 12px;
+    margin-bottom: 14px;
+    border: 1px solid #cfe0ee;
+    border-radius: 7px;
+    background: #f5f9fc;
+  }
+  .current-task-title-row { display: flex; align-items: center; gap: 8px; margin: 0; }
+  .current-task-sequence { color: var(--primary); font-weight: 600; }
+  .current-task-title-row b { font-size: 13px; }
+  .current-task-path { margin-top: 6px; color: #53708a; font-size: 11px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-blue { background: #e3f0fb; color: #2f6fa8; }
+  .badge-orange { background: #fdf0e0; color: var(--orange); }
+  .badge-gray { background: #eef1f4; color: var(--gray); }
+  .badge-green { background: #e3f5ec; color: var(--success); }
+
+  .task-associated-lessons-title {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin: 0 0 12px; color: #314a60; font-size: 12px; font-weight: 650;
+  }
+  .task-associated-lessons-title small { color: #7b8996; font-size: 10px; font-weight: 400; }
+
+  .lesson-media { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 14px; }
+  .task-associated-lessons .lesson-media:last-child { margin-bottom: 0; border-bottom: 0; }
+  .lesson-section-title {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px; color: var(--text); font-size: 12px; font-weight: 600;
+  }
+  .lesson-section-title small { color: var(--text-sub); font-weight: 400; }
+  .lesson-sequence {
+    display: inline-grid; place-items: center;
+    min-width: 22px; height: 22px; margin-right: 7px;
+    border-radius: 4px; background: var(--primary-soft); color: #4778a8; font-size: 10px;
+  }
+
+  /* 视频课件 */
+  .video-stage {
+    position: relative; aspect-ratio: 16/9; display: grid; place-items: center; overflow: hidden;
+    background: linear-gradient(145deg, #172536, #29455f); color: #fff; border-radius: 4px;
+  }
+  .video-stage:before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 68% 34%, rgba(79,142,190,.5), transparent 36%),
+                linear-gradient(120deg, transparent 48%, rgba(255,255,255,.06) 49%, transparent 50%);
+  }
+  .video-topic { position: absolute; left: 15px; top: 14px; z-index: 1; font-size: 16px; font-weight: 650; letter-spacing: .5px; }
+  .video-topic small { display: block; margin-top: 5px; color: #bdd4e4; font-size: 10px; font-weight: 400; }
+  .video-play {
+    position: relative; z-index: 2; width: 52px; height: 52px; border: 1px solid rgba(255,255,255,.6);
+    border-radius: 50%; background: rgba(0,0,0,.32); color: #fff; font-size: 19px; cursor: pointer;
+  }
+  .video-stage.playing .video-play { background: rgba(42,142,108,.88); }
+  .video-controls {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+    padding: 8px 10px; background: #20272e; color: #e6edf2; font-size: 10px;
+  }
+  .video-progress { height: 4px; background: #56616a; overflow: hidden; border-radius: 2px; }
+  .video-progress span { display: block; width: 68%; height: 100%; background: #4f94c4; }
+
+  /* PDF 课件 */
+  .pdf-preview { border: 1px solid #dfe3e7; background: #eef1f4; border-radius: 4px; overflow: hidden; }
+  .pdf-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; background: #f7f8fa; border-bottom: 1px solid #dfe3e7; color: #526170; font-size: 10px;
+  }
+  .pdf-page {
+    width: 92%; min-height: 300px; margin: 12px auto; padding: 22px 24px;
+    background: #fff; box-shadow: 0 2px 7px rgba(15,23,42,.12); color: #33475a; font-size: 11px; line-height: 1.75;
+  }
+  .pdf-page h4 { margin: 0 0 10px; font-size: 16px; color: #263e55; text-align: center; }
+  .pdf-page h5 { margin: 13px 0 5px; font-size: 12px; color: #365a78; }
+  .pdf-page p { margin: 0 0 7px; }
+  .pdf-page .pdf-note { padding: 8px 10px; border-left: 3px solid #5b8db4; background: #f2f7fb; }
+
+  /* 简单占位（课程章节 / 资源） */
+  .placeholder-pane { padding: 16px; color: var(--text-sub); font-size: 12px; line-height: 1.9; }
+  .placeholder-pane .chapter {
+    border: 1px solid var(--border); border-radius: 6px; background: #fff;
+    padding: 10px; margin-bottom: 10px; font-size: 12px; color: var(--text);
+  }
+  .placeholder-pane .chapter small { color: var(--text-sub); }
+
+  /* ===== 右侧内容区（仅作语境示意） ===== */
+  .workspace-center {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    height: 660px; padding: 20px; color: var(--text-sub); font-size: 12px;
+  }
+  .workspace-center h2 { color: var(--primary); font-size: 15px; margin: 0 0 6px; }
+  .workspace-center .hint { line-height: 1.8; }
+  .ghost-window {
+    margin-top: 18px; border: 1px dashed #c2ced8; border-radius: 8px; padding: 26px;
+    background: #fbfdff; text-align: center; color: #7c8a98;
+  }
+  .tag-row { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag { padding: 4px 10px; border-radius: 4px; background: var(--primary-soft); color: #3d6f97; font-size: 11px; }
+  .note {
+    margin-top: 18px; padding: 12px 14px; border-left: 3px solid var(--primary);
+    background: #f5f9fc; color: #3a566e; font-size: 12px; line-height: 1.7; border-radius: 0 6px 6px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>任务详情 · 课程任务左侧栏 · 展示示例</h1>
+  <p>单个任务同时关联「视频」与「PDF」两类课件 —— 左侧栏「课程任务」标签下的真实呈现效果</p>
+</div>
+
+<div class="demo-shell">
+  <!-- ============ 左侧栏 ============ -->
+  <aside class="workspace-sidebar">
+    <div class="workspace-tabs">
+      <button class="workspace-tab" data-tab="structure" onclick="switchTab('structure')">课程章节</button>
+      <button class="workspace-tab active" data-tab="lessons" onclick="switchTab('lessons')">课程任务</button>
+      <button class="workspace-tab" data-tab="resources" onclick="switchTab('resources')">资源</button>
+    </div>
+
+    <!-- 课程任务 面板 -->
+    <div class="workspace-pane active" id="pane-lessons">
+      <div class="task-lessons-scroll">
+        <!-- 当前任务位置（与真实页面 currentTaskLocationHtml 一致） -->
+        <section class="current-task-location">
+          <div class="current-task-title-row">
+            <b><span class="current-task-sequence">任务 2：</span>构建知识库并调优召回</b>
+            <span class="badge badge-orange">可跳过</span>
+          </div>
+          <div class="current-task-path">第 1 章 知识库基础 · 第 1 节 知识库构建</div>
+        </section>
+
+        <!-- 关联课件（共 2 个：视频 + PDF） -->
+        <div class="task-associated-lessons-title"><span>关联课件</span><small>共 2 个</small></div>
+
+        <section class="task-associated-lessons">
+          <!-- 课件 1：视频 -->
+          <section class="lesson-media">
+            <div class="lesson-section-title">
+              <span><span class="lesson-sequence">1</span>RAG 原理与实践.mp4</span>
+              <small>视频 · 24:18</small>
+            </div>
+            <div class="video-stage">
+              <div class="video-topic">RAG 原理与实践<small>关联课件展示顺序 1</small></div>
+              <button class="video-play" type="button" title="播放视频" onclick="toggleVideo(this)">▶</button>
+            </div>
+            <div class="video-controls">
+              <span>00:00 / 24:18</span>
+              <div class="video-progress"><span style="width:0"></span></div>
+              <span>音量 · 全屏</span>
+            </div>
+          </section>
+
+          <!-- 课件 2：PDF -->
+          <section class="lesson-media">
+            <div class="lesson-section-title">
+              <span><span class="lesson-sequence">2</span>知识库配置指南.pdf</span>
+              <small>PDF · 6.8 MB</small>
+            </div>
+            <div class="pdf-preview">
+              <div class="pdf-toolbar"><span>－　100%　＋</span><span>连续滚动</span><span>适合页面</span></div>
+              <article class="pdf-page">
+                <h4>知识库配置指南.pdf</h4>
+                <h5>课件预览</h5>
+                <p>当前为任务关联的第 2 个课件。学生将严格按照教师在课程设计中配置的上下顺序进行预览。</p>
+                <div class="pdf-note">完成当前课件后，可继续向下滚动查看下一份关联课件。</div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <!-- 课程章节 面板（占位，演示标签切换） -->
+    <div class="workspace-pane" id="pane-structure">
+      <div class="placeholder-pane">
+        <div class="chapter"><b>第 1 章 知识库基础</b><br><small>章级任务 1 个 · 第 1 节 知识库构建 2 个任务</small></div>
+        <div class="chapter"><b>第 2 章 召回与调优</b><br><small>第 1 节 召回参数配置 2 个任务</small></div>
+        <div class="chapter"><b>第 3 章 综合实践</b><br><small>第 1 节 项目实战 1 个任务</small></div>
+      </div>
+    </div>
+
+    <!-- 资源 面板（占位，演示标签切换） -->
+    <div class="workspace-pane" id="pane-resources">
+      <div class="placeholder-pane">
+        <div class="chapter"><b>课程问答数据集.csv</b><br><small>120 条数据 · 任务学习资源</small></div>
+        <div class="chapter"><b>知识库构建步骤</b><br><small>任务指南</small></div>
+        <div class="chapter"><b>测试报告.pdf</b><br><small>必需作业 · 不超过 50MB</small></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 右侧内容区（仅作语境示意） ============ -->
+  <section class="workspace-center">
+    <h2>任务学习区（语境示意）</h2>
+    <p class="hint">左侧「课程任务」标签内，当前任务关联了 2 个课件：<b>1 个视频</b> + <b>1 个 PDF</b>。<br>学生按教师设定的上下顺序依次学习，左侧栏即所见即所得的课件导航。</p>
+    <div class="ghost-window">此处为任务工作台 / 虚拟桌面区域（示例省略）</div>
+    <div class="tag-row">
+      <span class="tag">视频课件 ×1</span>
+      <span class="tag">PDF 课件 ×1</span>
+      <span class="tag">按序学习</span>
+    </div>
+    <div class="note">
+      说明：本示例为「任务详情 - 课程任务左侧栏」的独立展示页，HTML 结构与真实页面
+      <code>lessonPreviewHtml</code> / <code>currentTaskLocationHtml</code> 完全一致，
+      样式取自 <code>my-training.html</code> 页内 CSS。如需把某真实任务改成"视频 + PDF"组合，
+      只需在其 <code>lessonIds</code> 中同时配置一个视频课件与一个 PDF 课件即可。
+    </div>
+  </section>
+</div>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.workspace-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.workspace-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+  }
+  function toggleVideo(btn) {
+    const stage = btn.closest('.video-stage');
+    const playing = stage.classList.toggle('playing');
+    btn.textContent = playing ? 'Ⅱ' : '▶';
+    btn.title = playing ? '暂停视频' : '播放视频';
+  }
+</script>
+</body>
+</html>
